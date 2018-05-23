@@ -1,2 +1,85 @@
-## VIZE.AI API Python Client
-...
+# VIZE.AI API Python Client
+
+This Python Client library is simple wrapper for vize.ai.
+
+You can use this library to enhance your application with vize.ai.
+
+## Installation
+
+    pip install git@gitlab.com:ximilar-public/ximilar-vize-api.git
+
+This will install also python-opencv, requests and pprint library.
+
+##  Usage
+
+First you need to obtain your api token for communication with vize rest endpoints. You can obtain the token from the vize.ai administration page. After you obtain the token the usage is quite straightforward. First import this package and create the rest client.
+
+    from vize.api.rest_client import VizeRestClient
+    
+    client = VizeRestClient(token='your-api-token')
+
+After creating client object you can for example load your existing task:
+
+    task = client.get_task(task_id='your-identification-of-task')
+
+#### Classify
+
+Suppose you want to use the task to predict the result on your image. Always try to send us image bigger than 200px and lower than 600px for speed and performance:
+
+    result_v1 = task.classify_v1({'_url': 'www.example.com/1.jpg'})
+    result_v2 = task.classify_v2([{'_url': 'www.example.com/1.jpg'}])
+
+The result is in json/dictionary format and you can access it like this(depends on which version of classify you use):
+
+    best_label_v1 = result_v1['best_label']
+    best_label_v2 = result_v2['records'][0]['best_label']
+
+There is an option to send also file from your local storage. Internally it will convert and send base64 image representation.
+
+    result_v1 = task.classify_v2([{'_file': 'c:/test.jpg'}])
+ 
+#### Working with Task
+
+To list all tasks you can use this:
+
+    tasks = client.get_all_task()
+
+Creating new task:
+
+    task = client.create_new_task()
+
+Delete existing task:
+ 
+    client.delete_task('task_id')
+
+#### Working with Labels
+
+To create new label and add this label to task:
+
+    label = client.create_label()
+    task = task.add_label(label)
+
+To get all labels of given task use:
+
+    labels = task.get_labels()
+
+    for label in labels:
+        print(label.id, label.name)
+
+To get list of all images of label use:
+
+    images = label.get_all_images()
+
+#### Working with images
+
+Uploading image is quite straightforward with combination of existing labels:
+
+    image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=label)
+
+Deleting image:
+
+    client.remove_image(image)
+
+#### Start training of Task
+
+    training = task.start_training()
