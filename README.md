@@ -53,7 +53,7 @@ result_v1 = task.classify_v2([{'_file': 'c:/test.jpg'}])
 To list all tasks you can use this:
 
 ```python
-tasks = client.get_all_task()
+tasks = client.get_all_tasks()
 ```
 
 Creating new task:
@@ -97,7 +97,7 @@ images = label.get_all_images()
 Uploading image is quite straightforward with combination of existing labels:
 
 ```python
-image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=label)
+image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=labels)
 ```
 
 Deleting image:
