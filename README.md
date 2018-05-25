@@ -8,7 +8,7 @@ You can use this library to enhance your application with vize.ai.
 
     pip install git@gitlab.com:ximilar-public/ximilar-vize-api.git
 
-This will install also python-opencv, requests and pprint library.
+This will install also python-opencv, requests library.
 
 ##  Usage
 
@@ -34,7 +34,7 @@ Suppose you want to use the task to predict the result on your image. Always try
 result = task.classify([{'_url': 'www.example.com/1.jpg'}])
 ```
 
-The result is in json/dictionary format and you can access it like this(depends on which version of classify you use):
+The result is in json/dictionary format and you can access it like this:
 
 ```python
 best_label = result['records'][0]['best_label']
@@ -57,7 +57,7 @@ tasks = client.get_all_tasks()
 Creating new task:
 
 ```python
-task = client.create_new_task()
+task = client.create_task()
 ```
 
 Delete existing task:
