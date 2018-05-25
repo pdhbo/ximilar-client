@@ -31,8 +31,7 @@ task = client.get_task(task_id='your-identification-of-task')
 Suppose you want to use the task to predict the result on your image. Always try to send us image bigger than 200px and lower than 600px for speed and performance:
 
 ```python
-result_v1 = task.classify_v1({'_url': 'www.example.com/1.jpg'})
-result_v2 = task.classify_v2([{'_url': 'www.example.com/1.jpg'}])
+result_v1 = task.classify([{'_url': 'www.example.com/1.jpg'}])
 ```
 
 The result is in json/dictionary format and you can access it like this(depends on which version of classify you use):
@@ -45,7 +44,7 @@ best_label_v2 = result_v2['records'][0]['best_label']
 There is an option to send also file from your local storage. Internally it will convert and send base64 image representation.
 
 ```python
-result_v1 = task.classify_v2([{'_file': 'c:/test.jpg'}])
+result_v1 = task.classify([{'_file': 'c:/test.jpg'}])
 ```
 
 #### Working with Task
