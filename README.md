@@ -98,6 +98,13 @@ Uploading image is quite straightforward with combination of existing labels:
 image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=labels)
 ```
 
+You can get image by id and add labels also after uploading image.
+
+```python
+image = client.get_image(image_id='some-image-id')
+image.add_label(label)
+```
+
 Deleting image:
 
 ```python
