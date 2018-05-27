@@ -71,7 +71,7 @@ client.delete_task('task_id')
 To create new label and add this label to task:
 
 ```python
-label = client.create_label()
+label = client.create_label(name='New-Label')
 task = task.add_label(label)
 ```
 
