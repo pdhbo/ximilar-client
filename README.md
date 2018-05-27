@@ -23,12 +23,12 @@ client = VizeRestClient(token='your-api-token')
 After creating client object you can for example load your existing task:
 
 ```python
-task = client.get_task(task_id='your-identification-of-task')
+task = client.get_task(task_id='identification-of-your-task')
 ```
 
 #### Classify
 
-Suppose you want to use the task to predict the result on your image. Always try to send us image bigger than 200px and lower than 600px for speed and performance:
+Suppose you want to use the task to predict the result on your images. Always try to send us image bigger than 200px and lower than 600px for quality and speed:
 
 ```python
 result = task.classify([{'_url': 'www.example.com/1.jpg'}])
@@ -60,9 +60,10 @@ Creating new task:
 task = client.create_task()
 ```
 
-Delete existing task:
+Delete existing task (two ways):
  
  ```python
+task.delete_task()
 client.delete_task('task_id')
 ```
 
@@ -84,15 +85,18 @@ for label in labels:
     print(label.id, label.name)
 ```
 
+#### Working with training images
+
 To get list of all images of label use:
 
 ```python
 images = label.get_all_images()
+for image in images:
+    print(str(image.id))
 ```
 
-#### Working with images
-
-Uploading image is quite straightforward with combination of existing labels:
+Let's say you want to upload a training image and add several labels to this image.
+It's quite straightforward if you have objects of these labels:
 
 ```python
 image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=labels)
@@ -101,7 +105,7 @@ image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=labels)
 You can get image by id and add labels also after uploading image.
 
 ```python
-image = client.get_image(image_id='some-image-id')
+image = client.get_image(image_id=image.id)
 image.add_label(label)
 ```
 
