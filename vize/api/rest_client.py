@@ -1,8 +1,10 @@
 import requests
 
 
-LABEL_ENDPOINT = 'v2/label/'
-TASK_ENDPOINT = 'v2/task/'
+LABEL_ENDPOINT = 'v1/label/'
+TASK_ENDPOINT = 'v1/task/'
+IMAGE_ENDPOINT = 'v1/training-image/'
+CLASSIFY_ENDPOINT = 'v1/classify/'
 RESULTS = 'results'
 ID = 'id'
 NAME = 'name'
@@ -10,7 +12,7 @@ TASK = 'task'
 
 
 class RestClient(object):
-    def __init__(self, api_key, endpoint='https://api.vize.ximilar.com/'):
+    def __init__(self, api_key, endpoint='https://api.vize.ai/'):
         self.api_key = api_key
         self.endpoint = endpoint
         self.headers = {'Content-Type': 'application/json',
@@ -19,8 +21,8 @@ class RestClient(object):
     def get(self, api_endpoint, data=None):
         return requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
 
-    def post(self, api_endpoint, data=None):
-        return requests.post(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
+    def post(self, api_endpoint, data=None, files=None):
+        return requests.post(self.endpoint+api_endpoint, headers=self.headers, data=data, files=files).json()
 
     def delete(self, api_endpoint, data=None):
         return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
@@ -72,9 +74,8 @@ class Task(VizeRestClient):
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
-        self.label_counts = task_json['labelsCount']
-        self.frozen = task_json['frozen']
-        self.type = task_json['type']
+        #self.frozen = task_json['frozen']
+        #self.type = task_json['type']
 
     def delete_task(self):
         super(Task, self).delete_task(self.id)
@@ -82,6 +83,20 @@ class Task(VizeRestClient):
     def get_labels(self):
         result = self.get(LABEL_ENDPOINT, data={TASK: self.id})
         return [Label(self.api_key, self.endpoint, label_json) for label_json in result[RESULTS]]
+
+    def upload_image(self, file_path, labels):
+        results = []
+        for label in labels:
+            with open(file_path, "rb") as image_file:
+                files = {'file': image_file}
+                data = {"label": label.id, "task": self.id}
+                results.append(self.post(IMAGE_ENDPOINT, data=data, files=files))
+        return results
+
+    def classify(self, file_path):
+        files = {'image_file': open(file_path, 'rb')}
+        data = {'task': self.id}
+        return self.post(CLASSIFY_ENDPOINT, data=data, files=files)
 
 
 class Label(VizeRestClient):
@@ -94,10 +109,13 @@ class Label(VizeRestClient):
 
 if __name__ == '__main__':
     client = VizeRestClient('')
-    tasks = client.get_all_tasks()
-    print(tasks[0].__dict__)
-    print(len(tasks))
-    print(tasks[0].get_labels())
+    task = client.get_task('')
+    label = client.get_label('')
+    print(task.upload_image('images.jpeg', [label]))
+    #print(tasks[0].__dict__)
+    #print(len(tasks))
+    #print(tasks.__dict__)
+    #.get_labels())
     #task.delete_task()
-    client.create_task('test to test', 'testing')
+    #print(client.create_task('test to test'))
     #client.create_label('test to test', 'testing')
