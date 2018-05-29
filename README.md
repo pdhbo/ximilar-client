@@ -1,6 +1,6 @@
 # VIZE.AI API Python Client
 
-This Python Client library is simple wrapper for vize.ai.
+This Python 3.X Client library is simple wrapper for vize.ai.
 
 You can use this library to enhance your application with vize.ai.
 
