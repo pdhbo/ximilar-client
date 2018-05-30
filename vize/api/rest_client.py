@@ -98,9 +98,17 @@ class Task(VizeRestClient):
         self.production_version = task_json['production_version']
 
     def delete_task(self):
+        """
+        Delete the task from vize.
+        :return: None
+        """
         super(Task, self).delete_task(self.id)
 
     def get_labels(self):
+        """
+        Get labels of this task.
+        :return: list of Labels
+        """
         result = self.get(LABEL_ENDPOINT+'?task='+self.id)
         return [Label(self.api_key, self.endpoint, label_json) for label_json in result[RESULTS]]
 
@@ -125,11 +133,21 @@ class Task(VizeRestClient):
         return self.post(CLASSIFY_ENDPOINT, data=data)
 
     def add_label(self, id_label):
+        """
+        Add label to this task. If the task was already trained then it is frozen and you are not able to add new label.
+        :param id_label: identification of label
+        :return: json/dict result
+        """
         if not self.frozen:
             return self.post(TASK_ENDPOINT+self.id+'/add-label/', data={'label_id': id_label})
         return {'status': 'error', 'message': 'cannot add label to this task, task is frozen'}
 
     def remove_label(self, id_label):
+        """
+        Remove label from the task. If the task was already trained then it is frozen and you are not able to remove it.
+        :param id_label: identification of label
+        :return: json/dict result
+        """
         if not self.frozen:
             return self.post(TASK_ENDPOINT+self.id+'/remove-label/', data={'label_id': id_label})
         return {'status': 'error', 'message': 'cannot add label to this task, task is frozen'}
@@ -151,7 +169,6 @@ class Label(VizeRestClient):
         """
         url = page_url if page_url else IMAGE_ENDPOINT
         result = self.get(url)
-        print(result)
         return [Image(self.api_key, self.endpoint, image_json) for image_json in result[RESULTS]], result['next']
 
 
@@ -163,6 +180,10 @@ class Image(VizeRestClient):
         self.thumb_img_path = image_json['thumb_img_path']
 
     def get_labels(self):
+        """
+        Get labels assigned to this image.
+        :return: list of Labels
+        """
         return [Label(self.api_key, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT+self.id)['labels']]
 
     def add_label(self, id_label):
