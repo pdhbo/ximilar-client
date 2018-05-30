@@ -13,6 +13,11 @@ TASK = 'task'
 
 
 class RestClient(object):
+    """
+    Parent class that implements HTTP GET, POST, DELETE methods with requests lib and loading images to base64.
+
+    All objects contains API_KEY and ENDPOINT information.
+    """
     def __init__(self, api_key, endpoint='https://api.vize.ximilar.com/'):
         self.api_key = api_key
         self.endpoint = endpoint
@@ -20,30 +25,12 @@ class RestClient(object):
                         'Authorization': 'Token ' + self.api_key}
 
     def get(self, api_endpoint, data=None):
-        """
-        Sends the http get request
-        :param api_endpoint: url endpoint
-        :param data: json_data to send
-        :return: json/dict result
-        """
         return requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
 
     def post(self, api_endpoint, data=None, files=None):
-        """
-        Sends the http post request
-        :param api_endpoint: url endpoint
-        :param data: json_data to send
-        :return: json/dict result
-        """
         return requests.post(self.endpoint+api_endpoint, headers=self.headers, data=json.dumps(data), files=files).json()
 
     def delete(self, api_endpoint, data=None):
-        """
-        Sends the http delete request
-        :param api_endpoint: url endpoint
-        :param data: json_data to send
-        :return: json/dict result
-        """
         return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
 
     def load_base64_file(self, path):
