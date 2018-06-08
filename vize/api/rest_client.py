@@ -28,7 +28,11 @@ class RestClient(object):
         return requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
 
     def post(self, api_endpoint, data=None, files=None):
-        return requests.post(self.endpoint+api_endpoint, headers=self.headers, data=json.dumps(data), files=files).json()
+        if data:
+            data = json.dumps(data)
+
+        headers = self.headers if not files else {'Authorization': 'Token ' + self.api_key}
+        return requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files).json()
 
     def delete(self, api_endpoint, data=None):
         return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
@@ -54,16 +58,27 @@ class VizeRestClient(RestClient):
         :return: List of tasks
         """
         result = self.get(TASK_ENDPOINT)
+
+        if not RESULTS in result:
+            return result
+
         return [Task(self.api_key, self.endpoint, task_json) for task_json in result[RESULTS]]
 
     def delete_task(self, id_task):
         self.delete(TASK_ENDPOINT+id_task+'/')
 
     def create_task(self, name):
-        return self.post(TASK_ENDPOINT, data={NAME: name})
+        task_json = self.post(TASK_ENDPOINT, data={NAME: name})
+        if 'id' not in task_json:
+            return task_json
+        return Task(self.api_key, self.endpoint, task_json)
 
     def create_label(self, name):
-        return self.post(LABEL_ENDPOINT, data={NAME: name})
+        label_json = self.post(LABEL_ENDPOINT, data={NAME: name})
+        if 'id' not in label_json:
+            return label_json
+        return Label(self.api_key, self.endpoint, label_json)
+
 
     def get_all_labels(self):
         """
@@ -76,15 +91,22 @@ class VizeRestClient(RestClient):
     def get_label(self, id_label):
         return Label(self.api_key, self.endpoint, self.get(LABEL_ENDPOINT+id_label))
 
-    def upload_image(self, file_path, labels):
-        # TODO this method
-        raise NotImplementedError
-
     def get_image(self, id_image):
         return Image(self.api_key, self.endpoint, self.get(IMAGE_ENDPOINT+id_image))
 
+    def delete_label(self, id_label):
+        self.delete(LABEL_ENDPOINT+id_label)
+
     def remove_image(self, id_image):
         return self.delete(IMAGE_ENDPOINT+id_image)
+
+    def upload_image(self, file_path, label_ids=[]):
+        image_json = self.post(IMAGE_ENDPOINT, files={'img_path': open(file_path, 'rb')})
+        image = Image(self.api_key, self.endpoint, image_json)
+
+        for label_id in label_ids:
+            image.add_label(label_id)
+        return image
 
 
 class Task(VizeRestClient):
@@ -93,9 +115,11 @@ class Task(VizeRestClient):
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
-        self.frozen = task_json['frozen']
         self.type = task_json['type']
         self.production_version = task_json['production_version']
+
+    def __str__(self):
+        return self.id
 
     def delete_task(self):
         """
@@ -138,9 +162,7 @@ class Task(VizeRestClient):
         :param id_label: identification of label
         :return: json/dict result
         """
-        if not self.frozen:
-            return self.post(TASK_ENDPOINT+self.id+'/add-label/', data={'label_id': id_label})
-        return {'status': 'error', 'message': 'cannot add label to this task, task is frozen'}
+        return self.post(TASK_ENDPOINT+self.id+'/add-label/', data={'label_id': id_label})
 
     def remove_label(self, id_label):
         """
@@ -148,9 +170,7 @@ class Task(VizeRestClient):
         :param id_label: identification of label
         :return: json/dict result
         """
-        if not self.frozen:
-            return self.post(TASK_ENDPOINT+self.id+'/remove-label/', data={'label_id': id_label})
-        return {'status': 'error', 'message': 'cannot add label to this task, task is frozen'}
+        return self.post(TASK_ENDPOINT+self.id+'/remove-label/', data={'label_id': id_label})
 
 
 class Label(VizeRestClient):
@@ -160,6 +180,9 @@ class Label(VizeRestClient):
         self.id = label_json[ID]
         self.name = label_json[NAME]
 
+    def __str__(self):
+        return self.id
+
     def get_training_images(self, page_url=None):
         """
         Get paginated result of images for specific label.
@@ -167,9 +190,15 @@ class Label(VizeRestClient):
         :param page_url: optional, select the specific page of images, default first page
         :return: (list of images, next_page)
         """
-        url = page_url if page_url else IMAGE_ENDPOINT
+        url = page_url if page_url else IMAGE_ENDPOINT + '?label='+self.id
         result = self.get(url)
         return [Image(self.api_key, self.endpoint, image_json) for image_json in result[RESULTS]], result['next']
+
+    def upload_image(self, file_path):
+        image_json = self.post(IMAGE_ENDPOINT, files={'img_path': open(file_path, 'rb')})
+        image = Image(self.api_key, self.endpoint, image_json)
+        image.add_label(self.id)
+        return image
 
 
 class Image(VizeRestClient):
@@ -179,6 +208,9 @@ class Image(VizeRestClient):
         self.id = image_json[ID]
         self.thumb_img_path = image_json['thumb_img_path']
 
+    def __str__(self):
+        return self.thumb_img_path
+
     def get_labels(self):
         """
         Get labels assigned to this image.
@@ -187,16 +219,7 @@ class Image(VizeRestClient):
         return [Label(self.api_key, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT+self.id)['labels']]
 
     def add_label(self, id_label):
-        # todo this works but raises error
         return self.post(IMAGE_ENDPOINT + self.id + '/add-label/', data={'label_id': id_label})
 
     def remove_label(self, id_label):
-        # todo this works but raises error
         return self.post(IMAGE_ENDPOINT + self.id + '/remove-label/', data={'label_id': id_label})
-
-
-if __name__ == '__main__':
-    client = VizeRestClient('')
-    task = client.get_task('')
-    task_labels = task.get_labels()
-    result = task.classify([{'_url': 'http://www.ximilar.com/examples/dubai.jpg'}, {'_file': 'normal.jpg'}])
