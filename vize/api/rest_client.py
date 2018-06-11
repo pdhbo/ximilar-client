@@ -49,9 +49,11 @@ class RestClient(object):
 
 
 class VizeRestClient(RestClient):
-    def get_task(self, id_task):
-        task_json = self.get(TASK_ENDPOINT + id_task)
+    def get_task(self, task_id):
+        task_json = self.get(TASK_ENDPOINT + task_id)
         if 'id' not in task_json:
+            print(json.dumps(task_json))
+            raise Exception("error creating task: " + str(task_json))
             return task_json
         return Task(self.token, self.endpoint, task_json)
 
@@ -67,8 +69,8 @@ class VizeRestClient(RestClient):
 
         return [Task(self.token, self.endpoint, task_json) for task_json in result[RESULTS]]
 
-    def delete_task(self, id_task):
-        return self.delete(TASK_ENDPOINT+id_task+'/')
+    def delete_task(self, task_id):
+        return self.delete(TASK_ENDPOINT + task_id + '/')
 
     def create_task(self, name):
         task_json = self.post(TASK_ENDPOINT, data={NAME: name})
@@ -90,23 +92,23 @@ class VizeRestClient(RestClient):
         result = self.get(LABEL_ENDPOINT)
         return [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
 
-    def get_label(self, id_label):
-        label_json = self.get(LABEL_ENDPOINT+id_label)
+    def get_label(self, label_id):
+        label_json = self.get(LABEL_ENDPOINT + label_id)
         if 'id' not in label_json:
             return label_json
         return Label(self.token, self.endpoint, label_json)
 
-    def get_image(self, id_image):
-        image_json = self.get(IMAGE_ENDPOINT+id_image)
+    def get_image(self, image_id):
+        image_json = self.get(IMAGE_ENDPOINT + image_id)
         if 'id' not in image_json:
             return image_json
         return Image(self.token, self.endpoint, image_json)
 
-    def delete_label(self, id_label):
-        self.delete(LABEL_ENDPOINT+id_label)
+    def delete_label(self, label_id):
+        self.delete(LABEL_ENDPOINT + label_id)
 
-    def remove_image(self, id_image):
-        return self.delete(IMAGE_ENDPOINT+id_image)
+    def remove_image(self, image_id):
+        return self.delete(IMAGE_ENDPOINT + image_id)
 
     def upload_image(self, file_path, label_ids=[]):
         image_json = self.post(IMAGE_ENDPOINT, files={'img_path': open(file_path, 'rb')})
@@ -180,21 +182,21 @@ class Task(VizeRestClient):
         self.add_label(label.id)
         return label
 
-    def add_label(self, id_label):
+    def add_label(self, label_id):
         """
         Add label to this task. If the task was already trained then it is frozen and you are not able to add new label.
-        :param id_label: identification of label
+        :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(TASK_ENDPOINT+self.id+'/add-label/', data={'label_id': id_label})
+        return self.post(TASK_ENDPOINT + self.id +'/add-label/', data={'label_id': label_id})
 
-    def remove_label(self, id_label):
+    def remove_label(self, label_id):
         """
         Remove/Detach label from the task. If the task was already trained then it is frozen and you are not able to remove it.
-        :param id_label: identification of label
+        :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(TASK_ENDPOINT+self.id+'/remove-label/', data={'label_id': id_label})
+        return self.post(TASK_ENDPOINT + self.id +'/remove-label/', data={'label_id': label_id})
 
 
 class Label(VizeRestClient):
@@ -242,8 +244,8 @@ class Image(VizeRestClient):
         """
         return [Label(self.token, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT + self.id)['labels']]
 
-    def add_label(self, id_label):
-        return self.post(IMAGE_ENDPOINT + self.id + '/add-label/', data={'label_id': id_label})
+    def add_label(self, label_id):
+        return self.post(IMAGE_ENDPOINT + self.id + '/add-label/', data={'label_id': label_id})
 
-    def remove_label(self, id_label):
-        return self.post(IMAGE_ENDPOINT + self.id + '/remove-label/', data={'label_id': id_label})
+    def remove_label(self, label_id):
+        return self.post(IMAGE_ENDPOINT + self.id + '/remove-label/', data={'label_id': label_id})
