@@ -6,8 +6,13 @@ You can use this library to enhance your application with vize.ai.
 
 ## Installation
 
-    1. 
-    pip install git@gitlab.com:ximilar-public/ximilar-vize-api.git
+Manual installation:
+
+    1. Cloning the repo
+    clone git@gitlab.com:ximilar-public/ximilar-vize-api.git
+    2. Install it with pip to your virtualenv
+    pip install -e ximilar-vize-api
+
 
 This will install also python-opencv, requests library.
 
