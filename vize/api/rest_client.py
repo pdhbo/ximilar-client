@@ -16,13 +16,13 @@ class RestClient(object):
     """
     Parent class that implements HTTP GET, POST, DELETE methods with requests lib and loading images to base64.
 
-    All objects contains API_KEY and ENDPOINT information.
+    All objects contains TOKEN and ENDPOINT information.
     """
-    def __init__(self, api_key, endpoint='https://api.vize.ximilar.com/'):
-        self.api_key = api_key
+    def __init__(self, token, endpoint='https://api.vize.ximilar.com/'):
+        self.token = token
         self.endpoint = endpoint
         self.headers = {'Content-Type': 'application/json',
-                        'Authorization': 'Token ' + self.api_key}
+                        'Authorization': 'Token ' + self.token}
 
     def get(self, api_endpoint, data=None):
         return requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
@@ -31,7 +31,7 @@ class RestClient(object):
         if data:
             data = json.dumps(data)
 
-        headers = self.headers if not files else {'Authorization': 'Token ' + self.api_key}
+        headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
         return requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files).json()
 
     def delete(self, api_endpoint, data=None):
@@ -53,7 +53,7 @@ class VizeRestClient(RestClient):
         task_json = self.get(TASK_ENDPOINT + id_task)
         if 'id' not in task_json:
             return task_json
-        return Task(self.api_key, self.endpoint, task_json)
+        return Task(self.token, self.endpoint, task_json)
 
     def get_all_tasks(self):
         """
@@ -65,7 +65,7 @@ class VizeRestClient(RestClient):
         if not RESULTS in result:
             return result
 
-        return [Task(self.api_key, self.endpoint, task_json) for task_json in result[RESULTS]]
+        return [Task(self.token, self.endpoint, task_json) for task_json in result[RESULTS]]
 
     def delete_task(self, id_task):
         return self.delete(TASK_ENDPOINT+id_task+'/')
@@ -74,13 +74,13 @@ class VizeRestClient(RestClient):
         task_json = self.post(TASK_ENDPOINT, data={NAME: name})
         if 'id' not in task_json:
             return task_json
-        return Task(self.api_key, self.endpoint, task_json)
+        return Task(self.token, self.endpoint, task_json)
 
     def create_label(self, name):
         label_json = self.post(LABEL_ENDPOINT, data={NAME: name})
         if 'id' not in label_json:
             return label_json
-        return Label(self.api_key, self.endpoint, label_json)
+        return Label(self.token, self.endpoint, label_json)
 
     def get_all_labels(self):
         """
@@ -88,19 +88,19 @@ class VizeRestClient(RestClient):
         :return: List of labels
         """
         result = self.get(LABEL_ENDPOINT)
-        return [Label(self.api_key, self.endpoint, label_json) for label_json in result[RESULTS]]
+        return [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
 
     def get_label(self, id_label):
         label_json = self.get(LABEL_ENDPOINT+id_label)
         if 'id' not in label_json:
             return label_json
-        return Label(self.api_key, self.endpoint, label_json)
+        return Label(self.token, self.endpoint, label_json)
 
     def get_image(self, id_image):
         image_json = self.get(IMAGE_ENDPOINT+id_image)
         if 'id' not in image_json:
             return image_json
-        return Image(self.api_key, self.endpoint, image_json)
+        return Image(self.token, self.endpoint, image_json)
 
     def delete_label(self, id_label):
         self.delete(LABEL_ENDPOINT+id_label)
@@ -110,7 +110,7 @@ class VizeRestClient(RestClient):
 
     def upload_image(self, file_path, label_ids=[]):
         image_json = self.post(IMAGE_ENDPOINT, files={'img_path': open(file_path, 'rb')})
-        image = Image(self.api_key, self.endpoint, image_json)
+        image = Image(self.token, self.endpoint, image_json)
 
         for label_id in label_ids:
             image.add_label(label_id)
@@ -118,8 +118,8 @@ class VizeRestClient(RestClient):
 
 
 class Task(VizeRestClient):
-    def __init__(self, api_key, endpoint, task_json):
-        super(Task, self).__init__(api_key, endpoint)
+    def __init__(self, token, endpoint, task_json):
+        super(Task, self).__init__(token, endpoint)
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
@@ -148,7 +148,7 @@ class Task(VizeRestClient):
         :return: list of Labels
         """
         result = self.get(LABEL_ENDPOINT+'?task='+self.id)
-        return [Label(self.api_key, self.endpoint, label_json) for label_json in result[RESULTS]]
+        return [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
 
     def classify(self, records, version=None):
         """
@@ -198,8 +198,8 @@ class Task(VizeRestClient):
 
 
 class Label(VizeRestClient):
-    def __init__(self, api_key, endpoint, label_json):
-        super(Label, self).__init__(api_key, endpoint)
+    def __init__(self, token, endpoint, label_json):
+        super(Label, self).__init__(token, endpoint)
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
@@ -216,18 +216,18 @@ class Label(VizeRestClient):
         """
         url = page_url if page_url else IMAGE_ENDPOINT + '?label='+self.id
         result = self.get(url)
-        return [Image(self.api_key, self.endpoint, image_json) for image_json in result[RESULTS]], result['next']
+        return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next']
 
     def upload_image(self, file_path):
         image_json = self.post(IMAGE_ENDPOINT, files={'img_path': open(file_path, 'rb')})
-        image = Image(self.api_key, self.endpoint, image_json)
+        image = Image(self.token, self.endpoint, image_json)
         image.add_label(self.id)
         return image
 
 
 class Image(VizeRestClient):
-    def __init__(self, api_key, endpoint, image_json):
-        super(Image, self).__init__(api_key, endpoint)
+    def __init__(self, token, endpoint, image_json):
+        super(Image, self).__init__(token, endpoint)
 
         self.id = image_json[ID]
         self.thumb_img_path = image_json['thumb_img_path']
@@ -240,7 +240,7 @@ class Image(VizeRestClient):
         Get labels assigned to this image.
         :return: list of Labels
         """
-        return [Label(self.api_key, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT+self.id)['labels']]
+        return [Label(self.token, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT + self.id)['labels']]
 
     def add_label(self, id_label):
         return self.post(IMAGE_ENDPOINT + self.id + '/add-label/', data={'label_id': id_label})
