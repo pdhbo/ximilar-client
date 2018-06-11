@@ -26,6 +26,15 @@ After creating client object you can for example load your existing task:
 task = client.get_task(task_id='identification-of-your-task')
 ```
 
+
+## Train the task
+
+If your task is not trained yet, you can call the api to force it:
+
+```python
+task.train()
+```
+
 #### Classify
 
 Suppose you want to use the task to predict the result on your images. Always try to send us image bigger than 200px and lower than 600px for quality and speed:

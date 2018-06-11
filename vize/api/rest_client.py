@@ -35,7 +35,7 @@ class RestClient(object):
         return requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files).json()
 
     def delete(self, api_endpoint, data=None):
-        return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
+        return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
 
     def load_base64_file(self, path):
         """
@@ -50,7 +50,10 @@ class RestClient(object):
 
 class VizeRestClient(RestClient):
     def get_task(self, id_task):
-        return Task(self.api_key, self.endpoint, self.get(TASK_ENDPOINT + id_task))
+        task_json = self.get(TASK_ENDPOINT + id_task)
+        if 'id' not in task_json:
+            return task_json
+        return Task(self.api_key, self.endpoint, task_json)
 
     def get_all_tasks(self):
         """
@@ -65,7 +68,7 @@ class VizeRestClient(RestClient):
         return [Task(self.api_key, self.endpoint, task_json) for task_json in result[RESULTS]]
 
     def delete_task(self, id_task):
-        self.delete(TASK_ENDPOINT+id_task+'/')
+        return self.delete(TASK_ENDPOINT+id_task+'/')
 
     def create_task(self, name):
         task_json = self.post(TASK_ENDPOINT, data={NAME: name})
@@ -79,7 +82,6 @@ class VizeRestClient(RestClient):
             return label_json
         return Label(self.api_key, self.endpoint, label_json)
 
-
     def get_all_labels(self):
         """
         Get all labels of the user(user is specified by api key).
@@ -89,10 +91,16 @@ class VizeRestClient(RestClient):
         return [Label(self.api_key, self.endpoint, label_json) for label_json in result[RESULTS]]
 
     def get_label(self, id_label):
-        return Label(self.api_key, self.endpoint, self.get(LABEL_ENDPOINT+id_label))
+        label_json = self.get(LABEL_ENDPOINT+id_label)
+        if 'id' not in label_json:
+            return label_json
+        return Label(self.api_key, self.endpoint, label_json)
 
     def get_image(self, id_image):
-        return Image(self.api_key, self.endpoint, self.get(IMAGE_ENDPOINT+id_image))
+        image_json = self.get(IMAGE_ENDPOINT+id_image)
+        if 'id' not in image_json:
+            return image_json
+        return Image(self.api_key, self.endpoint, image_json)
 
     def delete_label(self, id_label):
         self.delete(LABEL_ENDPOINT+id_label)
@@ -121,12 +129,18 @@ class Task(VizeRestClient):
     def __str__(self):
         return self.id
 
+    def train(self):
+        return self.post(TASK_ENDPOINT+self.id+'/train/')
+
     def delete_task(self):
         """
         Delete the task from vize.
         :return: None
         """
         super(Task, self).delete_task(self.id)
+
+    def get_all_labels(self):
+        return self.get_labels()
 
     def get_labels(self):
         """
@@ -156,6 +170,16 @@ class Task(VizeRestClient):
         data = {'records': records, 'task_id': self.id, 'version': version if version else self.production_version}
         return self.post(CLASSIFY_ENDPOINT, data=data)
 
+    def create_label(self, name):
+        """
+        Creates label and adds it to this task.
+        :param name:
+        :return:
+        """
+        label = super(Task, self).create_label(name)
+        self.add_label(label.id)
+        return label
+
     def add_label(self, id_label):
         """
         Add label to this task. If the task was already trained then it is frozen and you are not able to add new label.
@@ -166,7 +190,7 @@ class Task(VizeRestClient):
 
     def remove_label(self, id_label):
         """
-        Remove label from the task. If the task was already trained then it is frozen and you are not able to remove it.
+        Remove/Detach label from the task. If the task was already trained then it is frozen and you are not able to remove it.
         :param id_label: identification of label
         :return: json/dict result
         """

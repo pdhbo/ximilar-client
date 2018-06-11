@@ -52,20 +52,39 @@ def test_client_create_task_label_image(request):
     task1 = client.get_task(task.id)
     labels0 = task1.get_all_labels()
     label = task.create_label('Test-Task-In-Vize-Label-X-1')
-    label1 = task.get_labels(task.id)
-    #image = label.upload_image()
+    labels1 = task.get_labels()
+    images0 = label.get_training_images()
+    image = label.upload_image('ximilar.png')
+    images1 = label.get_training_images()
 
-    #client.remove_task(task.id)
-    #task.remove_label(label1.id)
-    #client.delete_task(label1.id)
-    #client.remove_image(image.id)
+    task.remove_label(label.id)
+    client.delete_task(task.id)
+    client.delete_label(label.id)
+    client.remove_image(image.id)
 
+    rtask = client.get_task(task.id)
+    rlabel = client.get_label(label.id)
+    rimage = client.get_image(image.id)
+
+    # check creating of Task, Label and Image
     assert isinstance(task, Task)
     assert isinstance(label, Label)
-    #assert isinstance(image, Image)
+    assert isinstance(image, Image)
+
+    # check the get endpoints
     assert task.id == task1.id
-    assert label == label1.id
+    assert label.id == labels1[0].id
+
+    # check the creating of label and image
     assert len(labels0) == 0
+    assert len(labels1) == 1
+    assert len(images0[0]) == 0
+    assert len(images1[0]) == 1
+
+    # check that the removed task does not exists
+    assert isinstance(rtask, dict)
+    assert isinstance(rlabel, dict)
+    assert isinstance(rimage, dict)
 
 
 def test_classify_v1(request):
