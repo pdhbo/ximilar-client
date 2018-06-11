@@ -6,6 +6,7 @@ You can use this library to enhance your application with vize.ai.
 
 ## Installation
 
+    1. 
     pip install git@gitlab.com:ximilar-public/ximilar-vize-api.git
 
 This will install also python-opencv, requests library.
@@ -15,7 +16,7 @@ This will install also python-opencv, requests library.
 First you need to obtain your api token for communication with vize rest endpoints. You can obtain the token from the vize.ai administration page. After you obtain the token the usage is quite straightforward. First import this package and create the rest client.
 
 ```python
-from vize.api.rest_client import VizeRestClient
+from vize.api import VizeRestClient, Task, Image, Label
     
 client = VizeRestClient(token='your-api-token')
 ```
