@@ -88,7 +88,7 @@ To create new label and add this label to task:
 
 ```python
 label = client.create_label(name='New-Label')
-task = task.add_label(label)
+task = task.add_label(label.id)
 ```
 
 To get all labels of given task use:
@@ -99,6 +99,19 @@ labels = task.get_labels()
 for label in labels:
     print(label.id, label.name)
 ```
+
+To detach label from task:
+
+```python
+task.remove_label(label.id)
+```
+
+To remove label from database(and all tasks):
+
+```python
+client.remove_label(label.id)
+```
+
 
 #### Working with training images
 
@@ -117,17 +130,18 @@ It's quite straightforward if you have objects of these labels:
 image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=labels)
 ```
 
-You can get image by id and add labels also after uploading image.
+You can get image by id and add/remove labels also after uploading image.
 
 ```python
 image = client.get_image(image_id=image.id)
-image.add_label(label)
+image.add_label(label.id)
+image.remove_label(label.id)
 ```
 
 Deleting image:
 
 ```python
-client.remove_image(image)
+client.remove_image(image.id)
 ```
 
 #### Start training of Task

@@ -56,6 +56,8 @@ def test_client_create_task_label_image(request):
     images0 = label.get_training_images()
     image = label.upload_image('ximilar.png')
     images1 = label.get_training_images()
+    label.remove_image(image.id)
+    images0_new = label.get_training_images()
 
     task.remove_label(label.id)
     client.delete_task(task.id)
@@ -80,6 +82,7 @@ def test_client_create_task_label_image(request):
     assert len(labels1) == 1
     assert len(images0[0]) == 0
     assert len(images1[0]) == 1
+    assert len(images0_new[0]) == 0
 
     # check that the removed task does not exists
     assert isinstance(rtask, dict)
@@ -93,5 +96,5 @@ def test_classify_v1(request):
 
 
 def test_classify_v2(request):
-    """Tests an API call for all labels"""
-    pass
+    client = get_client(request)
+
