@@ -110,7 +110,7 @@ task.remove_label(label.id)
 To remove label from database(and all tasks):
 
 ```python
-client.remove_label(label.id)
+client.delete_label(label.id)
 ```
 
 
