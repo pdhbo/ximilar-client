@@ -18,7 +18,7 @@ class RestClient(object):
 
     All objects contains TOKEN and ENDPOINT information.
     """
-    def __init__(self, token, endpoint='https://api.vize.ximilar.com/'):
+    def __init__(self, token, endpoint='https://api.vize.ai/'):
         self.token = token
         self.endpoint = endpoint
         self.headers = {'Content-Type': 'application/json',
@@ -132,13 +132,13 @@ class VizeRestClient(RestClient):
     def get_label(self, label_id):
         label_json = self.get(LABEL_ENDPOINT + label_id)
         if 'id' not in label_json:
-            return label_json
+            raise Exception("Error getting label: " + label_id)
         return Label(self.token, self.endpoint, label_json)
 
     def get_image(self, image_id):
         image_json = self.get(IMAGE_ENDPOINT + image_id)
         if 'id' not in image_json:
-            return image_json
+            raise Exception("Error getting image: " + image_id)
         return Image(self.token, self.endpoint, image_json)
 
     def delete_label(self, label_id):
@@ -275,6 +275,14 @@ class Label(VizeRestClient):
         image = Image(self.token, self.endpoint, image_json)
         image.add_label(self.id)
         return image
+
+    def remove_image(self, image_id):
+        """
+        Remove/Detach label from the image.
+        :param label_id: id of label
+        :return: result
+        """
+        return self.post(IMAGE_ENDPOINT + image_id + '/remove-label/', data={'label_id': self.id})
 
 
 class Image(VizeRestClient):
