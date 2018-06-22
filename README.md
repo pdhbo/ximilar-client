@@ -110,8 +110,12 @@ task.remove_label(label.id)
 To remove label from database(and all tasks):
 
 ```python
-client.remove_label(label.id)
+client.delete_label(label.id)
 ```
+
+Detach image from label:
+
+label.remove_image(image.id)
 
 
 #### Working with training images
@@ -128,7 +132,7 @@ Let's say you want to upload a training image and add several labels to this ima
 It's quite straightforward if you have objects of these labels:
 
 ```python
-image = client.upload_image({'_url': 'www.example.com/1.jpg'}, labels=labels)
+image = client.upload_image({'_url': 'www.example.com/1.jpg'}, label_ids=[label.id for label in labels])
 ```
 
 You can get image by id and add/remove labels also after uploading image.

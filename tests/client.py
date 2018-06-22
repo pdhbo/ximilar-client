@@ -62,11 +62,16 @@ def test_client_create_task_label_image(request):
     task.remove_label(label.id)
     client.delete_task(task.id)
     client.delete_label(label.id)
-    client.remove_image(image.id)
+    client.delete_image(image.id)
 
-    rtask = client.get_task(task.id)
-    rlabel = client.get_label(label.id)
-    rimage = client.get_image(image.id)
+    with pytest.raises(Exception):
+        client.get_task(task.id)
+
+    with pytest.raises(Exception):
+        client.get_label(label.id)
+
+    with pytest.raises(Exception):
+        client.get_image(image.id)
 
     # check creating of Task, Label and Image
     assert isinstance(task, Task)
@@ -84,17 +89,14 @@ def test_client_create_task_label_image(request):
     assert len(images1[0]) == 1
     assert len(images0_new[0]) == 0
 
-    # check that the removed task does not exists
-    assert isinstance(rtask, dict)
-    assert isinstance(rlabel, dict)
-    assert isinstance(rimage, dict)
 
-
-def test_classify_v1(request):
-    """Tests an API call for all labels"""
-    pass
-
-
-def test_classify_v2(request):
+def test_classify(request):
+    """Tests an API call for one of our label"""
     client = get_client(request)
+    tasks = client.get_all_tasks()
+    task = tasks[0]
+
+    result = task.classify([{"_file": "ximilar.png"}])
+    assert isinstance(result, dict)
+
 
