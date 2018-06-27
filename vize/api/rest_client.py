@@ -18,7 +18,7 @@ class RestClient(object):
 
     All objects contains TOKEN and ENDPOINT information.
     """
-    def __init__(self, token, endpoint='https://api.vize.ai/'):
+    def __init__(self, token, endpoint='http://localhost:8000/api/'):#'https://api.vize.ai/'):
         self.token = token
         self.endpoint = endpoint
         self.headers = {'Content-Type': 'application/json',
@@ -45,7 +45,8 @@ class RestClient(object):
             data = json.dumps(data)
 
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
-        return requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files).json()
+        result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files)
+        return result.json()
 
     def delete(self, api_endpoint, data=None):
         """
