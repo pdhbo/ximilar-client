@@ -91,6 +91,11 @@ class VizeRestClient(RestClient):
 
         return [Task(self.token, self.endpoint, task_json) for task_json in result[RESULTS]]
 
+    def get_task_by_name(self, name):
+        for task in self.get_all_tasks():
+            if task.name == name:
+                return task
+
     def delete_task(self, task_id):
         """
         Delete the task from the db.
@@ -131,13 +136,14 @@ class VizeRestClient(RestClient):
 
     def get_label(self, label_id):
         label_json = self.get(LABEL_ENDPOINT + label_id)
-        if 'id' not in label_json:
+        if ID not in label_json:
             raise Exception("Error getting label: " + label_id)
         return Label(self.token, self.endpoint, label_json)
 
     def get_image(self, image_id):
         image_json = self.get(IMAGE_ENDPOINT + image_id)
-        if 'id' not in image_json:
+        print(image_json)
+        if ID not in image_json:
             raise Exception("Error getting image: " + image_id)
         return Image(self.token, self.endpoint, image_json)
 
@@ -147,9 +153,16 @@ class VizeRestClient(RestClient):
     def delete_image(self, image_id):
         return self.delete(IMAGE_ENDPOINT + image_id)
 
-    def upload_image(self, file_path, label_ids=[]):
-        image_json = self.post(IMAGE_ENDPOINT, files={'img_path': open(file_path, 'rb')})
-        image = Image(self.token, self.endpoint, image_json)
+    def upload_image(self, file_path=None, base64=None, label_ids=[]):
+        files, data = None, None
+
+        if file_path:
+            files = {'img_path': open(file_path, 'rb')}
+        if base64:
+            data = {'base64': base64.decode("utf-8")}
+
+        image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
+        image = self.get_image(image_json['id'])
 
         for label_id in label_ids:
             image.add_label(label_id)
@@ -265,16 +278,13 @@ class Label(VizeRestClient):
         result = self.get(url)
         return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next']
 
-    def upload_image(self, file_path):
+    def upload_image(self, file_path=None, base64=None):
         """
         Upload image to the vize.ai and adding label to this image.
         :param file_path: local path to the file
         :return: None
         """
-        image_json = self.post(IMAGE_ENDPOINT, files={'img_path': open(file_path, 'rb')})
-        image = Image(self.token, self.endpoint, image_json)
-        image.add_label(self.id)
-        return image
+        return super(Task, self).upload_image(file_path=file_path, base64=base64, label_ids=[self.id])
 
     def remove_image(self, image_id):
         """
