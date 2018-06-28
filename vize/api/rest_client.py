@@ -18,7 +18,7 @@ class RestClient(object):
 
     All objects contains TOKEN and ENDPOINT information.
     """
-    def __init__(self, token, endpoint='http://localhost:8000/api/'):#'https://api.vize.ai/'):
+    def __init__(self, token, endpoint='https://api.vize.ai/'):
         self.token = token
         self.endpoint = endpoint
         self.headers = {'Content-Type': 'application/json',
