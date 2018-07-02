@@ -233,7 +233,7 @@ class Task(VizeRestClient):
         :return: json response
         """
         for record in records:
-            if '_file' in record:
+            if '_file' in record and '_base64' not in record:
                 record['_base64'] = self.load_base64_file(record['_file'])
 
         data = {'records': records, 'task_id': self.id, 'version': version if version else self.production_version}
