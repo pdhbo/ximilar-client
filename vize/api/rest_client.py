@@ -174,7 +174,6 @@ class VizeRestClient(RestClient):
 
     def get_image(self, image_id):
         image_json = self.get(IMAGE_ENDPOINT + image_id)
-        print(image_json)
         if ID not in image_json:
             raise Exception("Error getting image: " + image_id)
         return Image(self.token, self.endpoint, image_json)
@@ -241,6 +240,15 @@ class Task(VizeRestClient):
         """
         result = self.get(LABEL_ENDPOINT+'?task='+self.id)
         return [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
+
+    def get_label_by_name(self, name):
+        """
+        Get label of this task by name.
+        """
+        labels = self.get_labels()
+        for label in labels:
+            if label.name == name:
+                return label
 
     def classify(self, records, version=None):
         """
