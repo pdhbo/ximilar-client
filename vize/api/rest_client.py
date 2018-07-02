@@ -1,6 +1,7 @@
 import requests
 import json
 import base64
+import cv2
 
 LABEL_ENDPOINT = 'v2/label/'
 TASK_ENDPOINT = 'v2/task/'
@@ -21,6 +22,7 @@ class RestClient(object):
     def __init__(self, token, endpoint='https://api.vize.ai/'):
         self.token = token
         self.endpoint = endpoint
+        self.max_size = 600
         self.headers = {'Content-Type': 'application/json',
                         'Authorization': 'Token ' + self.token}
 
@@ -57,15 +59,44 @@ class RestClient(object):
         """
         return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
 
+    def resize_image_data(self, image_data):
+        """
+        Resize image data that are no bigger than max_size.
+        :param image_data: cv2/np ndarray
+        :return: cv2/np ndarray
+        """
+        height, width, _ = image_data.shape
+        if height > self.max_size and width > self.max_size:
+            image_data = cv2.resize(image_data, (self.max_size, self.max_size))
+        return image_data
+
     def load_base64_file(self, path):
         """
-        Load file/image to base64.
+        Load file from disk to base64.
         :param path: local path to the image
         :return: base64 encoded string
         """
-        with open(path, 'rb') as file_img:
-            image = base64.b64encode(file_img.read()).decode('utf-8')
+        image = cv2.imread(str(path))
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.resize_image_data(image)
+        image = self.cv2img_to_base64(image)
         return image
+
+    def cv2img_to_base64(self, image):
+        """
+        Load raw numpy/cv2 data of image to base64. The image should have RGB order.
+        The image_data was loaded in similar way:
+            image = cv2.imread(str(path))
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        :param image_data: numpy/cv2 data with RGB order
+        :return: base64 encoded string
+        """
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        image = self.resize_image_data(image)
+        retval, buffer = cv2.imencode('.jpg', image)
+        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+        return jpg_as_text
 
 
 class VizeRestClient(RestClient):
@@ -225,8 +256,11 @@ class Task(VizeRestClient):
         :return: json response
         """
         for record in records:
-            if '_file' in record and '_base64' not in record:
+            if '_file' in record and '_base64' not in record and '_img_data' not in record:
                 record['_base64'] = self.load_base64_file(record['_file'])
+            elif '_img_data' in record and '_base64' not in record:
+                record['_base64'] = self.cv2img_to_base64(record['_img_data'])
+                del record['_img_data']
 
         data = {'records': records, 'task_id': self.id, 'version': version if version else self.production_version}
         return self.post(CLASSIFY_ENDPOINT, data=data)
