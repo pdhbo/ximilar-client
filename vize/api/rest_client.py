@@ -59,16 +59,27 @@ class RestClient(object):
         """
         return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
 
-    def resize_image_data(self, image_data):
+    def resize_image_data(self, image_data, aspect_ratio=False):
         """
         Resize image data that are no bigger than max_size.
         :param image_data: cv2/np ndarray
         :return: cv2/np ndarray
         """
         height, width, _ = image_data.shape
-        if height > self.max_size and width > self.max_size:
+        if height > self.max_size and width > self.max_size and not aspect_ratio:
             image_data = cv2.resize(image_data, (self.max_size, self.max_size))
+        if height > self.max_size and width > self.max_size and aspect_ratio:
+            image_data = cv2.resize(image_data, self.get_aspect_ratio_dim(image_data, self.max_size))
         return image_data
+
+    def get_aspect_ratio_dim(self, image, img_size):
+        if image.shape[0] > image.shape[1]:
+            r = float(img_size) / image.shape[1]
+            dim = (img_size, int(image.shape[0] * r))
+        else:
+            r = float(img_size) / image.shape[0]
+            dim = (int(image.shape[1] * r), img_size)
+        return dim
 
     def load_base64_file(self, path):
         """
@@ -347,6 +358,13 @@ class Image(VizeRestClient):
 
     def __str__(self):
         return self.thumb_img_path
+
+    def delete_image(self):
+        """
+        Delete the image from vize.
+        :return: None
+        """
+        super(Image, self).delete_image(self.id)
 
     def get_labels(self):
         """
