@@ -33,7 +33,8 @@ class RestClient(object):
         :param data: optional data
         :return: json response
         """
-        return requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
+        result = requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data)
+        return result.json()
 
     def post(self, api_endpoint, data=None, files=None):
         """
@@ -321,6 +322,13 @@ class Label(VizeRestClient):
     def __str__(self):
         return self.id
 
+    def wipe_label(self):
+        """
+        Delete label and all images associated with this label.
+        :return: None
+        """
+        self.delete(LABEL_ENDPOINT + self.id + '/wipe')
+
     def get_training_images(self, page_url=None):
         """
         Get paginated result of images for specific label.
@@ -338,7 +346,7 @@ class Label(VizeRestClient):
         :param file_path: local path to the file
         :return: None
         """
-        return super(Task, self).upload_image(file_path=file_path, base64=base64, label_ids=[self.id])
+        return super(Label, self).upload_image(file_path=file_path, base64=base64, label_ids=[self.id])
 
     def remove_image(self, image_id):
         """
