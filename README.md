@@ -19,7 +19,7 @@ This will install also python-opencv, requests library.
 ##  Usage
 
 First you need to obtain your api token for communication with vize rest endpoints. You can obtain the token from the [Vize.ai option](https://app.vize.ximilar.com/options) page. 
-After you obtain the token, the usage is quite straightforward. First, import this package and create the rest client.
+After you obtain the token, the usage is quite straightforward. First, import this package and create the rest client. 
 
 ```python
 from vize.api import VizeRestClient, Task, Image, Label
@@ -39,7 +39,7 @@ task = client.get_task(task_id='identification-of-your-task')
 If your task is not trained yet, you can call the api to force it:
 
 ```python
-task.train()
+task.train() 
 ```
 
 #### Classify
