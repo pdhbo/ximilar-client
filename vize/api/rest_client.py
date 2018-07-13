@@ -275,12 +275,15 @@ class Task(VizeRestClient):
         :param version: optional(integer of specific version), default None/production_version
         :return: json response
         """
-        for record in records:
-            if '_file' in record and '_base64' not in record and '_img_data' not in record:
-                record['_base64'] = self.load_base64_file(record['_file'])
-            elif '_img_data' in record and '_base64' not in record:
-                record['_base64'] = self.cv2img_to_base64(record['_img_data'])
-                del record['_img_data']
+        for i in range(len(records)):
+            if '_file' in records[i] and '_base64' not in records[i] and '_img_data' not in records[i]:
+                records[i]['_base64'] = self.load_base64_file(records[i]['_file'])
+            elif '_img_data' in records[i]:
+                records[i]['_base64'] = self.cv2img_to_base64(records[i]['_img_data'])
+
+            # finally we need to delete the image data and just send url or base64
+            if '_img_data' in records[i]:
+                del records[i]['_img_data']
 
         data = {'records': records, 'task_id': self.id, 'version': version if version else self.production_version}
         return self.post(CLASSIFY_ENDPOINT, data=data)
