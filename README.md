@@ -123,7 +123,7 @@ label.remove_image(image.id)
 To get list of all images of label use:
 
 ```python
-images = label.get_all_images()
+images = label.get_training_images()
 for image in images:
     print(str(image.id))
 ```
