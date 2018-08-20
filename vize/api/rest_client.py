@@ -21,10 +21,14 @@ class RestClient(object):
     """
     def __init__(self, token, endpoint='https://api.vize.ai/'):
         self.token = token
+        self.cache = {}
         self.endpoint = endpoint
         self.max_size = 600
         self.headers = {'Content-Type': 'application/json',
                         'Authorization': 'Token ' + self.token}
+
+    def invalidate(self):
+        self.cache = {}
 
     def get(self, api_endpoint, data=None):
         """
@@ -43,6 +47,7 @@ class RestClient(object):
         :param files: optional files to upload
         :return: json response
         """
+        self.invalidate()
         if data:
             data = json.dumps(data)
 
@@ -57,6 +62,7 @@ class RestClient(object):
         :param data: optional data
         :return: response
         """
+        self.invalidate()
         return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
 
     def resize_image_data(self, image_data, aspect_ratio=False):
@@ -249,8 +255,12 @@ class Task(VizeRestClient):
         Get labels of this task.
         :return: list of Labels
         """
-        result = self.get(LABEL_ENDPOINT+'?task='+self.id)
-        return [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
+        if 'labels' in self.cache:
+            return self.cache['labels']
+        else:
+            result = self.get(LABEL_ENDPOINT+'?task='+self.id)
+            self.cache['labels'] = [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
+            return self.cache['labels']
 
     def get_label_by_name(self, name):
         """
@@ -328,7 +338,7 @@ class Label(VizeRestClient):
         :param page_url: optional, select the specific page of images, default first page
         :return: (list of images, next_page)
         """
-        url = page_url if page_url else IMAGE_ENDPOINT + '?label='+self.id
+        url = page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "") if page_url else IMAGE_ENDPOINT + '?label='+self.id
         result = self.get(url)
         return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next']
 
@@ -347,6 +357,13 @@ class Label(VizeRestClient):
         :return: result
         """
         return self.post(IMAGE_ENDPOINT + image_id + '/remove-label/', data={'label_id': self.id})
+
+    def delete_label(self):
+        """
+        Delete the image from vize.
+        :return: None
+        """
+        super(Label, self).delete_label(self.id)
 
 
 class Image(VizeRestClient):
