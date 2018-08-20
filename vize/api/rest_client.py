@@ -37,7 +37,8 @@ class RestClient(object):
         :param data: optional data
         :return: json response
         """
-        return requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data).json()
+        result = requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data)
+        return result.json()
 
     def post(self, api_endpoint, data=None, files=None):
         """
@@ -284,12 +285,15 @@ class Task(VizeRestClient):
         :param version: optional(integer of specific version), default None/production_version
         :return: json response
         """
-        for record in records:
-            if '_file' in record and '_base64' not in record and '_img_data' not in record:
-                record['_base64'] = self.load_base64_file(record['_file'])
-            elif '_img_data' in record and '_base64' not in record:
-                record['_base64'] = self.cv2img_to_base64(record['_img_data'])
-                del record['_img_data']
+        for i in range(len(records)):
+            if '_file' in records[i] and '_base64' not in records[i] and '_img_data' not in records[i]:
+                records[i]['_base64'] = self.load_base64_file(records[i]['_file'])
+            elif '_img_data' in records[i]:
+                records[i]['_base64'] = self.cv2img_to_base64(records[i]['_img_data'])
+
+            # finally we need to delete the image data and just send url or base64
+            if '_img_data' in records[i]:
+                del records[i]['_img_data']
 
         data = {'records': records, 'task_id': self.id, 'version': version if version else self.production_version}
         return self.post(CLASSIFY_ENDPOINT, data=data)
@@ -331,6 +335,13 @@ class Label(VizeRestClient):
     def __str__(self):
         return self.id
 
+    def wipe_label(self):
+        """
+        Delete label and all images associated with this label.
+        :return: None
+        """
+        self.delete(LABEL_ENDPOINT + self.id + '/wipe')
+
     def get_training_images(self, page_url=None):
         """
         Get paginated result of images for specific label.
@@ -348,7 +359,7 @@ class Label(VizeRestClient):
         :param file_path: local path to the file
         :return: None
         """
-        return super(Task, self).upload_image(file_path=file_path, base64=base64, label_ids=[self.id])
+        return super(Label, self).upload_image(file_path=file_path, base64=base64, label_ids=[self.id])
 
     def remove_image(self, image_id):
         """
