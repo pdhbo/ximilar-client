@@ -342,6 +342,24 @@ class Label(VizeRestClient):
         """
         self.delete(LABEL_ENDPOINT + self.id + '/wipe')
 
+    def merge_label(self, label_b):
+        """
+        Get all photos of label_b and remove the label_b. Add this label to all the photos.
+        This will lead to merging these two labels.
+        """
+        next_page, images = None, []
+        while True:
+            images_m, next_page = label_b.get_training_images(page_url=next_page)
+            for image in images_m:
+                 images.append(image)
+
+            if not next_page:
+                break
+
+        for image in images:
+            image.remove_label(label_b.id)
+            image.add_label(self.id)
+
     def get_training_images(self, page_url=None):
         """
         Get paginated result of images for specific label.
