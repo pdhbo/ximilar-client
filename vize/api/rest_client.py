@@ -162,7 +162,8 @@ class VizeRestClient(RestClient):
         """
         task_json = self.post(TASK_ENDPOINT, data={NAME: name})
         if 'id' not in task_json:
-            raise Exception("Error creating task: " + name)
+            msg = task_json['detail'] if 'detail' in task_json else ''
+            raise Exception("Error creating task" + " '" + name + "':" + msg)
         return Task(self.token, self.endpoint, task_json)
 
     def create_label(self, name):
