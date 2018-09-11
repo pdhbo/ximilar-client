@@ -177,13 +177,25 @@ class VizeRestClient(RestClient):
             raise Exception("Error creating label: " + name)
         return Label(self.token, self.endpoint, label_json)
 
-    def get_all_labels(self):
+    def get_all_labels(self, suffix=''):
         """
         Get all labels of the user(user is specified by api key).
         :return: List of labels
         """
-        result = self.get(LABEL_ENDPOINT)
-        return [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
+        url, labels = LABEL_ENDPOINT+suffix, []
+
+        while True:
+            result = self.get(url)
+
+            for label_json in result[RESULTS]:
+                labels.append(Label(self.token, self.endpoint, label_json))
+
+            if result['next'] is None:
+                break
+
+            url = result['next'].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
+
+        return labels
 
     def get_label(self, label_id):
         label_json = self.get(LABEL_ENDPOINT + label_id)
@@ -245,13 +257,6 @@ class Task(VizeRestClient):
         """
         super(Task, self).delete_task(self.id)
 
-    def get_all_labels(self):
-        """
-        Getting labels of this task.
-        :return: list of Labels
-        """
-        return self.get_labels()
-
     def get_labels(self):
         """
         Get labels of this task.
@@ -260,8 +265,8 @@ class Task(VizeRestClient):
         if 'labels' in self.cache:
             return self.cache['labels']
         else:
-            result = self.get(LABEL_ENDPOINT+'?task='+self.id)
-            self.cache['labels'] = [Label(self.token, self.endpoint, label_json) for label_json in result[RESULTS]]
+            labels = self.get_all_labels(suffix='?task=' + self.id)
+            self.cache['labels'] = labels
             return self.cache['labels']
 
     def get_label_by_name(self, name):
