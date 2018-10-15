@@ -11,6 +11,7 @@ RESULTS = 'results'
 ID = 'id'
 NAME = 'name'
 TASK = 'task'
+TASKS_COUNT = 'tasksCount'
 
 
 class RestClient(object):
@@ -337,6 +338,7 @@ class Label(VizeRestClient):
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
+        self.tasks_count = label_json[TASKS_COUNT]
 
     def __str__(self):
         return self.id
