@@ -54,6 +54,7 @@ class RestClient(object):
 
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
         result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files)
+        print(result)
         return result.json()
 
     def delete(self, api_endpoint, data=None):
@@ -102,7 +103,8 @@ class RestClient(object):
 
     def cv2img_to_base64(self, image):
         """
-        Load raw numpy/cv2 data of image to base64. The image should have RGB order.
+        Load raw numpy/cv2 data of image to base64. The input image to this method should have RGB order.
+        The vize accepts base64 data to have BGR order that is why we convert it here.
         The image_data was loaded in similar way:
             image = cv2.imread(str(path))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -301,7 +303,8 @@ class Task(VizeRestClient):
             if '_img_data' in records[i]:
                 del records[i]['_img_data']
 
-        data = {'records': records, 'task_id': self.id, 'version': version if version else self.production_version}
+        # version is default set to None, so vize will determine which one to take
+        data = {'records': records, 'task_id': self.id, 'version': version}
         return self.post(CLASSIFY_ENDPOINT, data=data)
 
     def create_label(self, name):
