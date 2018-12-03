@@ -55,7 +55,6 @@ class RestClient(object):
 
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
         result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files)
-        print(result)
         return result.json()
 
     def delete(self, api_endpoint, data=None):
@@ -132,17 +131,25 @@ class VizeRestClient(RestClient):
             raise Exception("Error getting task: " + task_id)
         return Task(self.token, self.endpoint, task_json)
 
-    def get_all_tasks(self):
+    def get_all_tasks(self, suffix=''):
         """
         Get all tasks of the user(user is specified by api key).
         :return: List of Tasks
         """
-        result = self.get(TASK_ENDPOINT)
+        url, tasks = TASK_ENDPOINT+suffix, []
 
-        if not RESULTS in result:
-            return result
+        while True:
+            result = self.get(url)
 
-        return [Task(self.token, self.endpoint, task_json) for task_json in result[RESULTS]]
+            for task_json in result[RESULTS]:
+                tasks.append(Task(self.token, self.endpoint, task_json))
+
+            if result['next'] is None:
+                break
+
+            url = result['next'].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
+
+        return tasks
 
     def get_task_by_name(self, name):
         for task in self.get_all_tasks():
