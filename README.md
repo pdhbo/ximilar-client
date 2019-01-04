@@ -20,11 +20,11 @@ First you need to obtain your `API TOKEN` for communication with ximilar rest en
 After you obtain the token, the usage is quite straightforward. First, import this package and create specific rest client (reconition/vize, tagging, colors, search, ...).  In following example we will create client for `Ximilar Recognition Service` (vize.ai): 
 
 ```python
-from ximilar.client import VizeRestClient
+from ximilar.client import RecognitionClient
 from ximilar.client import DominantColorProductClient, DominantColorGenericClient
 from ximilar.client import FashionTaggingClient, GenericTaggingClient
 
-app_client = VizeRestClient(token="__API_TOKEN__")
+app_client = RecognitionClient(token="__API_TOKEN__")
 fashion_client = FashionTaggingClient(token="__API_TOKEN__")
 ...
 ```
