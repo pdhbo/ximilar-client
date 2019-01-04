@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
-from vize import __version__
+from ximilar import __version__
 
 with open('requirements.txt') as f:
     install_requirements = f.read().splitlines()
 
-setup(name='ximilar-vize-api',
+setup(name='ximilar-ximilar-client',
     version=__version__,
     description='The Ximilar VIZE.AI API.',
     url='http://ximilar.com/',
@@ -22,4 +22,4 @@ setup(name='ximilar-vize-api',
     install_requires=install_requirements,
     include_package_data=True,
     zip_safe=False,
-    namespace_packages=["vize"])
+    namespace_packages=["ximilar"])

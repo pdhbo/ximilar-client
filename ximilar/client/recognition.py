@@ -1,125 +1,13 @@
-import requests
-import json
-import base64
-import cv2
+from ximilar.client import RestClient
+from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT
 
-LABEL_ENDPOINT = 'v2/label/'
-TASK_ENDPOINT = 'v2/task/'
-IMAGE_ENDPOINT = 'v2/training-image/'
-CLASSIFY_ENDPOINT = 'v2/classify/'
-RESULTS = 'results'
-ID = 'id'
-NAME = 'name'
-TASK = 'task'
-TASKS_COUNT = 'tasksCount'
+LABEL_ENDPOINT = 'recognition/v2/label/'
+TASK_ENDPOINT = 'recognition/v2/task/'
+IMAGE_ENDPOINT = 'recognition/v2/training-image/'
+CLASSIFY_ENDPOINT = 'recognition/v2/classify/'
 
 
-class RestClient(object):
-    """
-    Parent class that implements HTTP GET, POST, DELETE methods with requests lib and loading images to base64.
-
-    All objects contains TOKEN and ENDPOINT information.
-    """
-    def __init__(self, token, endpoint='https://api.vize.ai/'):
-        self.token = token
-        self.cache = {}
-        self.endpoint = endpoint
-        self.max_size = 600
-        self.headers = {'Content-Type': 'application/json',
-                        'Authorization': 'Token ' + self.token}
-
-    def invalidate(self):
-        self.cache = {}
-
-    def get(self, api_endpoint, data=None):
-        """
-        Call the http GET request with data.
-        :param api_endpoint: endpoint path
-        :param data: optional data
-        :return: json response
-        """
-        result = requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data)
-        return result.json()
-
-    def post(self, api_endpoint, data=None, files=None):
-        """
-        Call the http POST request with data.
-        :param api_endpoint: endpoint path
-        :param data: optional data
-        :param files: optional files to upload
-        :return: json response
-        """
-        self.invalidate()
-        if data:
-            data = json.dumps(data)
-
-        headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
-        result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files)
-        return result.json()
-
-    def delete(self, api_endpoint, data=None):
-        """
-        Call the http DELETE request with data.
-        :param api_endpoint: endpoint path
-        :param data: optional data
-        :return: response
-        """
-        self.invalidate()
-        return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
-
-    def resize_image_data(self, image_data, aspect_ratio=False):
-        """
-        Resize image data that are no bigger than max_size.
-        :param image_data: cv2/np ndarray
-        :return: cv2/np ndarray
-        """
-        height, width, _ = image_data.shape
-        if height > self.max_size and width > self.max_size and not aspect_ratio:
-            image_data = cv2.resize(image_data, (self.max_size, self.max_size))
-        if height > self.max_size and width > self.max_size and aspect_ratio:
-            image_data = cv2.resize(image_data, self.get_aspect_ratio_dim(image_data, self.max_size))
-        return image_data
-
-    def get_aspect_ratio_dim(self, image, img_size):
-        if image.shape[0] > image.shape[1]:
-            r = float(img_size) / image.shape[1]
-            dim = (img_size, int(image.shape[0] * r))
-        else:
-            r = float(img_size) / image.shape[0]
-            dim = (int(image.shape[1] * r), img_size)
-        return dim
-
-    def load_base64_file(self, path):
-        """
-        Load file from disk to base64.
-        :param path: local path to the image
-        :return: base64 encoded string
-        """
-        image = cv2.imread(str(path))
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = self.resize_image_data(image)
-        image = self.cv2img_to_base64(image)
-        return image
-
-    def cv2img_to_base64(self, image):
-        """
-        Load raw numpy/cv2 data of image to base64. The input image to this method should have RGB order.
-        The vize accepts base64 data to have BGR order that is why we convert it here.
-        The image_data was loaded in similar way:
-            image = cv2.imread(str(path))
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        :param image_data: numpy/cv2 data with RGB order
-        :return: base64 encoded string
-        """
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        image = self.resize_image_data(image)
-        retval, buffer = cv2.imencode('.jpg', image)
-        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
-        return jpg_as_text
-
-
-class VizeRestClient(RestClient):
+class RecognitionClient(RestClient):
     def get_task(self, task_id):
         """
         Getting task by id.
@@ -133,13 +21,16 @@ class VizeRestClient(RestClient):
 
     def get_all_tasks(self, suffix=''):
         """
-        Get all tasks of the user(user is specified by api key).
+        Get all tasks of the user(user is specified by client key).
         :return: List of Tasks
         """
         url, tasks = TASK_ENDPOINT+suffix, []
 
         while True:
             result = self.get(url)
+
+            if RESULTS not in result:
+                return None
 
             for task_json in result[RESULTS]:
                 tasks.append(Task(self.token, self.endpoint, task_json))
@@ -189,7 +80,7 @@ class VizeRestClient(RestClient):
 
     def get_all_labels(self, suffix=''):
         """
-        Get all labels of the user(user is specified by api key).
+        Get all labels of the user(user is specified by client key).
         :return: List of labels
         """
         url, labels = LABEL_ENDPOINT+suffix, []
@@ -241,7 +132,7 @@ class VizeRestClient(RestClient):
         return image
 
 
-class Task(VizeRestClient):
+class Task(RecognitionClient):
     def __init__(self, token, endpoint, task_json):
         super(Task, self).__init__(token, endpoint)
 
@@ -255,14 +146,14 @@ class Task(VizeRestClient):
 
     def train(self):
         """
-        Create new training in vize.ai.
+        Create new training in ximilar.ai.
         :return: None
         """
         return self.post(TASK_ENDPOINT+self.id+'/train/')
 
     def delete_task(self):
         """
-        Delete the task from vize.
+        Delete the task from ximilar.
         :return: None
         """
         super(Task, self).delete_task(self.id)
@@ -290,28 +181,20 @@ class Task(VizeRestClient):
 
     def classify(self, records, version=None):
         """
-        Takes the images and calls the vize api for classifying these images on the task.
+        Takes the images and calls the ximilar client for classifying these images on the task.
 
         Usage:
             client = VizeRestClient('your-token')
             task = client.get_task('')
-            result = task.classify({'_url':'http://example.com/test.jpg'})
+            result = task.classify({'_url':'http://example.com/client.jpg'})
 
         :param records: array of json/dicts [{'_url':'url-path'}, {'_file': ''}, {'_base64': 'base64encodeimg'}]
         :param version: optional(integer of specific version), default None/production_version
         :return: json response
         """
-        for i in range(len(records)):
-            if '_file' in records[i] and '_base64' not in records[i] and '_img_data' not in records[i]:
-                records[i]['_base64'] = self.load_base64_file(records[i]['_file'])
-            elif '_img_data' in records[i]:
-                records[i]['_base64'] = self.cv2img_to_base64(records[i]['_img_data'])
+        records = self.preprocess_records(records)
 
-            # finally we need to delete the image data and just send url or base64
-            if '_img_data' in records[i]:
-                del records[i]['_img_data']
-
-        # version is default set to None, so vize will determine which one to take
+        # version is default set to None, so ximilar will determine which one to take
         data = {'records': records, 'task_id': self.id, 'version': version}
         return self.post(CLASSIFY_ENDPOINT, data=data)
 
@@ -333,7 +216,7 @@ class Task(VizeRestClient):
         """
         return self.post(TASK_ENDPOINT + self.id +'/add-label/', data={'label_id': label_id})
 
-    def remove_label(self, label_id):
+    def detach_label(self, label_id):
         """
         Remove/Detach label from the task. If the task was already trained then it is frozen and you are not able to remove it.
         :param label_id: identification of label
@@ -342,7 +225,7 @@ class Task(VizeRestClient):
         return self.post(TASK_ENDPOINT + self.id +'/remove-label/', data={'label_id': label_id})
 
 
-class Label(VizeRestClient):
+class Label(RecognitionClient):
     def __init__(self, token, endpoint, label_json):
         super(Label, self).__init__(token, endpoint)
 
@@ -391,13 +274,13 @@ class Label(VizeRestClient):
 
     def upload_image(self, file_path=None, base64=None):
         """
-        Upload image to the vize.ai and adding label to this image.
+        Upload image to the ximilar.ai and adding label to this image.
         :param file_path: local path to the file
         :return: None
         """
         return super(Label, self).upload_image(file_path=file_path, base64=base64, label_ids=[self.id])
 
-    def remove_image(self, image_id):
+    def detach_image(self, image_id):
         """
         Remove/Detach label from the image.
         :param label_id: id of label
@@ -407,13 +290,13 @@ class Label(VizeRestClient):
 
     def delete_label(self):
         """
-        Delete the image from vize.
+        Delete the image from ximilar.
         :return: None
         """
         super(Label, self).delete_label(self.id)
 
 
-class Image(VizeRestClient):
+class Image(RecognitionClient):
     def __init__(self, token, endpoint, image_json):
         super(Image, self).__init__(token, endpoint)
 
@@ -425,7 +308,7 @@ class Image(VizeRestClient):
 
     def delete_image(self):
         """
-        Delete the image from vize.
+        Delete the image from ximilar.
         :return: None
         """
         super(Image, self).delete_image(self.id)
@@ -445,7 +328,7 @@ class Image(VizeRestClient):
         """
         return self.post(IMAGE_ENDPOINT + self.id + '/add-label/', data={'label_id': label_id})
 
-    def remove_label(self, label_id):
+    def detach_label(self, label_id):
         """
         Remove/Detach label from the image.
         :param label_id: id of label
