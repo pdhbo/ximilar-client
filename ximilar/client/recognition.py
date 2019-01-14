@@ -170,7 +170,7 @@ class Task(RecognitionClient):
         :return: list of Labels
         """
         if 'labels' in self.cache:
-            return self.cache['labels']
+            return self.cache['labels'], RESULT_OK
         else:
             labels, result = self.get_all_labels(suffix='?task=' + self.id)
 
