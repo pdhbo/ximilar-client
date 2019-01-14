@@ -35,7 +35,7 @@ This client allows you to work with Ximilar Recognition Service. With this clien
 After creating client object you can for example load your existing task and call train:
 
 ```python
-task = client.get_task(task_id='__ID_TASK_')
+task, status = client.get_task(task_id='__ID_TASK_')
 
 # Every label in the task must have at least 20 images before training.
 # The training can take up to several hours so this endpoint will 
@@ -43,11 +43,11 @@ task = client.get_task(task_id='__ID_TASK_')
 task.train() 
 
 # or you can list all your available tasks
-tasks = client.get_all_tasks()
+tasks, status = client.get_all_tasks()
 
 # or you can create new task and immediatelly delete it
 # each Task, Image, Label is identified by unique ID
-task = client.create_task('__TASK_NAME__')
+task, status = client.create_task('__TASK_NAME__')
 client.delete_task(task.id)
 ```
 
@@ -70,14 +70,14 @@ Working with the labels are pretty simple.
 
 ```python
 # getting existing label
-existing_label = client.get_label('__ID_LABEL__')
+existing_label, status = client.get_label('__ID_LABEL__')
 
 # creating new label and attaching it to existing task
-label = client.create_label(name='__NEW_LABEL_NAME__')
-task = task.add_label(label.id)
+label, status = client.create_label(name='__NEW_LABEL_NAME__')
+task.add_label(label.id)
 
 # get all labels of given task use
-labels = task.get_labels()
+labels, status = task.get_labels()
 
 for label in labels:
     print(label.id, label.name)
@@ -96,15 +96,15 @@ label.detach_image(image.id)
 
 ```python
 # getting all images of label (paginated result)
-images, next_page = label.get_training_images()
+images, next_page, status = label.get_training_images()
 while next_page:
     for image in images:
         print(str(image.id))
 
-    next_page = label.get_training_images(next_page)
+    images, next_page, status = label.get_training_images(next_page)
 
 # basic operations
-image = client.get_image(image_id=image.id)
+image, status = client.get_image(image_id=image.id)
 image.add_label(label.id)
 
 # detach label from image
@@ -118,7 +118,7 @@ Let's say you want to upload a training image and add several labels to this ima
 It's quite straightforward if you have objects of these labels:
 
 ```python
-image = client.upload_image({'_url': '__SOME_URL__'}, label_ids=[label.id for label in labels])
+image, status = client.upload_image({'_url': '__SOME_URL__'}, label_ids=[label.id for label in labels])
 
 # and maybe add another label
 image.add_label(label_X.id)

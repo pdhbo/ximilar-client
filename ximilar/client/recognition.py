@@ -1,5 +1,5 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT
+from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
@@ -16,8 +16,8 @@ class RecognitionClient(RestClient):
         """
         task_json = self.get(TASK_ENDPOINT + task_id)
         if 'id' not in task_json:
-            raise Exception("Error getting task: " + task_id)
-        return Task(self.token, self.endpoint, task_json)
+            return None, {'status': 'Not Found'}
+        return Task(self.token, self.endpoint, task_json), RESULT_OK
 
     def get_all_tasks(self, suffix=''):
         """
@@ -30,7 +30,7 @@ class RecognitionClient(RestClient):
             result = self.get(url)
 
             if RESULTS not in result:
-                return None
+                return None, {'status': 'unexpected error'}
 
             for task_json in result[RESULTS]:
                 tasks.append(Task(self.token, self.endpoint, task_json))
@@ -40,12 +40,18 @@ class RecognitionClient(RestClient):
 
             url = result['next'].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
 
-        return tasks
+        return tasks, RESULT_OK
 
     def get_task_by_name(self, name):
-        for task in self.get_all_tasks():
-            if task.name == name:
-                return task
+        tasks, result = self.get_all_tasks()
+
+        if result['status'] == 'OK':
+            for task in tasks:
+                if task.name == name:
+                    return task, result
+        else:
+            return None, result
+        return None, {'status': 'Task with this name not found!'}
 
     def delete_task(self, task_id):
         """
@@ -63,9 +69,9 @@ class RecognitionClient(RestClient):
         """
         task_json = self.post(TASK_ENDPOINT, data={NAME: name})
         if 'id' not in task_json:
-            msg = task_json['detail'] if 'detail' in task_json else ''
-            raise Exception("Error creating task" + " '" + name + "':" + msg)
-        return Task(self.token, self.endpoint, task_json)
+            msg = task_json['detail'] if 'detail' in task_json else 'unexpected error'
+            return None, {'status': msg}
+        return Task(self.token, self.endpoint, task_json), RESULT_OK
 
     def create_label(self, name):
         """
@@ -75,8 +81,8 @@ class RecognitionClient(RestClient):
         """
         label_json = self.post(LABEL_ENDPOINT, data={NAME: name})
         if 'id' not in label_json:
-            raise Exception("Error creating label: " + name)
-        return Label(self.token, self.endpoint, label_json)
+            return None, {'status': 'unexpected error'}
+        return Label(self.token, self.endpoint, label_json), RESULT_OK
 
     def get_all_labels(self, suffix=''):
         """
@@ -96,19 +102,19 @@ class RecognitionClient(RestClient):
 
             url = result['next'].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
 
-        return labels
+        return labels, RESULT_OK
 
     def get_label(self, label_id):
         label_json = self.get(LABEL_ENDPOINT + label_id)
         if ID not in label_json:
-            raise Exception("Error getting label: " + label_id)
-        return Label(self.token, self.endpoint, label_json)
+            return None, {'status': 'label with id not found'}
+        return Label(self.token, self.endpoint, label_json), RESULT_OK
 
     def get_image(self, image_id):
         image_json = self.get(IMAGE_ENDPOINT + image_id)
         if ID not in image_json:
-            raise Exception("Error getting image: " + image_id)
-        return Image(self.token, self.endpoint, image_json)
+            return None, {'status': 'image with id not found'}
+        return Image(self.token, self.endpoint, image_json), RESULT_OK
 
     def delete_label(self, label_id):
         self.delete(LABEL_ENDPOINT + label_id)
@@ -125,11 +131,11 @@ class RecognitionClient(RestClient):
             data = {'base64': base64.decode("utf-8")}
 
         image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
-        image = self.get_image(image_json['id'])
+        image, status = self.get_image(image_json['id'])
 
         for label_id in label_ids:
             image.add_label(label_id)
-        return image
+        return image, RESULT_OK
 
 
 class Task(RecognitionClient):
@@ -166,18 +172,26 @@ class Task(RecognitionClient):
         if 'labels' in self.cache:
             return self.cache['labels']
         else:
-            labels = self.get_all_labels(suffix='?task=' + self.id)
-            self.cache['labels'] = labels
-            return self.cache['labels']
+            labels, result = self.get_all_labels(suffix='?task=' + self.id)
+
+            if result['status'] == 'OK':
+                self.cache['labels'] = labels
+
+            return self.cache['labels'], result
 
     def get_label_by_name(self, name):
         """
         Get label of this task by name.
         """
-        labels = self.get_labels()
-        for label in labels:
-            if label.name == name:
-                return label
+        labels, result = self.get_labels()
+        if result['status'] == 'OK':
+            for label in labels:
+                if label.name == name:
+                    return label, RESULT_OK
+        else:
+            return None, result
+
+        return None, {'status': 'Label with this name not found!'}
 
     def classify(self, records, version=None):
         """
@@ -204,9 +218,9 @@ class Task(RecognitionClient):
         :param name:
         :return:
         """
-        label = super(Task, self).create_label(name)
+        label, result = super(Task, self).create_label(name)
         self.add_label(label.id)
-        return label
+        return label, RESULT_OK
 
     def add_label(self, label_id):
         """
@@ -250,7 +264,7 @@ class Label(RecognitionClient):
         """
         next_page, images = None, []
         while True:
-            images_m, next_page = label_b.get_training_images(page_url=next_page)
+            images_m, next_page, status = label_b.get_training_images(page_url=next_page)
             for image in images_m:
                  images.append(image)
 
@@ -270,7 +284,7 @@ class Label(RecognitionClient):
         """
         url = page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "") if page_url else IMAGE_ENDPOINT + '?label='+self.id
         result = self.get(url)
-        return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next']
+        return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next'], RESULT_OK
 
     def upload_image(self, file_path=None, base64=None):
         """
@@ -318,7 +332,7 @@ class Image(RecognitionClient):
         Get labels assigned to this image.
         :return: list of Labels
         """
-        return [Label(self.token, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT + self.id)['labels']]
+        return [Label(self.token, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT + self.id)['labels']], RESULT_OK
 
     def add_label(self, label_id):
         """
