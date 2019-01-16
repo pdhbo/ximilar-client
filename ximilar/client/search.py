@@ -1,4 +1,5 @@
 from ximilar.client import RestClient
+from ximilar.client.constants import RECORDS
 
 SIMILARITY_PHOTOS = '/similarity/photos/v2/'
 SIMILARITY_PHOTOS = '/similarity/products/v2/'
@@ -27,14 +28,19 @@ class Similarity(RestClient):
 
 
 class SmartSearchClient(RestClient):
+    def __init__(self, token):
+        super(SmartSearchClient, self).__init__(token)
+        self.max_size = 1000
+
     def insert(self):
         raise NotImplementedError
 
     def search(self, records, collection):
         raise NotImplementedError
 
-    def detect(self, records, collection):
-        raise NotImplementedError
+    def detect(self, records):
+        records = self.preprocess_records(records)
+        return self.post(SMART_DETECT_ENDPOINT, data={RECORDS: records})
 
     def search_by_object(self, records, collection):
         raise NotImplementedError
