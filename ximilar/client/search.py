@@ -1,13 +1,13 @@
 from ximilar.client import RestClient
 from ximilar.client.constants import RECORDS
 
-SIMILARITY_PHOTOS = '/similarity/photos/v2/'
-SIMILARITY_PHOTOS = '/similarity/products/v2/'
+SIMILARITY_PHOTOS = 'similarity/photos/v2/'
+SIMILARITY_PHOTOS = 'similarity/products/v2/'
 
-SMART_INSERT_ENDPOINT = '/smart/v2/product/insert'
-SMART_SEARCH_ENDPOINT = '/smart/v2/product/search'
-SMART_DETECT_ENDPOINT = '/smart/v2/product/detect'
-SMART_SEARCH_OBJ_ENDPOINT = '/smart/v2/product/search_by_object'
+SMART_INSERT_ENDPOINT = 'smart/v2/product/insert'
+SMART_SEARCH_ENDPOINT = 'smart/v2/product/search'
+SMART_DETECT_ENDPOINT = 'smart/v2/product/detect'
+SMART_SEARCH_OBJ_ENDPOINT = 'smart/v2/product/search_by_object'
 
 
 class Similarity(RestClient):
