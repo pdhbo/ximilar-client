@@ -65,6 +65,10 @@ class RestClient(object):
         :param image_data: cv2/np ndarray
         :return: cv2/np ndarray
         """
+        # do not resize image if set to 0
+        if self.max_size == 0:
+            return image_data
+
         height, width, _ = image_data.shape
         if height > self.max_size and width > self.max_size and not aspect_ratio:
             image_data = cv2.resize(image_data, (self.max_size, self.max_size))
@@ -126,5 +130,8 @@ class RestClient(object):
             # finally we need to delete the image data and just send url or base64
             if IMG_DATA in records[i]:
                 del records[i][IMG_DATA]
+
+            if FILE in records[i]:
+                del records[i][FILE]
 
         return records

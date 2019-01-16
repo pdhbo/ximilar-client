@@ -28,9 +28,11 @@ class Similarity(RestClient):
 
 
 class SmartSearchClient(RestClient):
-    def __init__(self, token):
+    def __init__(self, token, collection):
         super(SmartSearchClient, self).__init__(token)
+
         self.max_size = 1000
+        self.headers['collection'] = collection
 
     def insert(self):
         raise NotImplementedError
