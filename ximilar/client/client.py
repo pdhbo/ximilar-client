@@ -47,7 +47,6 @@ class RestClient(object):
 
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
         result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files)
-        print(result, self.endpoint+api_endpoint)
         return result.json()
 
     def delete(self, api_endpoint, data=None):
