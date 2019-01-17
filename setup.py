@@ -1,11 +1,17 @@
 from setuptools import setup, find_packages
-from ximilar import __version__
+import os
 
 with open('requirements.txt') as f:
     install_requirements = f.read().splitlines()
 
+if os.environ.get('CI_COMMIT_TAG'):
+    version = os.environ['CI_COMMIT_TAG']
+else:
+    version = os.environ['CI_JOB_ID']
+
+
 setup(name='ximilar-client',
-    version=__version__,
+    version=version,
     description='The Ximilar App and Vize.ai Client.',
     url='http://ximilar.com/',
     author='Michal Lukac, David Novak and Ximilar.com Team',
