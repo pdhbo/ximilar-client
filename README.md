@@ -4,6 +4,11 @@ This Python 3.X Client library is lightweight wrapper for `ximilar.com` and `viz
 
 ## Installation
 
+PyPI:
+
+    # we recommend to install ximilar-client to new virtualenv
+    pip install ximilar-client
+
 Manual installation:
 
     1. Cloning the repo
