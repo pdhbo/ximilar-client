@@ -13,7 +13,7 @@ else:
 setup(name='ximilar-client',
     version=version,
     description='The Ximilar App and Vize.ai Client.',
-    url='http://ximilar.com/',
+    url='https://gitlab.com/ximilar-public/ximilar-vize-api',
     author='Michal Lukac, David Novak and Ximilar.com Team',
     author_email='tech@ximilar.com',
     license='Apache 2.0',
