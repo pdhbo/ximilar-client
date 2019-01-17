@@ -41,6 +41,11 @@ class SmartSearchClient(RestClient):
         raise NotImplementedError
 
     def detect(self, records):
+        """
+        Detects Objects and Tags without searching items.
+        :param records: list of dictionaries with _url|_file|_base64
+        :return: json response
+        """
         records = self.preprocess_records(records)
         return self.post(SMART_DETECT_ENDPOINT, data={RECORDS: records})
 
