@@ -1,5 +1,5 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK
+from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
@@ -122,20 +122,33 @@ class RecognitionClient(RestClient):
     def delete_image(self, image_id):
         return self.delete(IMAGE_ENDPOINT + image_id)
 
-    def upload_image(self, file_path=None, base64=None, label_ids=[]):
-        files, data = None, None
+    def upload_images(self, records):
+        """
+        Upload one or more files and add labels to them.
+        :param record: list of dictionaries with labels and one of '_base64', '_file', '_url'
+                       [{'_file': '__FILE_PATH__', 'labels': ['__UUID_1__', '__UUID_2__']}, ...]
+        :return: image, status
+        """
+        images = []
+        for record in records:
+            files, data = None, None
 
-        if file_path:
-            files = {'img_path': open(file_path, 'rb')}
-        if base64:
-            data = {'base64': base64.decode("utf-8")}
+            if FILE in record:
+                files = {'img_path': open(record[FILE], 'rb')}
+            elif BASE64 in record:
+                data = {'base64': record[BASE64].decode("utf-8")}
+            elif URL in record:
+                data = {'base64': self.load_url_image(record[URL])}
 
-        image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
-        image, status = self.get_image(image_json['id'])
+            image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
+            image, status = self.get_image(image_json['id'])
 
-        for label_id in label_ids:
-            image.add_label(label_id)
-        return image, RESULT_OK
+            if 'labels' in record:
+                for label_id in record['labels']:
+                    image.add_label(label_id)
+
+            images.append(image)
+        return images, RESULT_OK
 
 
 class Task(RecognitionClient):

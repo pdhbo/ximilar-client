@@ -2,6 +2,9 @@ import requests
 import json
 import base64
 import cv2
+import numpy as np
+import concurrent.futures
+from tqdm import tqdm
 
 from ximilar.client.constants import FILE, BASE64, IMG_DATA
 
@@ -114,6 +117,20 @@ class RestClient(object):
         jpg_as_text = base64.b64encode(buffer).decode('utf-8')
         return jpg_as_text
 
+    def load_url_image(self, path):
+        """
+        Load url file to base64 WITHOUT resizing (it is used in upload image for recognition).
+        :param path: url path
+        :return: base64 encoded string
+        """
+        r = requests.get(str(path), headers={'Accept': '*/*', 'User-Agent': 'request'})
+        img_bin = r.content
+        image = np.asarray(bytearray(img_bin), dtype="uint8")
+        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.cv2img_to_base64(image)
+        return image
+
     def preprocess_records(self, records):
         """
         Preprocess all records (list of dictionaries with possible '_base64'|'_file'|'_url' fields
@@ -135,3 +152,46 @@ class RestClient(object):
                 del records[i][FILE]
 
         return records
+
+    def parallel_records_processing(self, records, method, max_workers=3, batch_size=1, output=False):
+        """
+        Process method which uses records in parallel way. This works for methods:
+
+        RecogntionClient.upload_image
+        RecognitionClient.classify
+        FashionTaggingClient.tags
+        GenericTaggingClient.tags
+        DominantColorClient.dominantcolor
+
+        :param records: list of dictionaries with _url, _file, _base64 and other metadata
+                        [{'_file': '__IMG_PATH__', 'id': '__MY_IMAGE_ID__'}, ... ]
+        :param method: method to call
+        :param max_workers: how many threads will we spawn for work (recommended is 3)
+        :param batch: how many images are we sending in batch
+        :param output: output to stdout with progressbar / tqdm
+        :return: list of results from every method
+        """
+        executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+        futures = [{'future': executor.submit(method, records_to_proc),
+                    'size': len(records_to_proc)} for records_to_proc in self.batch(records, n=batch_size)]
+
+        results = []
+        if output:
+            with tqdm(total=len(records)) as pbar:
+                for future in futures:
+                    result = future['future'].result()
+                    results.append(result)
+                    pbar.update(future['size'])
+        else:
+            results = [future['future'].result() for future in futures]
+        return results
+
+    def batch(self, iterable, n=1):
+        """
+        Divides list to batches of size n.
+        """
+        l = len(iterable)
+        for ndx in range(0, l, n):
+            yield iterable[ndx:min(ndx + n, l)]
+
+

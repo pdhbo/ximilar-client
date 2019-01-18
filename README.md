@@ -123,11 +123,27 @@ Let's say you want to upload a training image and add several labels to this ima
 It's quite straightforward if you have objects of these labels:
 
 ```python
-image, status = client.upload_image({'_url': '__SOME_URL__'}, label_ids=[label.id for label in labels])
+images, status = client.upload_images([{'_url': '__SOME_URL__', 'labels': [label.id for label in labels]},
+                                       {'_file': '__SOME_URL__', 'labels': [label.id for label in labels]},
+                                       {'_base64': '__SOME_URL__', 'labels': [label.id for label in labels]}])
 
-# and maybe add another label
-image.add_label(label_X.id)
+# and maybe add another label to the first image
+images[0].add_label(label_X.id)
 ```
+
+#### Speeding it up with Parallel Processing
+
+If you are uploading/classifying thousands of images and really need to speed it up, then you can use method parallel_records_processing in similar way:
+
+```python
+# classifying images
+result = client.parallel_records_processing([{"_url": image} for image in images], method=task.classify, output=True, max_workers=3)
+
+# uploading images
+result = client.parallel_records_processing([{"_url": image} for image in images], method=client.upload_images, output=True)
+```
+
+This method works only for getting result for classification, tagging, detection, color or uploading images to Ximilar Recognition platform.
 
 ## Ximilar Dominant Colors
 
