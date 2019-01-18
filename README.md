@@ -140,7 +140,7 @@ If you are uploading/classifying thousands of images and really need to speed it
 result = client.parallel_records_processing([{"_url": image} for image in images], method=task.classify, output=True, max_workers=3)
 
 # uploading images
-result = client.parallel_records_processing([{"_url": image} for image in images], method=client.upload_images, output=True)
+result = client.parallel_records_processing([{"_url": image, "labels": ["__LABEL_ID_1__"]} for image in images], method=client.upload_images, output=True)
 ```
 
 This method works only for getting result for classification, tagging, detection, color or uploading images to Ximilar Recognition platform.
