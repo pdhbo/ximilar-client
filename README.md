@@ -12,9 +12,9 @@ PyPI:
 Manual installation:
 
     1. Cloning the repo
-    clone git@gitlab.com:ximilar-public/ximilar-vize-api.git
+    git clone https://gitlab.com/ximilar-public/ximilar-client.git
     2. Install it with pip to your virtualenv
-    pip install -e ximilar-vize-api
+    pip install -e ximilar-client
 
 
 This will install also python-opencv, requests and pytest library.
