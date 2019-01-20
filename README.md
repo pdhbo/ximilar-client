@@ -123,9 +123,9 @@ Let's say you want to upload a training image and add several labels to this ima
 It's quite straightforward if you have objects of these labels:
 
 ```python
-images, status = client.upload_images([{'_url': '__SOME_URL__', 'labels': [label.id for label in labels]},
-                                       {'_file': '__SOME_URL__', 'labels': [label.id for label in labels]},
-                                       {'_base64': '__SOME_URL__', 'labels': [label.id for label in labels]}])
+images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', 'labels': [label.id for label in labels]},
+                                       {'_file': '__LOCAL_FILE_PATH__', 'labels': [label.id for label in labels]},
+                                       {'_base64': '__BASE64_DATA__', 'labels': [label.id for label in labels]}])
 
 # and maybe add another label to the first image
 images[0].add_label(label_X.id)
