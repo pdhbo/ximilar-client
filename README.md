@@ -12,9 +12,9 @@ PyPI:
 Manual installation:
 
     1. Cloning the repo
-    clone git@gitlab.com:ximilar-public/ximilar-vize-api.git
+    git clone https://gitlab.com/ximilar-public/ximilar-client.git
     2. Install it with pip to your virtualenv
-    pip install -e ximilar-vize-api
+    pip install -e ximilar-client
 
 
 This will install also python-opencv, requests and pytest library.
@@ -123,9 +123,9 @@ Let's say you want to upload a training image and add several labels to this ima
 It's quite straightforward if you have objects of these labels:
 
 ```python
-images, status = client.upload_images([{'_url': '__SOME_URL__', 'labels': [label.id for label in labels]},
-                                       {'_file': '__SOME_URL__', 'labels': [label.id for label in labels]},
-                                       {'_base64': '__SOME_URL__', 'labels': [label.id for label in labels]}])
+images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', 'labels': [label.id for label in labels]},
+                                       {'_file': '__LOCAL_FILE_PATH__', 'labels': [label.id for label in labels]},
+                                       {'_base64': '__BASE64_DATA__', 'labels': [label.id for label in labels]}])
 
 # and maybe add another label to the first image
 images[0].add_label(label_X.id)
@@ -140,7 +140,7 @@ If you are uploading/classifying thousands of images and really need to speed it
 result = client.parallel_records_processing([{"_url": image} for image in images], method=task.classify, output=True, max_workers=3)
 
 # uploading images
-result = client.parallel_records_processing([{"_url": image} for image in images], method=client.upload_images, output=True)
+result = client.parallel_records_processing([{"_url": image, "labels": ["__LABEL_ID_1__"]} for image in images], method=client.upload_images, output=True)
 ```
 
 This method works only for getting result for classification, tagging, detection, color or uploading images to Ximilar Recognition platform.
