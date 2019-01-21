@@ -6,7 +6,7 @@ import numpy as np
 import concurrent.futures
 from tqdm import tqdm
 
-from ximilar.client.constants import FILE, BASE64, IMG_DATA
+from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS
 
 
 class RestClient(object):
@@ -152,6 +152,16 @@ class RestClient(object):
                 del records[i][FILE]
 
         return records
+
+    def custom_records_processing(self, records, endpoint):
+        """
+        Records processing for your custom endpoint.
+        :param records: list of dictionaries with _url, _file, _base64
+        :param endpoint: endpoint to add to api.ximilar.com/
+        :return: result from endpoint
+        """
+        records = self.preprocess_records(records)
+        return self.post(endpoint, data={RECORDS: records})
 
     def parallel_records_processing(self, records, method, max_workers=3, batch_size=1, output=False):
         """
