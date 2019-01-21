@@ -153,7 +153,7 @@ class RestClient(object):
 
         return records
 
-    def custom_records_processing(self, records, endpoint):
+    def custom_endpoint_processing(self, records, endpoint):
         """
         Records processing for your custom endpoint.
         :param records: list of dictionaries with _url, _file, _base64
