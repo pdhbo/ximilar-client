@@ -1,5 +1,5 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64
+from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
@@ -117,7 +117,7 @@ class RecognitionClient(RestClient):
         return Image(self.token, self.endpoint, image_json), RESULT_OK
 
     def delete_label(self, label_id):
-        self.delete(LABEL_ENDPOINT + label_id)
+        return self.delete(LABEL_ENDPOINT + label_id)
 
     def delete_image(self, image_id):
         return self.delete(IMAGE_ENDPOINT + image_id)
@@ -259,6 +259,7 @@ class Label(RecognitionClient):
         self.id = label_json[ID]
         self.name = label_json[NAME]
         self.tasks_count = label_json[TASKS_COUNT] if TASKS_COUNT in label_json else 0
+        self.negative_for_task = label_json[NEGATIVE_FOR_TASK] if NEGATIVE_FOR_TASK in label_json else None
 
     def __str__(self):
         return self.id
@@ -320,7 +321,7 @@ class Label(RecognitionClient):
         Delete the image from ximilar.
         :return: None
         """
-        super(Label, self).delete_label(self.id)
+        return super(Label, self).delete_label(self.id)
 
 
 class Image(RecognitionClient):

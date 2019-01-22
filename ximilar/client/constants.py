@@ -5,6 +5,7 @@ URL = '_url'
 BASE64 = '_base64'
 IMG_DATA = '_img_data'
 RESULT_OK = {'status': 'OK'}
+NEGATIVE_FOR_TASK = 'negative_for_task'
 
 # Recognition/Vize related
 RESULTS = 'results'

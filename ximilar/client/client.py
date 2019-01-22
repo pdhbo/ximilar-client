@@ -60,7 +60,8 @@ class RestClient(object):
         :return: response
         """
         self.invalidate()
-        return requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
+        result = requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
+        return result.json()
 
     def resize_image_data(self, image_data, aspect_ratio=False):
         """
