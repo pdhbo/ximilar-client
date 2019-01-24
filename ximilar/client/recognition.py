@@ -1,5 +1,5 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import TASK, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK
+from ximilar.client.constants import TASK, MULTI_CLASS, TASK_TYPE, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
@@ -61,13 +61,14 @@ class RecognitionClient(RestClient):
         """
         return self.delete(TASK_ENDPOINT + task_id + '/')
 
-    def create_task(self, name):
+    def create_task(self, name, type=MULTI_CLASS):
         """
         Create task with given name.
         :param name: name of the task
+        :param task_type: 'multi_class' (default) or 'multi_label'
         :return: Task object
         """
-        task_json = self.post(TASK_ENDPOINT, data={NAME: name})
+        task_json = self.post(TASK_ENDPOINT, data={NAME: name,  TASK_TYPE: type})
         if 'id' not in task_json:
             msg = task_json['detail'] if 'detail' in task_json else 'unexpected error'
             return None, {'status': msg}

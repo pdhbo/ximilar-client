@@ -50,10 +50,24 @@ task.train()
 # or you can list all your available tasks
 tasks, status = client.get_all_tasks()
 
-# or you can create new task and immediatelly delete it
+# or you can create new classification task and immediatelly delete it
 # each Task, Image, Label is identified by unique ID
 task, status = client.create_task('__TASK_NAME__')
-client.delete_task(task.id)
+client.delete_task(task.id) 
+```
+
+#### Task
+
+Currently there are two types of task to create. User can select 'multi_class' (default) or 'multi_label'.
+
+```python
+# classification or multi class task means that image is assigned to exactly one label
+# labels are exclusive which means image can contain only 'cat' or only 'dog'
+classification_task, status = client.create_task('__TASK_NAME__')
+
+# tagging or multi label task means that image can have one or more labels
+# for example image can contain 'cat', 'dog' and 'animal' labels if there are on the picture
+tagging_task, status = client.create_task('__TASK_NAME__', type='multi_label')
 ```
 
 #### Classify
