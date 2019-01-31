@@ -1,5 +1,5 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import TASK, MULTI_CLASS, TASK_TYPE, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK
+from ximilar.client.constants import ENDPOINT, TASK, MULTI_CLASS, TASK_TYPE, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK, WORKSPACE, DEFAULT_WORKSPACE
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
@@ -8,6 +8,11 @@ CLASSIFY_ENDPOINT = 'recognition/v2/classify/'
 
 
 class RecognitionClient(RestClient):
+    def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE):
+        super(RecognitionClient, self).__init__(token=token, endpoint=endpoint)
+
+        self.workspace = workspace
+
     def get_task(self, task_id):
         """
         Getting task by id.
@@ -16,7 +21,8 @@ class RecognitionClient(RestClient):
         """
         task_json = self.get(TASK_ENDPOINT + task_id)
         if 'id' not in task_json:
-            return None, {'status': 'Not Found'}
+            status = {'status': task_json['detail']} if 'detail' in task_json else {'status': 'Not Found'}
+            return None, status
         return Task(self.token, self.endpoint, task_json), RESULT_OK
 
     def get_all_tasks(self, suffix=''):
@@ -61,14 +67,15 @@ class RecognitionClient(RestClient):
         """
         return self.delete(TASK_ENDPOINT + task_id + '/')
 
-    def create_task(self, name, type=MULTI_CLASS):
+    def create_task(self, name, task_type=MULTI_CLASS):
         """
         Create task with given name.
         :param name: name of the task
         :param task_type: 'multi_class' (default) or 'multi_label'
         :return: Task object
         """
-        task_json = self.post(TASK_ENDPOINT, data={NAME: name,  TASK_TYPE: type})
+        data = self.add_workspace({NAME: name,  TASK_TYPE: task_type})
+        task_json = self.post(TASK_ENDPOINT, data=data)
         if 'id' not in task_json:
             msg = task_json['detail'] if 'detail' in task_json else 'unexpected error'
             return None, {'status': msg}
@@ -80,7 +87,8 @@ class RecognitionClient(RestClient):
         :param name: name of the label
         :return: Label object
         """
-        label_json = self.post(LABEL_ENDPOINT, data={NAME: name})
+        data = self.add_workspace({NAME: name})
+        label_json = self.post(LABEL_ENDPOINT, data=data)
         if 'id' not in label_json:
             return None, {'status': 'unexpected error'}
         return Label(self.token, self.endpoint, label_json), RESULT_OK
@@ -160,6 +168,7 @@ class Task(RecognitionClient):
         self.name = task_json[NAME]
         self.type = task_json['type']
         self.production_version = task_json['production_version']
+        self.workspace = task_json[WORKSPACE] if WORKSPACE in task_json else DEFAULT_WORKSPACE
 
     def __str__(self):
         return self.id
@@ -261,6 +270,7 @@ class Label(RecognitionClient):
         self.name = label_json[NAME]
         self.tasks_count = label_json[TASKS_COUNT] if TASKS_COUNT in label_json else 0
         self.negative_for_task = label_json[NEGATIVE_FOR_TASK] if NEGATIVE_FOR_TASK in label_json else None
+        self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
 
     def __str__(self):
         return self.id
@@ -331,6 +341,7 @@ class Image(RecognitionClient):
 
         self.id = image_json[ID]
         self.thumb_img_path = image_json['thumb_img_path']
+        self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
 
     def __str__(self):
         return self.thumb_img_path

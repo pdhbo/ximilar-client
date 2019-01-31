@@ -56,6 +56,12 @@ task, status = client.create_task('__TASK_NAME__')
 client.delete_task(task.id) 
 ```
 
+With a new version of Recognition App you are able to work also with workspaces. Workspaces are entities where all your task, labels and images live. Each user has by default workspace with name `Default` (it will be used if you do not specify workspace when working with Image, Label, Task)..
+
+```python
+client = RecognitionClient(token="__API_TOKEN__", workspace='__UUID_OF_YOUR_WORKSPACE__')
+```
+
 #### Task
 
 Currently there are two types of task to create. User can select 'multi_class' (default) or 'multi_label'.
@@ -185,4 +191,52 @@ generic_client = GenericTaggingClient(token="__API_TOKEN__")
 
 result = generic_client.tags([{"_url": "__URL_PATH_TO_IMAGE__"}])
 print(result['records'][0]['_tags'])
+```
+
+## Ximilar Photo and Product similarity
+
+These two services provides visual search (similarity search) for generic (stock) photos or products (e-commerce, fashion, ...).
+When initializing client you need to specify both `token` and your `collection` that we created for you.
+
+```python
+from ximilar.client.search import SimilarityPhotosClient, SimilarityProductsClient
+
+client = SimilarityPhotosClient(token='__API_TOKEN__', collection='__COLLECTION_ID__')
+client = SimilarityProductsClient(token='__API_TOKEN__', collection='__COLLECTION_ID__')
+
+# get random 7 items from database and return also _url if is present in item
+result = client.random(count=7, fields_to_return=['_id', '_url'])
+
+# search 10 most visually similar items for item in your index
+result = client.search({'_id': '__ITEM_ID__'}, count=10)
+
+# search 5 most visually similar items for external item (not in index) defined by _url field
+result = client.search({'_url': '__URL_PATH_TO_IMAGE__'}, count=5)
+
+# search visually similar items, return also _url field if present in item and 
+# search only for items defined by filter (mongodb syntax)
+result = client.search({'_id': '__ITEM_ID__'}, fields_to_return=['_id', '_url'],
+                       filter={
+                            'meta-category-x': { '$in': ['__SOME_VALUE_1__', '__SOME_VALUE_2__']},
+                            'some-field': '__SOME_VALUE__'
+                       })
+```
+
+All crud operations:
+
+```python
+# get list of items from index
+result = client.get([{'_id': '__ITEM_ID__'}, {'_id': '__ITEM_ID__'}])
+
+# insert item tot he index with your _id, and onr of _url | _base64, and other fields (meta-info) which you can 
+# then use when applying filter in search or random menthods
+result = client.insert([{'_id': '__ITEM_ID__', '_url': '__URL_PATH_TO_IMAGE__',
+                         'meta-category-x': '__CATEGORY_OF_ITEM__',
+                         'meta-info-y': '__ANOTHER_META_INFO__'}])
+
+# delete item from id
+result = client.delete([{'_id': '__ITEM_ID__'}])
+
+# update item in index with all additional fields and meta-info
+result = client.update([{'_id': '__ITEM_ID__', 'some-additional-field': '__VALUE__'}])
 ```

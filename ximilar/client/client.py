@@ -6,7 +6,7 @@ import numpy as np
 import concurrent.futures
 from tqdm import tqdm
 
-from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS
+from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS, WORKSPACE, DEFAULT_WORKSPACE, ENDPOINT
 
 
 class RestClient(object):
@@ -15,7 +15,7 @@ class RestClient(object):
 
     All objects contains TOKEN and ENDPOINT information.
     """
-    def __init__(self, token, endpoint='https://api.ximilar.com/'):
+    def __init__(self, token, endpoint=ENDPOINT):
         self.token = token
         self.cache = {}
         self.endpoint = endpoint
@@ -153,6 +153,16 @@ class RestClient(object):
                 del records[i][FILE]
 
         return records
+
+    def add_workspace(self, data):
+        """
+        Add workspace uuid to the data.
+        :param data: dictionary/json data which will be send to endpoint
+        :return: modified json data with workspace
+        """
+        if self.workspace != DEFAULT_WORKSPACE:
+            data[WORKSPACE] = self.workspace
+        return data
 
     def custom_endpoint_processing(self, records, endpoint):
         """
