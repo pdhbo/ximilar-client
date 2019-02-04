@@ -1,3 +1,6 @@
+# HTTP CODES
+HTTP_NO_COTENT_204 = 204
+
 # General
 RECORDS = 'records'
 FILE = '_file'

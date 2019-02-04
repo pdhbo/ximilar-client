@@ -6,7 +6,7 @@ import numpy as np
 import concurrent.futures
 from tqdm import tqdm
 
-from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS, WORKSPACE, DEFAULT_WORKSPACE, ENDPOINT
+from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS, WORKSPACE, DEFAULT_WORKSPACE, ENDPOINT, HTTP_NO_COTENT_204
 
 
 class RestClient(object):
@@ -61,6 +61,9 @@ class RestClient(object):
         """
         self.invalidate()
         result = requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
+
+        if result.status_code == HTTP_NO_COTENT_204:
+            return result
         return result.json()
 
     def resize_image_data(self, image_data, aspect_ratio=False):

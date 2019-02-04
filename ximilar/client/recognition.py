@@ -351,7 +351,7 @@ class Image(RecognitionClient):
         Delete the image from ximilar.
         :return: None
         """
-        super(Image, self).delete_image(self.id)
+        return super(Image, self).delete_image(self.id)
 
     def get_labels(self):
         """
