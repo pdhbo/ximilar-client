@@ -107,6 +107,9 @@ labels, status = task.get_labels()
 for label in labels:
     print(label.id, label.name)
 
+# get label with name which is mapped to task
+label, status = task.get_label_by_name(name='__LABEL_NAME__')
+
 # detaching existing label from existing task
 task.detach_label(label.id)
 
@@ -115,6 +118,9 @@ client.delete_label(label.id)
 
 # detach image from label
 label.detach_image(image.id)
+
+# search labels which contains given substring in name
+labels, status = client.get_labels_by_substring('__LABEL_NAME__')
 ```
 
 #### Working with training images

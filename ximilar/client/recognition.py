@@ -36,6 +36,8 @@ class RecognitionClient(RestClient):
             result = self.get(url)
 
             if RESULTS not in result:
+                if 'detail' in result:
+                    return None, {'status':  result['detail']}
                 return None, {'status': 'unexpected error'}
 
             for task_json in result[RESULTS]:
@@ -48,15 +50,20 @@ class RecognitionClient(RestClient):
 
         return tasks, RESULT_OK
 
-    def get_task_by_name(self, name):
+    def get_tasks_by_name(self, name):
         tasks, result = self.get_all_tasks()
 
+        tasks_to_return = []
         if result['status'] == 'OK':
             for task in tasks:
                 if task.name == name:
-                    return task, result
+                    tasks_to_return.append(task)
         else:
             return None, result
+
+        if len(tasks_to_return) > 0:
+            return tasks_to_return, result
+
         return None, {'status': 'Task with this name not found!'}
 
     def delete_task(self, task_id):
@@ -118,6 +125,19 @@ class RecognitionClient(RestClient):
         if ID not in label_json:
             return None, {'status': 'label with id not found'}
         return Label(self.token, self.endpoint, label_json), RESULT_OK
+
+    def get_labels_by_substring(self, name):
+        """
+        Return all labels of the workspace which contains the substring.
+        :param name: name/substring of the label
+        :return: list of labels, stattus
+        """
+        labels, result = self.get_all_labels(suffix='?search=' + name)
+
+        if len(labels) > 0:
+            return labels, result
+        else:
+            return None, {'status': "No labels found"}
 
     def get_image(self, image_id):
         image_json = self.get(IMAGE_ENDPOINT + image_id)
@@ -204,7 +224,7 @@ class Task(RecognitionClient):
 
     def get_label_by_name(self, name):
         """
-        Get label of this task by name.
+        Get label with specified name which also belongs to this task.
         """
         labels, result = self.get_labels()
         if result['status'] == 'OK':
@@ -311,13 +331,18 @@ class Label(RecognitionClient):
         result = self.get(url)
         return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next'], RESULT_OK
 
-    def upload_image(self, file_path=None, base64=None):
+    def upload_images(self, records):
         """
-        Upload image to the ximilar.ai and adding label to this image.
-        :param file_path: local path to the file
+        Upload image to the ximilar.com and adding label to this image.
+        :param records: list of files with _url, _base64, _file.
         :return: None
         """
-        return super(Label, self).upload_image(file_path=file_path, base64=base64, label_ids=[self.id])
+        for i in range(len(records)):
+            if "labels" in records[i]:
+                records[i]["labels"].append(self.id)
+            else:
+                records[i]["labels"] = [self.id]
+        return super(Label, self).upload_images(records)
 
     def detach_image(self, image_id):
         """
