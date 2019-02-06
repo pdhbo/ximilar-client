@@ -118,7 +118,7 @@ def test_classify(request):
     assert isinstance(result, dict)
 
 
-def parllel_classify(request):
+def parallel_classify(request):
     client = get_client(request)
     tasks, status = client.get_all_tasks()
     task = tasks[0]
@@ -147,7 +147,7 @@ def test_parallel_fashion_processing(request):
     assert len(result3) == 3 and 'records' in result3[0] and len(result3[0]['records']) == 1
 
 
-def test_fashion_tagging(request):
+def test_generic_tagging(request):
     client = GenericTaggingClient(request.config.getoption("--token"))
     result = client.tags([{"_file": "ximilar.png"}])
 
