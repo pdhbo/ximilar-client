@@ -6,7 +6,7 @@ import numpy as np
 import concurrent.futures
 from tqdm import tqdm
 
-from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS, WORKSPACE, DEFAULT_WORKSPACE, ENDPOINT, HTTP_NO_COTENT_204
+from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS, WORKSPACE, DEFAULT_WORKSPACE, ENDPOINT, HTTP_NO_COTENT_204, HTTP_UNAVAILABLE_503
 
 
 class RestClient(object):
@@ -49,7 +49,12 @@ class RestClient(object):
             data = json.dumps(data)
 
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
+
         result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files)
+
+        if result.status_code == HTTP_UNAVAILABLE_503:
+            return None
+
         return result.json()
 
     def delete(self, api_endpoint, data=None):
@@ -64,6 +69,7 @@ class RestClient(object):
 
         if result.status_code == HTTP_NO_COTENT_204:
             return result
+
         return result.json()
 
     def resize_image_data(self, image_data, aspect_ratio=False):
