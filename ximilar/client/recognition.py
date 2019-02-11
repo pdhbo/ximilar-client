@@ -396,7 +396,12 @@ class Image(RecognitionClient):
         Get labels assigned to this image.
         :return: list of Labels
         """
-        return [Label(self.token, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT + self.id)['labels']], RESULT_OK
+        if 'labels' not in self.cache:
+            labels = [Label(self.token, self.endpoint, label) for label in self.get(IMAGE_ENDPOINT + self.id)['labels']]
+        else:
+            labels = self.cache['labels']
+
+        return labels, RESULT_OK
 
     def add_label(self, label_id):
         """
