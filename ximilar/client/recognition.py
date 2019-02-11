@@ -1,5 +1,5 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import ENDPOINT, TASK, MULTI_CLASS, TASK_TYPE, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK, WORKSPACE, DEFAULT_WORKSPACE
+from ximilar.client.constants import ENDPOINT, TASK, MULTI_CLASS, TASK_TYPE, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK, WORKSPACE, DEFAULT_WORKSPACE, IMAGES_COUNT
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
@@ -291,6 +291,7 @@ class Label(RecognitionClient):
         self.tasks_count = label_json[TASKS_COUNT] if TASKS_COUNT in label_json else 0
         self.negative_for_task = label_json[NEGATIVE_FOR_TASK] if NEGATIVE_FOR_TASK in label_json else None
         self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
+        self.images_count = label_json[IMAGES_COUNT] if IMAGES_COUNT in label_json else None
 
     def __str__(self):
         return self.id
@@ -319,6 +320,18 @@ class Label(RecognitionClient):
         for image in images:
             image.remove_label(label_b.id)
             image.add_label(self.id)
+
+    def get_images_count(self):
+        """
+        Get count of the images connected to this label.
+        :return:
+        """
+        label_json = self.get(LABEL_ENDPOINT + self.id)
+
+        if IMAGES_COUNT in label_json:
+            self.images_count = label_json[IMAGES_COUNT]
+
+        return self.images_count
 
     def get_training_images(self, page_url=None):
         """

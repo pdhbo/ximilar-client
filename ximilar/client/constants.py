@@ -23,6 +23,7 @@ MULTI_LABEL = 'multi_label'
 MULTI_CLASS = 'multi_class'
 WORKSPACE = 'workspace'
 DEFAULT_WORKSPACE = 'Default'
+IMAGES_COUNT = 'imagesCount'
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"

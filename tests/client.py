@@ -59,7 +59,9 @@ def test_client_create_task_label_image(request):
     task, status = client.create_task(TASK_NAME)
     label, status = task.create_label(LABEL_NAME)
     images0, n_page, status = label.get_training_images()
+    label_count1 = label.images_count
     images, status = label.upload_images([{"_file": "ximilar.png"}])
+    label_count2 = label.get_images_count()
 
     # Query after creating
     task1, status = client.get_task(task.id)
@@ -84,6 +86,10 @@ def test_client_create_task_label_image(request):
     no_task, no_task_status = client.get_task(task.id)
     no_image, no_image_status = client.get_label(label.id)
     no_label, no_label_status = client.get_label(label.id)
+
+    # check the label had connected images
+    assert label_count1 is None
+    assert label_count2 == 1
 
     # and check it
     assert labels is None
