@@ -88,7 +88,7 @@ def test_client_create_task_label_image(request):
     no_label, no_label_status = client.get_label(label.id)
 
     # check the label had connected images
-    assert label_count1 is None
+    assert label_count1 == 0
     assert label_count2 == 1
 
     # and check it

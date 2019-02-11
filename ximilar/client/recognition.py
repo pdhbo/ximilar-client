@@ -291,7 +291,7 @@ class Label(RecognitionClient):
         self.tasks_count = label_json[TASKS_COUNT] if TASKS_COUNT in label_json else 0
         self.negative_for_task = label_json[NEGATIVE_FOR_TASK] if NEGATIVE_FOR_TASK in label_json else None
         self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
-        self.images_count = label_json[IMAGES_COUNT] if IMAGES_COUNT in label_json else None
+        self.images_count = label_json[IMAGES_COUNT] if IMAGES_COUNT in label_json else 0
 
     def __str__(self):
         return self.id
