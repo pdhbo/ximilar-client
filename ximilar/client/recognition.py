@@ -3,6 +3,7 @@ from ximilar.client.constants import ENDPOINT, TASK, MULTI_CLASS, TASK_TYPE, NAM
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
+MODEL_ENDPOINT = 'recognition/v2/model/'
 IMAGE_ENDPOINT = 'recognition/v2/training-image/'
 CLASSIFY_ENDPOINT = 'recognition/v2/classify/'
 
@@ -24,6 +25,13 @@ class RecognitionClient(RestClient):
             status = {'status': task_json['detail']} if 'detail' in task_json else {'status': 'Not Found'}
             return None, status
         return Task(self.token, self.endpoint, task_json), RESULT_OK
+
+    def get_model(self, model_id):
+        model_json = self.get(MODEL_ENDPOINT + model_id)
+        if 'id' not in model_json:
+            status = {'status': model_json['detail']} if 'detail' in model_json else {'status': 'Not Found'}
+            return None, status
+        return Model(self.token, self.endpoint, model_json), RESULT_OK
 
     def get_all_tasks(self, suffix=''):
         """
@@ -65,6 +73,9 @@ class RecognitionClient(RestClient):
             return tasks_to_return, result
 
         return None, {'status': 'Task with this name not found!'}
+
+    def delete_model(self, model_id):
+        return self.delete(MODEL_ENDPOINT + model_id + '/')
 
     def delete_task(self, task_id):
         """
@@ -280,6 +291,24 @@ class Task(RecognitionClient):
         :return: json/dict result
         """
         return self.post(TASK_ENDPOINT + self.id +'/remove-label/', data={'label_id': label_id})
+
+
+class Model(RecognitionClient):
+    def __init__(self, token, endpoint, model_json):
+        super(Model, self).__init__(token, endpoint)
+
+        self.id = model_json[ID]
+        self.task_id = model_json['task']
+        self.task_name = model_json['task_name']
+        self.version = model_json['version']
+        self.train_status = model_json['train_status']
+
+    def delete_model(self):
+        """
+        Delete the model from ximilar.
+        :return: None
+        """
+        super(Model, self).delete_model(self.id)
 
 
 class Label(RecognitionClient):
