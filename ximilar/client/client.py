@@ -8,6 +8,8 @@ from tqdm import tqdm
 
 from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS, WORKSPACE, DEFAULT_WORKSPACE, ENDPOINT, HTTP_NO_COTENT_204, HTTP_UNAVAILABLE_503
 
+CONFIG_ENDPOINT = 'account/v2/config/'
+
 
 class RestClient(object):
     """
@@ -182,6 +184,16 @@ class RestClient(object):
         """
         records = self.preprocess_records(records)
         return self.post(endpoint, data={RECORDS: records})
+
+    def get_config(self, config_type, version=None):
+        """
+        Get configuration json from account/v2/config endpoint
+        :param config_type: name of the configuration
+        :param version: number of config version (optional
+        :return: json response
+        """
+        version = '?version='+str(version) if version else ''
+        return self.get(CONFIG_ENDPOINT + config_type + version)
 
     def parallel_records_processing(self, records, method, max_workers=3, batch_size=1, output=False):
         """
