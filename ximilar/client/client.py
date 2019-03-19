@@ -47,7 +47,7 @@ class RestClient(object):
         :return: json response
         """
         self.invalidate()
-        if data:
+        if data is not None:
             data = json.dumps(data)
 
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}

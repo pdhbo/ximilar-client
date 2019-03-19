@@ -1,5 +1,6 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import RECORDS, ENDPOINT, FIELDS_TO_RETURN, _ID, FILTER, COUNT, K_COUNT, QUERY_RECORD, COLLECTION
+from ximilar.client.constants import RECORDS, ENDPOINT, FIELDS_TO_RETURN, _ID, FILTER, COUNT, K_COUNT, QUERY_RECORD, \
+    COLLECTION, COLLECTION_ID
 
 SIMILARITY_PHOTOS = 'similarity/photos/v2/'
 SIMILARITY_PRODUCTS = 'similarity/products/v2/'
@@ -18,11 +19,14 @@ PING = 'ping'
 
 
 class SimilarityPhotosClient(RestClient):
-    def __init__(self, token,  collection, endpoint=ENDPOINT+SIMILARITY_PHOTOS):
+    def __init__(self, token,  collection=None, collection_id=None, endpoint=ENDPOINT+SIMILARITY_PHOTOS):
         super(SimilarityPhotosClient, self).__init__(token=token, endpoint=endpoint)
 
         self.max_size = 1000
-        self.headers[COLLECTION] = collection
+        if collection_id:
+            self.headers[COLLECTION_ID] = collection_id
+        else:
+            self.headers[COLLECTION] = collection
 
     def search(self, record, filter=None, count=5, fields_to_return=[]):
         """
@@ -97,29 +101,3 @@ class SimilarityPhotosClient(RestClient):
 class SimilarityProductsClient(SimilarityPhotosClient):
     def __init__(self, token, collection, endpoint=ENDPOINT+SIMILARITY_PRODUCTS):
         super(SimilarityProductsClient, self).__init__(token=token, collection=collection, endpoint=endpoint)
-
-
-class SmartSearchClient(SimilarityPhotosClient):
-    def __init__(self, token, collection, endpoint=ENDPOINT+SMART_SEARCH):
-        super(SmartSearchClient, self).__init__(token=token, collection=collection, endpoint=endpoint)
-
-    def search(self, records):
-        """
-        Detects Objects and Tags and find for the largest object most visually similar items in your collection.
-        :param records:
-        :return:
-        """
-        records = self.preprocess_records(records)
-        return self.post(SEARCH, data={RECORDS: records})
-
-    def detect(self, records):
-        """
-        Detects Objects and Tags without searching items.
-        :param records: list of dictionaries with _url|_file|_base64
-        :return: json response
-        """
-        records = self.preprocess_records(records)
-        return self.post(DETECT, data={RECORDS: records, COLLECTION: self.headers[COLLECTION]})
-
-    def search_by_object(self, records, collection):
-        raise NotImplementedError
