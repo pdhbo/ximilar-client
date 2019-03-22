@@ -131,6 +131,16 @@ class RecognitionClient(RestClient):
 
         return labels, RESULT_OK
 
+    def get_training_images(self, page_url=None):
+        """
+        Get paginated result of images from workspace.
+        :param page_url: optional, select the specific page of images, default first page
+        :return: (list of images, next_page)
+        """
+        url = page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "") if page_url else IMAGE_ENDPOINT
+        result = self.get(url)
+        return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next'], RESULT_OK
+
     def get_label(self, label_id):
         label_json = self.get(LABEL_ENDPOINT + label_id)
         if ID not in label_json:
