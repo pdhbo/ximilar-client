@@ -35,7 +35,7 @@ class RestClient(object):
         :param data: optional data
         :return: json response
         """
-        result = requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data)
+        result = requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data, timeout=30)
         return result.json()
 
     def post(self, api_endpoint, data=None, files=None):
@@ -52,7 +52,7 @@ class RestClient(object):
 
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
 
-        result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files)
+        result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files, timeout=30)
 
         if result.status_code == HTTP_UNAVAILABLE_503:
             return None
@@ -67,7 +67,7 @@ class RestClient(object):
         :return: response
         """
         self.invalidate()
-        result = requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data)
+        result = requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data, timeout=30)
 
         if result.status_code == HTTP_NO_COTENT_204:
             return result
