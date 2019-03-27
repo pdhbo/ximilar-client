@@ -97,9 +97,12 @@ Working with the labels are pretty simple.
 # getting existing label
 existing_label, status = client.get_label('__ID_LABEL__')
 
-# creating new label and attaching it to existing task
+# creating new label (CATEGORY) and attaching it to existing Categorization task (multi class)
 label, status = client.create_label(name='__NEW_LABEL_NAME__')
 task.add_label(label.id)
+
+# creating new label (TAG) for Tagging task (multi label)
+label, status = client.create_label(name='__NEW_LABEL_NAME__', label_type='tag')
 
 # get all labels of given task use
 labels, status = task.get_labels()

@@ -1,5 +1,5 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import ENDPOINT, TASK, MULTI_CLASS, TASK_TYPE, NAME, ID, RESULTS, TASKS_COUNT, RESULT_OK, FILE, URL, BASE64, NEGATIVE_FOR_TASK, WORKSPACE, DEFAULT_WORKSPACE, IMAGES_COUNT
+from ximilar.client.constants import *
 
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
@@ -99,13 +99,14 @@ class RecognitionClient(RestClient):
             return None, {'status': msg}
         return Task(self.token, self.endpoint, task_json), RESULT_OK
 
-    def create_label(self, name):
+    def create_label(self, name, label_type=CATEGORY):
         """
         Create label with given name.
         :param name: name of the label
+        :param label_type: type of label to create (category or tag)
         :return: Label object
         """
-        data = self.add_workspace({NAME: name})
+        data = self.add_workspace({NAME: name, LABEL_TYPE: label_type})
         label_json = self.post(LABEL_ENDPOINT, data=data)
         if 'id' not in label_json:
             return None, {'status': 'unexpected error'}
@@ -276,13 +277,14 @@ class Task(RecognitionClient):
         data = {'records': records, 'task_id': self.id, 'version': version}
         return self.post(CLASSIFY_ENDPOINT, data=data)
 
-    def create_label(self, name):
+    def create_label(self, name, label_type=CATEGORY):
         """
         Creates label and adds it to this task.
-        :param name:
-        :return:
+        :param name: name of label to create
+        :param label_type: type of label to create (category or tag)
+        :return: label, status
         """
-        label, result = super(Task, self).create_label(name)
+        label, result = super(Task, self).create_label(name, label_type=label_type)
         self.add_label(label.id)
         return label, RESULT_OK
 
