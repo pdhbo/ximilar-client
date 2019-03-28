@@ -54,10 +54,11 @@ class RestClient(object):
 
         result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files, timeout=30)
 
-        if result.status_code == HTTP_UNAVAILABLE_503:
+        try:
+            json_result = result.json()
+            return json_result
+        except ValueError:
             return None
-
-        return result.json()
 
     def delete(self, api_endpoint, data=None):
         """
