@@ -177,20 +177,26 @@ class RecognitionClient(RestClient):
         """
         Upload one or more files and add labels to them.
         :param record: list of dictionaries with labels and one of '_base64', '_file', '_url'
-                       [{'_file': '__FILE_PATH__', 'labels': ['__UUID_1__', '__UUID_2__']}, ...]
+                        specify noresize: True to save image without (default False)
+                       [{'_file': '__FILE_PATH__', 'labels': ['__UUID_1__', '__UUID_2__'], noresize: False}, ...]
         :return: image, status
         """
         images = []
         for record in records:
             files, data = None, None
+            noresize = True if NORESIZE in record and record[NORESIZE] else False
 
             if FILE in record:
                 files = {'img_path': open(record[FILE], 'rb')}
+                if noresize:
+                    files[NORESIZE] = str(True)
             elif BASE64 in record:
-                data = {'base64': record[BASE64].decode("utf-8")}
+                data = {'base64': record[BASE64].decode("utf-8"), NORESIZE: noresize}
             elif URL in record:
-                data = {'base64': self.load_url_image(record[URL])}
+                # TODO: do not resize image when loading (right now we need to use self.max_size = 0)
+                data = {'base64': self.load_url_image(record[URL]), NORESIZE: noresize}
 
+            data = self.add_workspace(data)
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
             image, status = self.get_image(image_json['id'])
 

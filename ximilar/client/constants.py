@@ -27,6 +27,7 @@ CATEGORY = 'category'
 WORKSPACE = 'workspace'
 DEFAULT_WORKSPACE = 'Default'
 IMAGES_COUNT = 'imagesCount'
+NORESIZE = 'noresize'
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"
