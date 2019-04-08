@@ -425,6 +425,7 @@ class Image(RecognitionClient):
         super(Image, self).__init__(token, endpoint)
 
         self.id = image_json[ID]
+        self.img_path = image_json['img_path']
         self.thumb_img_path = image_json['thumb_img_path']
         self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
 

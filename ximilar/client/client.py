@@ -53,11 +53,10 @@ class RestClient(object):
         headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
 
         result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files, timeout=30)
-
         try:
             json_result = result.json()
             return json_result
-        except ValueError:
+        except ValueError as e:
             return None
 
     def delete(self, api_endpoint, data=None):
