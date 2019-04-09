@@ -1,11 +1,13 @@
 from ximilar.client import RestClient
 from ximilar.client.constants import *
 
+
 LABEL_ENDPOINT = 'recognition/v2/label/'
 TASK_ENDPOINT = 'recognition/v2/task/'
 MODEL_ENDPOINT = 'recognition/v2/model/'
 IMAGE_ENDPOINT = 'recognition/v2/training-image/'
 CLASSIFY_ENDPOINT = 'recognition/v2/classify/'
+OBJECT_ENDPOINT = 'detection/v2/object/'
 
 
 class RecognitionClient(RestClient):
@@ -139,7 +141,8 @@ class RecognitionClient(RestClient):
         :return: (list of images, next_page)
         """
         url = page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "") if page_url else IMAGE_ENDPOINT + "?page=1"
-        url += "" if verification else "verification=" + str(verification)
+        url += "&verification=" + str(verification) if verification is not None else ""
+        print(url)
         result = self.get(url)
         return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next'], RESULT_OK
 
@@ -428,6 +431,7 @@ class Image(RecognitionClient):
         self.id = image_json[ID]
         self.img_path = image_json['img_path']
         self.thumb_img_path = image_json['thumb_img_path']
+        self.verifyCount = image_json['verifyCount']
         self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
 
     def __str__(self):
