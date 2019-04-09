@@ -2,6 +2,7 @@ import requests
 import json
 import base64
 import cv2
+import os
 import numpy as np
 import concurrent.futures
 from tqdm import tqdm
@@ -195,6 +196,18 @@ class RestClient(object):
         version = '?version='+str(version) if version else ''
         return self.get(CONFIG_ENDPOINT + config_type + version)
 
+    def download_image(self, url, destination=''):
+        """
+        Download image from url to the destination
+        :param url: url to the image
+        :param destination: where the image will be stored
+        :return: None
+        """
+        page = requests.get(url)
+        f_name = url.split('/')[-1]
+        with open(destination+f_name, 'wb') as f:
+            f.write(page.content)
+
     def parallel_records_processing(self, records, method, max_workers=3, batch_size=1, output=False):
         """
         Process method which uses records in parallel way. This works for methods:
@@ -235,5 +248,3 @@ class RestClient(object):
         l = len(iterable)
         for ndx in range(0, l, n):
             yield iterable[ndx:min(ndx + n, l)]
-
-
