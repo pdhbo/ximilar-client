@@ -132,13 +132,14 @@ class RecognitionClient(RestClient):
 
         return labels, RESULT_OK
 
-    def get_training_images(self, page_url=None):
+    def get_training_images(self, page_url=None, verification=None):
         """
         Get paginated result of images from workspace.
         :param page_url: optional, select the specific page of images, default first page
         :return: (list of images, next_page)
         """
-        url = page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "") if page_url else IMAGE_ENDPOINT
+        url = page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "") if page_url else IMAGE_ENDPOINT + "?page=1"
+        url += "" if verification else "verification=" + str(verification)
         result = self.get(url)
         return [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]], result['next'], RESULT_OK
 
