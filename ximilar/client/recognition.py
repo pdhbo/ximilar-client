@@ -433,7 +433,7 @@ class Image(RecognitionClient):
         self.thumb_img_path = image_json['thumb_img_path']
         self.verifyCount = image_json['verifyCount']
         self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
-        self.local_path = None
+        self._file = None
 
     def __str__(self):
         return self.thumb_img_path
@@ -474,4 +474,4 @@ class Image(RecognitionClient):
         return self.post(IMAGE_ENDPOINT + self.id + '/remove-label/', data={'label_id': label_id})
 
     def download_image(self, destination=''):
-        self.local_path = super().download_image(self.img_path, destination=destination)
+        self._file = super().download_image(self.img_path, destination=destination)
