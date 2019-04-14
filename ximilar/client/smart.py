@@ -1,19 +1,21 @@
 from ximilar.client.constants import RECORDS, ENDPOINT, FIELDS_TO_RETURN, _ID, FILTER, K_COUNT, COLLECTION
 from ximilar.client.search import SimilarityPhotosClient
 
-SMART_SEARCH = 'smart/v2/'
+SMART_SEARCH = "smart/v2/"
 
-SEARCH_OBJ_ENDPOINT = 'product/search_by_object'
-SEARCH_PRODUCT = 'product/search'
-DETECT_PRODUCT = 'product/detect'
-INSERT_PRODUCT = 'product/insert'
-ALL_IDS = 'allIDs'
-PING = 'ping'
+SEARCH_OBJ_ENDPOINT = "product/search_by_object"
+SEARCH_PRODUCT = "product/search"
+DETECT_PRODUCT = "product/detect"
+INSERT_PRODUCT = "product/insert"
+ALL_IDS = "allIDs"
+PING = "ping"
 
 
 class SmartSearchClient(SimilarityPhotosClient):
-    def __init__(self, token, collection=None, collection_id=None, endpoint=ENDPOINT+SMART_SEARCH):
-        super(SmartSearchClient, self).__init__(token=token, collection=collection, collection_id=collection_id, endpoint=endpoint)
+    def __init__(self, token, collection=None, collection_id=None, endpoint=ENDPOINT + SMART_SEARCH):
+        super(SmartSearchClient, self).__init__(
+            token=token, collection=collection, collection_id=collection_id, endpoint=endpoint
+        )
 
     def search(self, records, filter=None, count=5, fields_to_return=[_ID]):
         """

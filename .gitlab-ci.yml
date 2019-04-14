@@ -1,11 +1,15 @@
 image: python:3.6-alpine
 
 stages:
+  - test
   - deploy
 
-before_script:
-   - pip install twine
-   - python setup.py sdist bdist_wheel
+black:
+  stage: test
+  image: python:alpine
+  script:
+    - pip install black
+    - black --check --line-length 120 .
 
 deploy_production:
   stage: deploy
@@ -13,6 +17,8 @@ deploy_production:
     TWINE_USERNAME: $PRODUCTION_USERNAME
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
+    - pip install twine
+    - python setup.py sdist bdist_wheel
     - twine upload dist/*
   only:
     - tags

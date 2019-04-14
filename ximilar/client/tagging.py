@@ -1,8 +1,8 @@
 from ximilar.client import RestClient
 from ximilar.client.constants import RECORDS
 
-FASHION_TAGGING_ENDPOINT = 'tagging/fashion/v2/tags'
-GENERIC_TAGGING_ENDPOINT = 'tagging/generic/v2/tags'
+FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/tags"
+GENERIC_TAGGING_ENDPOINT = "tagging/generic/v2/tags"
 
 
 class TaggingClient(RestClient):
