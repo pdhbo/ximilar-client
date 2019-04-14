@@ -7,9 +7,19 @@ import numpy as np
 import concurrent.futures
 from tqdm import tqdm
 
-from ximilar.client.constants import FILE, BASE64, IMG_DATA, RECORDS, WORKSPACE, DEFAULT_WORKSPACE, ENDPOINT, HTTP_NO_COTENT_204, HTTP_UNAVAILABLE_503
+from ximilar.client.constants import (
+    FILE,
+    BASE64,
+    IMG_DATA,
+    RECORDS,
+    WORKSPACE,
+    DEFAULT_WORKSPACE,
+    ENDPOINT,
+    HTTP_NO_COTENT_204,
+    HTTP_UNAVAILABLE_503,
+)
 
-CONFIG_ENDPOINT = 'account/v2/config/'
+CONFIG_ENDPOINT = "account/v2/config/"
 
 
 class RestClient(object):
@@ -18,13 +28,13 @@ class RestClient(object):
 
     All objects contains TOKEN and ENDPOINT information.
     """
+
     def __init__(self, token, endpoint=ENDPOINT):
         self.token = token
         self.cache = {}
         self.endpoint = endpoint
         self.max_size = 600
-        self.headers = {'Content-Type': 'application/json',
-                        'Authorization': 'Token ' + self.token}
+        self.headers = {"Content-Type": "application/json", "Authorization": "Token " + self.token}
 
     def invalidate(self):
         self.cache = {}
@@ -36,7 +46,7 @@ class RestClient(object):
         :param data: optional data
         :return: json response
         """
-        result = requests.get(self.endpoint+api_endpoint, headers=self.headers, data=data, timeout=30)
+        result = requests.get(self.endpoint + api_endpoint, headers=self.headers, data=data, timeout=30)
         return result.json()
 
     def post(self, api_endpoint, data=None, files=None):
@@ -51,9 +61,9 @@ class RestClient(object):
         if data is not None:
             data = json.dumps(data)
 
-        headers = self.headers if not files else {'Authorization': 'Token ' + self.token}
+        headers = self.headers if not files else {"Authorization": "Token " + self.token}
 
-        result = requests.post(self.endpoint+api_endpoint, headers=headers, data=data, files=files, timeout=30)
+        result = requests.post(self.endpoint + api_endpoint, headers=headers, data=data, files=files, timeout=30)
         try:
             json_result = result.json()
             return json_result
@@ -68,7 +78,7 @@ class RestClient(object):
         :return: response
         """
         self.invalidate()
-        result = requests.delete(self.endpoint+api_endpoint, headers=self.headers, data=data, timeout=30)
+        result = requests.delete(self.endpoint + api_endpoint, headers=self.headers, data=data, timeout=30)
 
         if result.status_code == HTTP_NO_COTENT_204:
             return result
@@ -126,8 +136,8 @@ class RestClient(object):
         """
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         image = self.resize_image_data(image)
-        retval, buffer = cv2.imencode('.jpg', image)
-        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+        retval, buffer = cv2.imencode(".jpg", image)
+        jpg_as_text = base64.b64encode(buffer).decode("utf-8")
         return jpg_as_text
 
     def load_url_image(self, path):
@@ -136,7 +146,7 @@ class RestClient(object):
         :param path: url path
         :return: base64 encoded string
         """
-        r = requests.get(str(path), headers={'Accept': '*/*', 'User-Agent': 'request'})
+        r = requests.get(str(path), headers={"Accept": "*/*", "User-Agent": "request"})
         img_bin = r.content
         image = np.asarray(bytearray(img_bin), dtype="uint8")
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
@@ -193,24 +203,24 @@ class RestClient(object):
         :param version: number of config version (optional
         :return: json response
         """
-        version = '?version='+str(version) if version else ''
+        version = "?version=" + str(version) if version else ""
         return self.get(CONFIG_ENDPOINT + config_type + version)
 
-    def download_image(self, url, destination=''):
+    def download_image(self, url, destination=""):
         """
         Download image from url to the destination
         :param url: url to the image
         :param destination: where the image will be stored
         :return: None
         """
-        f_name = url.split('/')[-1]
+        f_name = url.split("/")[-1]
         f_dest = destination + f_name
 
         if os.path.isfile(f_dest):
             return f_dest
 
         page = requests.get(url)
-        with open(f_dest, 'wb') as f:
+        with open(f_dest, "wb") as f:
             f.write(page.content)
         return f_dest
 
@@ -233,18 +243,20 @@ class RestClient(object):
         :return: list of results from every method
         """
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
-        futures = [{'future': executor.submit(method, records_to_proc),
-                    'size': len(records_to_proc)} for records_to_proc in self.batch(records, n=batch_size)]
+        futures = [
+            {"future": executor.submit(method, records_to_proc), "size": len(records_to_proc)}
+            for records_to_proc in self.batch(records, n=batch_size)
+        ]
 
         results = []
         if output:
             with tqdm(total=len(records)) as pbar:
                 for future in futures:
-                    result = future['future'].result()
+                    result = future["future"].result()
                     results.append(result)
-                    pbar.update(future['size'])
+                    pbar.update(future["size"])
         else:
-            results = [future['future'].result() for future in futures]
+            results = [future["future"].result() for future in futures]
         return results
 
     def batch(self, iterable, n=1):
@@ -253,4 +265,4 @@ class RestClient(object):
         """
         l = len(iterable)
         for ndx in range(0, l, n):
-            yield iterable[ndx:min(ndx + n, l)]
+            yield iterable[ndx : min(ndx + n, l)]

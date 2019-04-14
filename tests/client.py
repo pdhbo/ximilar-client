@@ -3,8 +3,8 @@ import pytest
 from ximilar.client.recognition import RecognitionClient, Image, Label, Task
 from ximilar.client.tagging import FashionTaggingClient, GenericTaggingClient
 
-TASK_NAME = 'Test-Task-In-Vize-X-1'
-LABEL_NAME = 'Test-Task-In-Vize-Label-X-1'
+TASK_NAME = "Test-Task-In-Vize-X-1"
+LABEL_NAME = "Test-Task-In-Vize-Label-X-1"
 
 
 def get_client(request):
@@ -15,12 +15,12 @@ def get_client(request):
 
 def test_client_non_existing(request):
     """Tests an API call for non existing Token"""
-    token = 'non-existing-token'
+    token = "non-existing-token"
     client = RecognitionClient(token)
     response, status = client.get_all_tasks()
 
     assert response is None
-    assert status['status'] == 'Invalid token.'
+    assert status["status"] == "Invalid token."
 
 
 def test_client_existing(request):
@@ -31,10 +31,10 @@ def test_client_existing(request):
     assert isinstance(tasks, list)
     if len(tasks):
         assert isinstance(tasks[0], Task)
-        assert hasattr(tasks[0], 'id')
-        assert hasattr(tasks[0], 'name')
-        assert hasattr(tasks[0], 'type')
-        assert hasattr(tasks[0], 'production_version')
+        assert hasattr(tasks[0], "id")
+        assert hasattr(tasks[0], "name")
+        assert hasattr(tasks[0], "type")
+        assert hasattr(tasks[0], "production_version")
 
 
 def test_client_all_labels(request):
@@ -45,8 +45,8 @@ def test_client_all_labels(request):
     assert isinstance(labels, list)
     if len(labels):
         assert isinstance(labels[0], Label)
-        assert hasattr(labels[0], 'id')
-        assert hasattr(labels[0], 'name')
+        assert hasattr(labels[0], "id")
+        assert hasattr(labels[0], "name")
 
 
 def test_client_create_task_label_image(request):
@@ -134,33 +134,36 @@ def parallel_classify(request):
     tasks, status = client.get_all_tasks()
     task = tasks[0]
 
-    result = client.parallel_records_processing([{"_file": "ximilar.png"} for i in range(3)], method=task.classify,
-                                                 output=False, max_workers=3)
-    assert len(result) == 1 and 'records' in result[0] and len(result[0]['records']) == 3
+    result = client.parallel_records_processing(
+        [{"_file": "ximilar.png"} for i in range(3)], method=task.classify, output=False, max_workers=3
+    )
+    assert len(result) == 1 and "records" in result[0] and len(result[0]["records"]) == 3
 
 
 def test_fashion_tagging(request):
     client = FashionTaggingClient(request.config.getoption("--token"))
     result = client.tags([{"_file": "ximilar.png"}])
 
-    assert 'records' in result and len(result['records']) > 0
-    assert '_tags' in result['records'][0]
+    assert "records" in result and len(result["records"]) > 0
+    assert "_tags" in result["records"][0]
 
 
 def test_parallel_fashion_processing(request):
     client = FashionTaggingClient(request.config.getoption("--token"))
-    result3 = client.parallel_records_processing([{"_file": "ximilar.png"} for i in range(3)], method=client.tags,
-                                                 output=False, max_workers=3)
-    result1 = client.parallel_records_processing([{"_file": "ximilar.png"} for i in range(3)], method=client.tags,
-                                                 output=False, max_workers=3, batch_size=3)
+    result3 = client.parallel_records_processing(
+        [{"_file": "ximilar.png"} for i in range(3)], method=client.tags, output=False, max_workers=3
+    )
+    result1 = client.parallel_records_processing(
+        [{"_file": "ximilar.png"} for i in range(3)], method=client.tags, output=False, max_workers=3, batch_size=3
+    )
 
-    assert len(result1) == 1 and 'records' in result1[0] and len(result1[0]['records']) == 3
-    assert len(result3) == 3 and 'records' in result3[0] and len(result3[0]['records']) == 1
+    assert len(result1) == 1 and "records" in result1[0] and len(result1[0]["records"]) == 3
+    assert len(result3) == 3 and "records" in result3[0] and len(result3[0]["records"]) == 1
 
 
 def test_generic_tagging(request):
     client = GenericTaggingClient(request.config.getoption("--token"))
     result = client.tags([{"_file": "ximilar.png"}])
 
-    assert 'records' in result and len(result['records']) > 0
-    assert '_tags' in result['records'][0]
+    assert "records" in result and len(result["records"]) > 0
+    assert "_tags" in result["records"][0]

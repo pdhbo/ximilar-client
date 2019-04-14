@@ -1,25 +1,35 @@
 from ximilar.client import RestClient
-from ximilar.client.constants import RECORDS, ENDPOINT, FIELDS_TO_RETURN, _ID, FILTER, COUNT, K_COUNT, QUERY_RECORD, \
-    COLLECTION, COLLECTION_ID
+from ximilar.client.constants import (
+    RECORDS,
+    ENDPOINT,
+    FIELDS_TO_RETURN,
+    _ID,
+    FILTER,
+    COUNT,
+    K_COUNT,
+    QUERY_RECORD,
+    COLLECTION,
+    COLLECTION_ID,
+)
 
-SIMILARITY_PHOTOS = 'similarity/photos/v2/'
-SIMILARITY_PRODUCTS = 'similarity/products/v2/'
-SMART_SEARCH = 'smart/v2/product/'
+SIMILARITY_PHOTOS = "similarity/photos/v2/"
+SIMILARITY_PRODUCTS = "similarity/products/v2/"
+SMART_SEARCH = "smart/v2/product/"
 
-SEARCH_OBJ_ENDPOINT = 'search_by_object'
-SEARCH = 'search'
-DETECT = 'detect'
-INSERT = 'insert'
-DELETE = 'delete'
-GET = 'get'
-UPDATE = 'update'
-RANDOM = 'random'
-KNN_VISUAL = 'visualKNN'
-PING = 'ping'
+SEARCH_OBJ_ENDPOINT = "search_by_object"
+SEARCH = "search"
+DETECT = "detect"
+INSERT = "insert"
+DELETE = "delete"
+GET = "get"
+UPDATE = "update"
+RANDOM = "random"
+KNN_VISUAL = "visualKNN"
+PING = "ping"
 
 
 class SimilarityPhotosClient(RestClient):
-    def __init__(self, token,  collection=None, collection_id=None, endpoint=ENDPOINT+SIMILARITY_PHOTOS):
+    def __init__(self, token, collection=None, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS):
         super(SimilarityPhotosClient, self).__init__(token=token, endpoint=endpoint)
 
         self.max_size = 1000
@@ -99,5 +109,5 @@ class SimilarityPhotosClient(RestClient):
 
 
 class SimilarityProductsClient(SimilarityPhotosClient):
-    def __init__(self, token, collection, endpoint=ENDPOINT+SIMILARITY_PRODUCTS):
+    def __init__(self, token, collection, endpoint=ENDPOINT + SIMILARITY_PRODUCTS):
         super(SimilarityProductsClient, self).__init__(token=token, collection=collection, endpoint=endpoint)
