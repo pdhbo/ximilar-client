@@ -11,10 +11,31 @@ OBJECT_ENDPOINT = "detection/v2/object/"
 
 
 class RecognitionClient(RestClient):
-    def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE):
+    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE):
         super(RecognitionClient, self).__init__(token=token, endpoint=endpoint)
 
-        self.workspace = workspace
+        self.workspace_id = workspace_id
+
+    def get(self, api_endpoint, data=None, params=None):
+        return super().get(api_endpoint, data=data, params=self.add_workspace(params))
+
+    def post(self, api_endpoint, data=None, files=None, params=None):
+        return super().post(api_endpoint, data=self.add_workspace(data), files=files, params=params)
+
+    def delete(self, api_endpoint, data=None, params=None):
+        return super().delete(api_endpoint, data=data, params=self.add_workspace(params))
+
+    def add_workspace(self, data):
+        """
+        Add workspace uuid to the data.
+        :param data: dictionary/json data which will be send to endpoint
+        :return: modified json data with workspace
+        """
+        if self.workspace_id != DEFAULT_WORKSPACE:
+            if data is None:
+                data = {}
+            data[WORKSPACE] = self.workspace_id
+        return data
 
     def get_task(self, task_id):
         """
@@ -94,7 +115,7 @@ class RecognitionClient(RestClient):
         :param task_type: 'multi_class' (default) or 'multi_label'
         :return: Task object
         """
-        data = self.add_workspace({NAME: name, TASK_TYPE: task_type})
+        data = {NAME: name, TASK_TYPE: task_type}
         task_json = self.post(TASK_ENDPOINT, data=data)
         if "id" not in task_json:
             msg = task_json["detail"] if "detail" in task_json else "unexpected error"
@@ -108,7 +129,7 @@ class RecognitionClient(RestClient):
         :param label_type: type of label to create (category or tag)
         :return: Label object
         """
-        data = self.add_workspace({NAME: name, LABEL_TYPE: label_type})
+        data = {NAME: name, LABEL_TYPE: label_type}
         label_json = self.post(LABEL_ENDPOINT, data=data)
         if "id" not in label_json:
             return None, {"status": "unexpected error"}
@@ -188,36 +209,40 @@ class RecognitionClient(RestClient):
     def upload_images(self, records):
         """
         Upload one or more files and add labels to them.
-        :param record: list of dictionaries with labels and one of '_base64', '_file', '_url'
+        :param records: list of dictionaries with labels and one of '_base64', '_file', '_url'
                         specify noresize: True to save image without (default False)
                        [{'_file': '__FILE_PATH__', 'labels': ['__UUID_1__', '__UUID_2__'], noresize: False}, ...]
         :return: image, status
         """
         images = []
+        worst_status = RESULT_OK
         for record in records:
             files, data = None, None
-            noresize = True if NORESIZE in record and record[NORESIZE] else False
+            rec_no_resize = NORESIZE in record and record[NORESIZE]
 
             if FILE in record:
                 files = {"img_path": open(record[FILE], "rb")}
-                if noresize:
+                if rec_no_resize:
                     files[NORESIZE] = str(True)
             elif BASE64 in record:
-                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize}
+                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: rec_no_resize}
             elif URL in record:
                 # TODO: do not resize image when loading (right now we need to use self.max_size = 0)
-                data = {"base64": self.load_url_image(record[URL]), NORESIZE: noresize}
+                data = {"base64": self.load_url_image(record[URL]), NORESIZE: rec_no_resize}
 
-            data = self.add_workspace(data)
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
-            image, status = self.get_image(image_json["id"])
+            if "id" not in image_json:
+                worst_status = {"status": "image not uploaded " + str(record)}
+                continue
+
+            image = Image(self.token, self.endpoint, image_json)
 
             if "labels" in record:
                 for label_id in record["labels"]:
                     image.add_label(label_id)
 
             images.append(image)
-        return images, RESULT_OK
+        return images, worst_status
 
 
 class Task(RecognitionClient):
@@ -427,7 +452,7 @@ class Label(RecognitionClient):
     def detach_image(self, image_id):
         """
         Remove/Detach label from the image.
-        :param label_id: id of label
+        :param image_id: id of label
         :return: result
         """
         return self.post(IMAGE_ENDPOINT + image_id + "/remove-label/", data={"label_id": self.id})
@@ -447,8 +472,10 @@ class Image(RecognitionClient):
         self.id = image_json[ID]
         self.img_path = image_json["img_path"]
         self.thumb_img_path = image_json["thumb_img_path"]
-        self.verifyCount = image_json["verifyCount"]
+        self.verifyCount = image_json["verifyCount"] if "verifyCount" in image_json else -1
         self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
+        self.img_width = image_json["img_width"]
+        self.img_height = image_json["img_height"]
         self._file = None
 
     def __str__(self):

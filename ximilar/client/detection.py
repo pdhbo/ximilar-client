@@ -6,10 +6,8 @@ LABEL_ENDPOINT = "detection/v2/label/"
 
 
 class DetectionClient(RecognitionClient):
-    def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE):
-        super(DetectionClient, self).__init__(token=token, endpoint=endpoint)
-
-        self.workspace = workspace
+    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE):
+        super(DetectionClient, self).__init__(token=token, endpoint=endpoint, workspace_id=workspace_id)
 
     def get_objects(self, page_url=None):
         """

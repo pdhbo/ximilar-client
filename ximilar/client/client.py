@@ -39,22 +39,24 @@ class RestClient(object):
     def invalidate(self):
         self.cache = {}
 
-    def get(self, api_endpoint, data=None):
+    def get(self, api_endpoint, data=None, params=None):
         """
         Call the http GET request with data.
         :param api_endpoint: endpoint path
         :param data: optional data
+        :param params: optional dictionary of URL params
         :return: json response
         """
-        result = requests.get(self.endpoint + api_endpoint, headers=self.headers, data=data, timeout=30)
+        result = requests.get(self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30)
         return result.json()
 
-    def post(self, api_endpoint, data=None, files=None):
+    def post(self, api_endpoint, data=None, files=None, params=None):
         """
         Call the http POST request with data.
         :param api_endpoint: endpoint path
         :param data: optional data
         :param files: optional files to upload
+        :param params: optional dictionary of URL params
         :return: json response
         """
         self.invalidate()
@@ -63,22 +65,27 @@ class RestClient(object):
 
         headers = self.headers if not files else {"Authorization": "Token " + self.token}
 
-        result = requests.post(self.endpoint + api_endpoint, headers=headers, data=data, files=files, timeout=30)
+        result = requests.post(
+            self.endpoint + api_endpoint, params=params, headers=headers, data=data, files=files, timeout=30
+        )
         try:
             json_result = result.json()
             return json_result
         except ValueError as e:
             return None
 
-    def delete(self, api_endpoint, data=None):
+    def delete(self, api_endpoint, data=None, params=None):
         """
         Call the http DELETE request with data.
         :param api_endpoint: endpoint path
         :param data: optional data
+        :param params: optional dictionary of URL params
         :return: response
         """
         self.invalidate()
-        result = requests.delete(self.endpoint + api_endpoint, headers=self.headers, data=data, timeout=30)
+        result = requests.delete(
+            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30
+        )
 
         if result.status_code == HTTP_NO_COTENT_204:
             return result
@@ -176,16 +183,6 @@ class RestClient(object):
 
         return records
 
-    def add_workspace(self, data):
-        """
-        Add workspace uuid to the data.
-        :param data: dictionary/json data which will be send to endpoint
-        :return: modified json data with workspace
-        """
-        if self.workspace != DEFAULT_WORKSPACE:
-            data[WORKSPACE] = self.workspace
-        return data
-
     def custom_endpoint_processing(self, records, endpoint):
         """
         Records processing for your custom endpoint.
@@ -238,7 +235,7 @@ class RestClient(object):
                         [{'_file': '__IMG_PATH__', 'id': '__MY_IMAGE_ID__'}, ... ]
         :param method: method to call
         :param max_workers: how many threads will we spawn for work (recommended is 3)
-        :param batch: how many images are we sending in batch
+        :param batch_size: how many images are we sending in batch
         :param output: output to stdout with progressbar / tqdm
         :return: list of results from every method
         """
