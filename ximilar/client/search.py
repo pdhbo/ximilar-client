@@ -76,7 +76,7 @@ class SimilarityPhotosClient(RestClient):
         data = {RECORDS: records}
         return self.post(UPDATE, data=data)
 
-    def delete(self, records):
+    def remove(self, records):
         """
         Delete records from your collection.
         :param records: list of dictionaries with '_id' field

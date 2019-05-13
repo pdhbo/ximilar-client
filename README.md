@@ -9,7 +9,7 @@ PyPI:
     # we recommend to install ximilar-client to new virtualenv
     pip install ximilar-client
 
-Manual installation:
+Manual installation with latest changes:
 
     1. Cloning the repo
     git clone https://gitlab.com/ximilar-public/ximilar-client.git
@@ -17,15 +17,15 @@ Manual installation:
     pip install -e ximilar-client
 
 
-This will install also python-opencv, requests and pytest library.
+This will install also python-opencv, numpy, requests, tqdm and pytest library.
 
 ##  Usage
 
-First you need to obtain your `API TOKEN` for communication with ximilar rest endpoints. You can obtain the token from the [Ximilar App](https://app.ximilar.com/) page. 
-After you obtain the token, the usage is quite straightforward. First, import this package and create specific rest client (reconition/vize, tagging, colors, search, ...).  In following example we will create client for `Ximilar Recognition Service` (vize.ai): 
+First you need to register via `app.ximilar.com` and obtain your `API TOKEN` for communication with ximilar rest endpoints. You can obtain the token from the [Ximilar App](https://app.ximilar.com/) at your profile page. 
+After you obtain the token, the usage is quite straightforward. First, import this package and create specific rest client (reconition/vize, tagging, colors, search, ...).  In following example we will create client for `Ximilar Recognition Service` (vize.ai). For all other Ximilar Services as Tagging, Custom Object Detection you will need to contact `tech@ximilar.com` first, so they will provide you access to the service: 
 
 ```python
-from ximilar.client import RecognitionClient
+from ximilar.client import RecognitionClient, DetectionClient
 from ximilar.client import DominantColorProductClient, DominantColorGenericClient
 from ximilar.client import FashionTaggingClient, GenericTaggingClient
 
@@ -34,37 +34,38 @@ fashion_client = FashionTaggingClient(token="__API_TOKEN__")
 ...
 ```
 
+## Workspaces
+
+With a new version of Recognition App you are able to work also with workspaces. Workspaces are entities where all your task, labels and images live. Each user has by default workspace with name `Default` (it will be used if you do not specify workspace when working with Image, Label, Task). However you can specify id of workspace in the constructor.
+
+```python
+client = RecognitionClient(token="__API_TOKEN__", workspace='__UUID_OF_YOUR_WORKSPACE__')
+client = DetectionClient(token="__API_TOKEN__", workspace='__UUID_OF_YOUR_WORKSPACE__')
+```
 
 ## Ximilar Recognition
-This client allows you to work with Ximilar Recognition Service. With this client you are able to create classification tasks/models based on latest trends in machine learning and neural networks.
+This client allows you to work with Ximilar Recognition Service. With this client you are able to create classification or tagging tasks based on latest trends in machine learning and neural networks.
 After creating client object you can for example load your existing task and call train:
 
 ```python
 task, status = client.get_task(task_id='__ID_TASK_')
 
 # Every label in the task must have at least 20 images before training.
-# The training can take up to several hours so this endpoint will 
-# immediately return success if your task is in training queue.
+# The training can take up to several hours as we are trying to achieve really high quality
+# solution. This endpoint will immediately return success if your task is in training queue.
 task.train() 
 
 # or you can list all your available tasks
 tasks, status = client.get_all_tasks()
 
-# or you can create new classification task and immediatelly delete it
+# or you can create new classification task
 # each Task, Image, Label is identified by unique ID
 task, status = client.create_task('__TASK_NAME__')
-client.delete_task(task.id) 
-```
-
-With a new version of Recognition App you are able to work also with workspaces. Workspaces are entities where all your task, labels and images live. Each user has by default workspace with name `Default` (it will be used if you do not specify workspace when working with Image, Label, Task)..
-
-```python
-client = RecognitionClient(token="__API_TOKEN__", workspace='__UUID_OF_YOUR_WORKSPACE__')
 ```
 
 #### Task
 
-Currently there are two types of task to create. User can select 'multi_class' (default) or 'multi_label'.
+Currently there are two types of task to create. User can select 'multi_class' (default) or 'multi_label'. See ximilar.docs for more info.
 
 ```python
 # categorization/classification or multi class task means that image is assigned to exactly one label
@@ -74,6 +75,10 @@ classification_task, status = client.create_task('__TASK_NAME__')
 # tagging or multi label task means that image can have one or more labels
 # for example image can contain 'cat', 'dog' and 'animal' labels if there are on the picture
 tagging_task, status = client.create_task('__TASK_NAME__', type='multi_label')
+
+# removing task is possible through client object or task itself
+client.remove_task(task.id)
+task.remove()
 ```
 
 #### Classify
@@ -91,33 +96,33 @@ best_label = result['records'][0]['best_label']
 
 #### Labels
 
-Working with the labels are pretty simple.
+Labels are connected to the task. Depends which task you are working with (Tagging/multi_label or Categorization/multi_class) you can create Tag or Category labels. Working with the labels are pretty simple:
 
 ```python
 # getting existing label
 existing_label, status = client.get_label('__ID_LABEL__')
 
-# creating new label (CATEGORY) and attaching it to existing Categorization task (multi class)
+# creating new label (CATEGORY, which is default) and attaching it to existing Categorization task (multi class)
 label, status = client.create_label(name='__NEW_LABEL_NAME__')
 task.add_label(label.id)
 
 # creating new label (TAG) for Tagging task (multi label)
 label, status = client.create_label(name='__NEW_LABEL_NAME__', label_type='tag')
 
-# get all labels of given task use
+# get all labels which are connected to the task
 labels, status = task.get_labels()
 
 for label in labels:
     print(label.id, label.name)
 
-# get label with name which is mapped to task
+# get label with exact name which is also connected to specific task
 label, status = task.get_label_by_name(name='__LABEL_NAME__')
 
-# detaching existing label from existing task
+# detaching (not deleting) existing label from existing task
 task.detach_label(label.id)
 
-# remove label (which also detach label from task)
-client.delete_label(label.id)
+# remove label (which also detach label from all tasks)
+client.remove_label(label.id)
 
 # detach image from label
 label.detach_image(image.id)
@@ -127,6 +132,8 @@ labels, status = client.get_labels_by_substring('__LABEL_NAME__')
 ```
 
 #### Working with training images
+
+Image is main entity in Ximilar system. Every image can have multiple labels (Recognition service) or multiple objects (Detection service).
 
 ```python
 # getting all images of label (paginated result)
@@ -148,8 +155,7 @@ image.detach_label(label.id)
 client.remove_image(image.id)
 ```
 
-Let's say you want to upload a training image and add several labels to this image.
-It's quite straightforward if you have objects of these labels:
+Let's say you want to upload a training image and add several labels to this image:
 
 ```python
 images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', 'labels': [label.id for label in labels]},
@@ -157,22 +163,92 @@ images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', 'labels
                                        {'_base64': '__BASE64_DATA__', 'labels': [label.id for label in labels]}])
 
 # and maybe add another label to the first image
-images[0].add_label(label_X.id)
+images[0].add_label("__SOME_LABEL_ID__")
 ```
 
-#### Speeding it up with Parallel Processing
-
-If you are uploading/classifying thousands of images and really need to speed it up, then you can use method parallel_records_processing in similar way:
+Upload image without resizing it (for example Custom Object Detection requires high resolution images):
 
 ```python
-# classifying images
+images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', "noresize": True}])
+```
+
+## Ximilar Object Detection
+
+This service is in BETA version.
+
+Ximilar Object Detection is service which will help you find exact location (Bounding Box/Object with four coordinates xmin, ymin, xmax, ymax).
+In similar way as Ximilar Recognition, here we also have Tasks, Labels and Images. However one more entity called Object is present in Ximilar Object Detection.
+
+First you need to create/get Detection Task:
+
+```python
+client = DetectionClient("__API_TOKEN__")
+detection_task, status = client.create_task("__DETECTION_TASK_ID__")
+detection_task, status = client.get_task("__DETECTION_TASK_ID__")
+```
+
+Second you need to create Detection Label and connect it to the task:
+
+```python
+detection_label, status = client.create_label("__DETECTION_LABEL_ID__")
+detection_label, status = client.get_label("__DETECTION_LABEL_ID__")
+
+detection_task.add_label(detection_label.id)
+```
+
+Lastly you need to create Objects/Bounding box annotations of some type (Label) on the images:
+
+```python
+image, status = client.get_image("__IMAGE_ID__")
+d_object, status = image.create_object([xmin, ymin, xmax, ymax], detection_label.id)
+d_object, status = client.get_object(d_object.id)
+
+# get all objects of image
+d_objects, status = image.get_objects()
+```
+
+Then you can create your task:
+
+```python
+detection_task.train()
+```
+
+Removing entities is same as in recognition client:
+
+```python
+client.remove_task("__DETECTION_TASK_ID__")
+client.remove_label("__DETECTION_LABEL_ID__") # this will delete all objects which were created as this label
+client.remove_object("__DETECTION_OBJECT_ID__")
+client.remove_image("__IMAGE_ID__")
+
+task.remove()
+label.remove()
+object.remove()
+image.remove()
+```
+
+Training and Getting Detection Result:
+
+```python
+result = detection_task.detect([{"_url": "__URL_PATH_TO_IMAGE__"}])
+```
+
+## Speeding it up with Parallel Processing
+
+If you are uploading/classifying thousands of images and really need to speed it up, then you can use method parallel_records_processing:
+
+```python
+# classifying images in Ximilar Custom Recognition service
 result = client.parallel_records_processing([{"_url": image} for image in images], method=task.classify, output=True, max_workers=3)
+
+# detection images in Ximilar Custom Object Detection
+result = client.parallel_records_processing([{"_url": image} for image in images], method=task.detect, output=True, max_workers=3)
 
 # uploading images
 result = client.parallel_records_processing([{"_url": image, "labels": ["__LABEL_ID_1__"]} for image in images], method=client.upload_images, output=True)
 ```
 
-This method works only for getting result for classification, tagging, detection, color or uploading images to Ximilar Recognition platform.
+This method works only for getting result for classification, tagging, detection, color extraction or uploading images (All methods which use json records as input).
 
 ## Ximilar Dominant Colors
 
@@ -244,7 +320,7 @@ result = client.insert([{'_id': '__ITEM_ID__', '_url': '__URL_PATH_TO_IMAGE__',
                          'meta-info-y': '__ANOTHER_META_INFO__'}])
 
 # delete item from id
-result = client.delete([{'_id': '__ITEM_ID__'}])
+result = client.remove([{'_id': '__ITEM_ID__'}])
 
 # update item in index with all additional fields and meta-info
 result = client.update([{'_id': '__ITEM_ID__', 'some-additional-field': '__VALUE__'}])

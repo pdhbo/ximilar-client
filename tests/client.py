@@ -1,3 +1,5 @@
+# RUN THIS as pytest client.py --token __TOKEN_ID__
+
 import pytest
 
 from ximilar.client.recognition import RecognitionClient, Image, Label, Task
@@ -71,16 +73,17 @@ def test_client_create_task_label_image(request):
     labels1, status = task1.get_labels()
     images1, n_page, status = label.get_training_images()
     label.detach_image(images[0].id)
-    tasks, status = client.get_tasks_by_name(TASK_NAME)
-    labels, status = client.get_labels_by_substring(LABEL_NAME)
+    tasksX, status = client.get_tasks_by_name(TASK_NAME)
+    labelsX, status = client.get_labels_by_substring(LABEL_NAME)
 
     # then delete everything
-    client.delete_image(images[0].id)
+    client.remove_image(images[0].id)
     task.detach_label(label.id)
-    for task_to_delete in tasks:
-        task_to_delete.delete_task()
-    for label_to_delete in labels:
-        label_to_delete.delete_label()
+
+    for task_to_delete in tasksX:
+        task_to_delete.remove()
+    for label_to_delete in labelsX:
+        label_to_delete.remove()
 
     # query after deleting
     tasks, status = client.get_tasks_by_name(TASK_NAME)
@@ -109,14 +112,19 @@ def test_client_create_task_label_image(request):
     assert isinstance(images[0], Image)
 
     # check the get endpoints
-    assert task.id == task1.id
-    assert label.id == labels1[0].id
+    print(tasksX, task)
+    assert task.id == tasksX[0].id
+    assert label.id == labelsX[0].id
 
     # check the creating of label and image
     assert len(labels_before) == len(labels_after)
-    assert len(labels1) == 1
+    assert len(labelsX) == 1
     assert len(images0) == 0
     assert len(images1) == 1
+
+
+# todo test detection
+# todo test workspace
 
 
 def test_classify(request):
