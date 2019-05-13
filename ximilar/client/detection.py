@@ -141,16 +141,19 @@ class DetectionClient(RecognitionClient):
         """
         label_json = self.post(LABEL_ENDPOINT, data={NAME: name})
         if ID not in label_json:
+            print(label_json)
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK
 
     def create_object(self, label_id, image_id, data):
         """
         Create detection object on some image with some label and coordinates.
-        :param name: name of the label
-        :return: Label object, status
+        :param label_id: id of detection label
+        :param image_id: id of image
+        :param data: [xmin, ymin, xmax, ymax]
+        :return: DetectionObject
         """
-        label_json = self.post(OBJECT_ENDPOINT, data={LABEL_ID: label_id, IMAGE_ID: image_id, "data": data})
+        label_json = self.post(OBJECT_ENDPOINT, data={DETECTION_LABEL: label_id, IMAGE: image_id, DATA: data})
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return DetectionObject(self.token, self.endpoint, label_json), RESULT_OK
@@ -162,6 +165,7 @@ class DetectionTask(DetectionClient):
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
+        self.workspace = task_json[WORKSPACE] if WORKSPACE in task_json else DEFAULT_WORKSPACE
 
     def train(self):
         """
@@ -171,6 +175,9 @@ class DetectionTask(DetectionClient):
         return self.post(TASK_ENDPOINT + self.id + "/train/")
 
     def remove(self):
+        """
+        Removes Detection Task.
+        """
         self.remove_task(self.id)
 
     def add_label(self, label_id):
@@ -234,12 +241,16 @@ class DetectionLabel(DetectionClient):
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
+        self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
 
     def __str__(self):
         return self.name
 
     def remove(self):
-        pass
+        """
+        Removes detection label.
+        """
+        return self.remove_label(self.id)
 
     def add_recognition_task(self, label_id):
         """
@@ -247,7 +258,7 @@ class DetectionLabel(DetectionClient):
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(TASK_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
+        return self.post(LABEL_ENDPOINT + self.id + "/add-task/", data={TASK_ID: label_id})
 
     def detach_recognition_task(self, label_id):
         """
@@ -255,7 +266,7 @@ class DetectionLabel(DetectionClient):
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(TASK_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
+        return self.post(LABEL_ENDPOINT + self.id + "/remove-task/", data={TASK_ID: label_id})
 
 
 class DetectionObject(DetectionClient):
@@ -275,7 +286,10 @@ class DetectionObject(DetectionClient):
         self.recognition_labels = object_json[RECOGNITION_LABELS]
 
     def remove(self):
-        pass
+        """
+        Removes detection object.
+        """
+        return self.remove_object(self.id)
 
     def add_recognition_label(self, label_id):
         """
@@ -283,7 +297,7 @@ class DetectionObject(DetectionClient):
         :param label_id: id (uuid) of label
         :return: result
         """
-        pass
+        return self.post(OBJECT_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
     def detach_recognition_label(self, label_id):
         """
@@ -291,7 +305,7 @@ class DetectionObject(DetectionClient):
         :param label_id: id (uuid) of label
         :return: result
         """
-        pass
+        return self.post(OBJECT_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
     def __str__(self):
-        return self.detection_label[NAME] + " " + str(self.data)
+        return self.id + " " + str(self.data)

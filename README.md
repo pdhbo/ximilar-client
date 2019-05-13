@@ -30,13 +30,13 @@ from ximilar.client import DominantColorProductClient, DominantColorGenericClien
 from ximilar.client import FashionTaggingClient, GenericTaggingClient
 
 app_client = RecognitionClient(token="__API_TOKEN__")
-fashion_client = FashionTaggingClient(token="__API_TOKEN__")
+detect_client = DetectionClient(token="__API_TOKEN__")
 ...
 ```
 
 ## Workspaces
 
-With a new version of Recognition App you are able to work also with workspaces. Workspaces are entities where all your task, labels and images live. Each user has by default workspace with name `Default` (it will be used if you do not specify workspace when working with Image, Label, Task). However you can specify id of workspace in the constructor.
+With a new version of Ximilar App you are able to work also with workspaces. Workspaces are entities where all your task, labels and images live. Each user has by default workspace with name `Default` (it will be used if you do not specify workspace when working with Image, Label, Task). However you can specify id of workspace in the constructor.
 
 ```python
 client = RecognitionClient(token="__API_TOKEN__", workspace='__UUID_OF_YOUR_WORKSPACE__')
@@ -200,7 +200,7 @@ Lastly you need to create Objects/Bounding box annotations of some type (Label) 
 
 ```python
 image, status = client.get_image("__IMAGE_ID__")
-d_object, status = image.create_object([xmin, ymin, xmax, ymax], detection_label.id)
+d_object, status = client.create_object("__DETECTION_LABEL_ID__", "__IMAGE_ID__", [xmin, ymin, xmax, ymax])
 d_object, status = client.get_object(d_object.id)
 
 # get all objects of image
@@ -227,7 +227,7 @@ object.remove()
 image.remove()
 ```
 
-Training and Getting Detection Result:
+Getting Detection Result:
 
 ```python
 result = detection_task.detect([{"_url": "__URL_PATH_TO_IMAGE__"}])
