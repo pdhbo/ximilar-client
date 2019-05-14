@@ -2,6 +2,7 @@
 
 import pytest
 
+from ximilar.client.constants import *
 from ximilar.client.recognition import RecognitionClient, Image, Label, Task
 from ximilar.client.detection import DetectionClient, DetectionObject, DetectionLabel, DetectionTask
 from ximilar.client.tagging import FashionTaggingClient, GenericTaggingClient
@@ -46,9 +47,9 @@ def test_02_client_existing(request):
     assert isinstance(tasks, list)
     if len(tasks):
         assert isinstance(tasks[0], Task)
-        assert hasattr(tasks[0], "id")
-        assert hasattr(tasks[0], "name")
-        assert hasattr(tasks[0], "type")
+        assert hasattr(tasks[0], ID)
+        assert hasattr(tasks[0], NAME)
+        assert hasattr(tasks[0], TYPE)
         assert hasattr(tasks[0], "production_version")
 
 
@@ -62,8 +63,8 @@ def test_03_client_all_labels(request):
     assert isinstance(labels, list)
     if len(labels):
         assert isinstance(labels[0], Label)
-        assert hasattr(labels[0], "id")
-        assert hasattr(labels[0], "name")
+        assert hasattr(labels[0], ID)
+        assert hasattr(labels[0], NAME)
 
 
 def test_04_client_create_task_label_image(request):
@@ -79,7 +80,7 @@ def test_04_client_create_task_label_image(request):
     label, status = task.create_label(LABEL_NAME)
     images0, n_page, status = label.get_training_images()
     label_count1 = label.images_count
-    images, status = label.upload_images([{"_file": TEST_IMG_SMALL}])
+    images, status = label.upload_images([{FILE: TEST_IMG_SMALL}])
     added_labels, status = images[0].get_labels()
     cached_labels, status = images[0].get_labels()
 
@@ -164,9 +165,9 @@ def test_06_upload_image_url_file_big(request):
     Test uploading images with resize and no resize
     """
     client = get_recognition_client(request)
-    images1, status = client.upload_images([{"_url": TEST_IMG_URL, "noresize": True}])
-    images2, status = client.upload_images([{"_url": TEST_IMG_URL}])
-    images3 = client.parallel_records_processing([{"_file": TEST_IMG_BIG, "noresize": True}], client.upload_images)
+    images1, status = client.upload_images([{URL: TEST_IMG_URL, "noresize": True}])
+    images2, status = client.upload_images([{URL: TEST_IMG_URL}])
+    images3 = client.parallel_records_processing([{FILE: TEST_IMG_BIG, "noresize": True}], client.upload_images)
 
     images1[0].remove()
     images2[0].remove()
@@ -184,8 +185,8 @@ def test_07_upload_image_url_file_small(request):
     Test uploading images with resize and no resize
     """
     client = get_recognition_client(request)
-    images1, status = client.upload_images([{"_file": TEST_IMG_SMALL, "noresize": True}])
-    images2, status = client.upload_images([{"_file": TEST_IMG_SMALL}])
+    images1, status = client.upload_images([{FILE: TEST_IMG_SMALL, "noresize": True}])
+    images2, status = client.upload_images([{FILE: TEST_IMG_SMALL}])
 
     images1[0].remove()
     images2[0].remove()
@@ -201,7 +202,7 @@ def test_08_classify(request):
     tasks, status = client.get_all_tasks()
     task = tasks[0]
 
-    result = task.classify([{"_file": TEST_IMG_SMALL}])
+    result = task.classify([{FILE: TEST_IMG_SMALL}])
     assert isinstance(result, dict)
 
 
@@ -214,9 +215,9 @@ def test_09_parallel_classify(request):
     task = tasks[0]
 
     result = client.parallel_records_processing(
-        [{"_file": TEST_IMG_SMALL} for i in range(3)], method=task.classify, output=False, max_workers=3
+        [{FILE: TEST_IMG_SMALL} for i in range(3)], method=task.classify, output=False, max_workers=3
     )
-    assert len(result) == 3 and "records" in result[0] and len(result[0]["records"]) == 1
+    assert len(result) == 3 and RECORDS in result[0] and len(result[0][RECORDS]) == 1
 
 
 def test_10_fashion_tagging(request):
@@ -224,10 +225,10 @@ def test_10_fashion_tagging(request):
     Test fashion tagging system prediction.
     """
     client = FashionTaggingClient(request.config.getoption("--token"))
-    result = client.tags([{"_file": TEST_IMG_SMALL}])
+    result = client.tags([{FILE: TEST_IMG_SMALL}])
 
-    assert "records" in result and len(result["records"]) > 0
-    assert "_tags" in result["records"][0]
+    assert RECORDS in result and len(result[RECORDS]) > 0
+    assert "_tags" in result[RECORDS][0]
 
 
 def test_11_parallel_fashion_processing(request):
@@ -236,14 +237,14 @@ def test_11_parallel_fashion_processing(request):
     """
     client = FashionTaggingClient(request.config.getoption("--token"))
     result3 = client.parallel_records_processing(
-        [{"_file": TEST_IMG_SMALL} for i in range(3)], method=client.tags, output=False, max_workers=3
+        [{FILE: TEST_IMG_SMALL} for i in range(3)], method=client.tags, output=False, max_workers=3
     )
     result1 = client.parallel_records_processing(
-        [{"_file": TEST_IMG_SMALL} for i in range(3)], method=client.tags, output=False, max_workers=3, batch_size=3
+        [{FILE: TEST_IMG_SMALL} for i in range(3)], method=client.tags, output=False, max_workers=3, batch_size=3
     )
 
-    assert len(result1) == 1 and "records" in result1[0] and len(result1[0]["records"]) == 3
-    assert len(result3) == 3 and "records" in result3[0] and len(result3[0]["records"]) == 1
+    assert len(result1) == 1 and RECORDS in result1[0] and len(result1[0][RECORDS]) == 3
+    assert len(result3) == 3 and RECORDS in result3[0] and len(result3[0][RECORDS]) == 1
 
 
 def test_12_generic_tagging(request):
@@ -251,14 +252,104 @@ def test_12_generic_tagging(request):
     Test generic tagging system for prediction.
     """
     client = GenericTaggingClient(request.config.getoption("--token"))
-    result = client.tags([{"_file": TEST_IMG_SMALL}])
+    result = client.tags([{FILE: TEST_IMG_SMALL}])
 
-    assert "records" in result and len(result["records"]) > 0
-    assert "_tags" in result["records"][0]
+    assert RECORDS in result and len(result[RECORDS]) > 0
+    assert "_tags" in result[RECORDS][0]
 
 
-def test_13_detection(request):
+def test_13_detection_workflow(request):
+    """
+    This is simple workflow test for detection.
+    """
+    client = get_detection_client(request)
+
+    # lets create task, labels, image
+    task, status = client.create_task("Test-Detection-Task-API")
+    label1, status = client.create_label("Test-Detection-Label-API-1")
+    label2, status = client.create_label("Test-Detection-Label-API-2")
+    images1, status = client.upload_images([{FILE: TEST_IMG_BIG, "noresize": True}])
+    object1, status = client.create_object(label1.id, images1[0].id, [0, 0, 100, 100])
+
+    # connect label to task
+    task.add_label(label1.id)
+
+    # get labels of task
+    labels1, status = task.get_labels()
+
+    # get all detection labels
+    labels2, status = client.get_all_labels()
+    objects, status = client.get_objects_of_image(images1[0].id)
+
+    # remove everything
+    task.remove()
+    label1.remove()
+    label2.remove()
+    images1[0].remove() # this should delete also object
+    object1.remove()
+
+    assert len(objects) == 1
+    assert len(labels1) == 1
+    assert len(labels1) != len(labels2)
 
 
 def test_14_recognition_workspace(request):
-    pass
+    """
+    This test will be skipped if you do not have at least 2 workspaces.
+    Test of creating new task to different workspace.
+    """
+    client = get_recognition_client(request)
+    result, status = client.get_workspaces()
+
+    def_workspace, oth_workspace = None, None
+    for workspace in result:
+        if workspace.name == "Default":
+            def_workspace = workspace
+        else:
+            oth_workspace = workspace
+
+    if len(result) > 1:
+        client1 = RecognitionClient(request.config.getoption("--token"), workspace=def_workspace.id)
+        client2 = RecognitionClient(request.config.getoption("--token"), workspace=oth_workspace.id)
+
+        tasks1, status = client1.get_all_tasks()
+        clean_tasks2, status = client2.get_all_tasks()
+
+        for task in clean_tasks2:
+            task.remove()
+
+        task2, status = client2.create_task("Other Workspace Task")
+        tasks2_other_workspace, status = client2.get_all_tasks()
+        client2.remove_task(task2.id)
+        tasks2_other_workspace_after_remove, status = client2.get_all_tasks()
+
+        assert len(tasks1) > 1
+        assert len(tasks2_other_workspace) == 1
+        assert len(tasks2_other_workspace_after_remove) == 0
+
+
+def test_15_upload_image_different_workspace(request):
+    """
+    This test will be skipped if you do not have at least 2 workspaces.
+    Test of uploading image to different workspace.
+    """
+    client = get_recognition_client(request)
+    result, status = client.get_workspaces()
+
+    if len(result) < 2:
+        return
+
+    def_workspace, oth_workspace = None, None
+    for workspace in result:
+        if workspace.name == "Default":
+            def_workspace = workspace
+        else:
+            oth_workspace = workspace
+
+    client1 = RecognitionClient(request.config.getoption("--token"), workspace=oth_workspace.id)
+    images1, status = client1.upload_images([{FILE: TEST_IMG_BIG, "noresize": True}])
+    images1[0].remove()
+
+    assert len(images1) > 0
+    assert images1[0].workspace == oth_workspace.id
+    assert images1[0].img_height > client1.max_size

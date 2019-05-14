@@ -7,14 +7,15 @@ TASK_ENDPOINT = "recognition/v2/task/"
 MODEL_ENDPOINT = "recognition/v2/model/"
 IMAGE_ENDPOINT = "recognition/v2/training-image/"
 CLASSIFY_ENDPOINT = "recognition/v2/classify/"
+WORKSPACE_ENDPOINT = "account/v2/workspace/"
 
 
 class RecognitionClient(RestClient):
     """
     Base Client for Ximilar Custom Image Recognition Service.
     """
-    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE, resource_name=CUSTOM_IMAGE_RECOGNITION):
-        self.workspace_id = workspace_id # this must be set before calling supers
+    def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_IMAGE_RECOGNITION):
+        self.workspace = workspace # this must be set before calling supers
         super(RecognitionClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
 
     def get(self, api_endpoint, data=None, params=None):
@@ -41,11 +42,22 @@ class RecognitionClient(RestClient):
         :param data: dictionary/json data which will be send to endpoint
         :return: modified json data with workspace
         """
-        if self.workspace_id != DEFAULT_WORKSPACE:
+        if self.workspace != DEFAULT_WORKSPACE:
             if data is None:
                 data = {}
-            data[WORKSPACE] = self.workspace_id
+            data[WORKSPACE] = self.workspace
         return data
+
+    def get_workspaces(self):
+        """
+        Get all workspaces accessed by user.
+        """
+        workspaces, status = self.get_all_paginated_items(WORKSPACE_ENDPOINT)
+
+        if not workspaces and status[STATUS] == STATUS_ERROR:
+            return None, status
+
+        return [Workspace(self.token, self.endpoint, w_json) for w_json in workspaces], RESULT_OK
 
     def get_task(self, task_id):
         """
@@ -226,14 +238,12 @@ class RecognitionClient(RestClient):
             noresize = NORESIZE in record and record[NORESIZE]
 
             if FILE in record:
-                files = {"img_path": open(record[FILE], "rb")}
-                if noresize:
-                    files[NORESIZE] = str(True)
+                # We cannot send files to request along with json data (for workspace)
+                # That is why we load image from disk to base64 representation
+                data = {"base64": self.load_base64_file(record[FILE], resize=not noresize), NORESIZE: noresize}
             elif BASE64 in record:
                 data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize}
             elif URL in record:
-                # TODO: do not resize image when loading (right now we need to use self.max_size = 0)
-                print('resizing:', noresize)
                 data = {"base64": self.load_url_image(record[URL], resize=not noresize), NORESIZE: noresize}
 
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
@@ -264,6 +274,7 @@ class Task(RecognitionClient):
         self.type = task_json[TYPE]
         self.production_version = task_json[PRODUCTION_VERSION]
         self.workspace = task_json[WORKSPACE] if WORKSPACE in task_json else DEFAULT_WORKSPACE
+        # TODO: negative task id
 
     def __str__(self):
         return self.name
@@ -512,3 +523,16 @@ class Image(RecognitionClient):
         """
         self._file = super().download_image(self.img_path, destination=destination)
         return self._file
+
+
+class Workspace(RecognitionClient):
+    """
+    Workspace entity. All Task, Labels and Images are mapped to some workspace.
+    Every workspace has some owner.
+    """
+    def __init__(self, token, endpoint, workspace_json):
+        self.id = workspace_json[ID]
+        self.name = workspace_json[NAME]
+
+    def __str__(self):
+        return "Worskpace: (%s) (%s)" % (self.name, self.id)

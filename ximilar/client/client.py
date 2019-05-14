@@ -45,6 +45,7 @@ class RestClient(object):
     def post(self, api_endpoint, data=None, files=None, params=None):
         """
         Call the http POST request with data.
+
         :param api_endpoint: endpoint path
         :param data: optional data
         :param files: optional files to upload
@@ -52,13 +53,15 @@ class RestClient(object):
         :return: json response
         """
         self.invalidate()
+
+        if data is not None and files is not None:
+            raise Exception("Unable to send data along with files with python requests library!")
+
         if data is not None:
             data = json.dumps(data)
 
-        headers = self.headers if not files else {"Authorization": "Token " + self.token}
-
         result = requests.post(
-            self.endpoint + api_endpoint, params=params, headers=headers, data=data, files=files, timeout=30
+            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, files=files, timeout=30
         )
 
         try:
@@ -76,6 +79,7 @@ class RestClient(object):
         :return: response
         """
         self.invalidate()
+
         result = requests.delete(
             self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30
         )
@@ -128,14 +132,14 @@ class RestClient(object):
 
         return items, RESULT_OK
 
-    def resize_image_data(self, image_data, aspect_ratio=False):
+    def resize_image_data(self, image_data, aspect_ratio=False, resize=True):
         """
         Resize image data that are no bigger than max_size.
         :param image_data: cv2/np ndarray
         :return: cv2/np ndarray
         """
         # do not resize image if set to 0
-        if self.max_size == 0:
+        if resize == False or self.max_size == 0:
             return image_data
 
         height, width, _ = image_data.shape
@@ -154,7 +158,7 @@ class RestClient(object):
             dim = (int(image.shape[1] * r), img_size)
         return dim
 
-    def load_base64_file(self, path):
+    def load_base64_file(self, path, resize=True):
         """
         Load file from disk to base64.
         :param path: local path to the image
@@ -162,8 +166,8 @@ class RestClient(object):
         """
         image = cv2.imread(str(path))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = self.resize_image_data(image)
-        image = self.cv2img_to_base64(image)
+        image = self.resize_image_data(image, resize=resize)
+        image = self.cv2img_to_base64(image, resize=resize)
         return image
 
     def cv2img_to_base64(self, image, resize=True):
@@ -179,8 +183,7 @@ class RestClient(object):
         :return: base64 encoded string
         """
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        if resize:
-            image = self.resize_image_data(image)
+        image = self.resize_image_data(image, resize=resize)
         retval, buffer = cv2.imencode(".jpg", image)
         jpg_as_text = base64.b64encode(buffer).decode("utf-8")
         return jpg_as_text

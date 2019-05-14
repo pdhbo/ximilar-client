@@ -8,8 +8,8 @@ DETECT_ENDPOINT = "detection/v2/detect/"
 
 
 class DetectionClient(RecognitionClient):
-    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE, resource_name=CUSTOM_OBJECT_DETECTION):
-        super(DetectionClient, self).__init__(token=token, endpoint=endpoint, workspace_id=workspace_id, resource_name=resource_name)
+    def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_OBJECT_DETECTION):
+        super(DetectionClient, self).__init__(token=token, endpoint=endpoint, workspace=workspace, resource_name=resource_name)
 
     def get_object(self, object_id):
         """
@@ -209,7 +209,7 @@ class DetectionTask(DetectionClient):
         else:
             labels, result = self.get_all_labels(suffix="?task=" + self.id)
 
-            if result[STATUS_OK] == STATUS_OK:
+            if result[STATUS] == STATUS_OK:
                 self.cache[LABELS] = labels
 
             return self.cache[LABELS], result
