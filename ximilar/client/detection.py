@@ -8,8 +8,8 @@ DETECT_ENDPOINT = "detection/v2/detect/"
 
 
 class DetectionClient(RecognitionClient):
-    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE):
-        super(DetectionClient, self).__init__(token=token, endpoint=endpoint, workspace_id=workspace_id)
+    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE, resource_name=CUSTOM_OBJECT_DETECTION):
+        super(DetectionClient, self).__init__(token=token, endpoint=endpoint, workspace_id=workspace_id, resource_name=resource_name)
 
     def get_object(self, object_id):
         """
@@ -72,7 +72,7 @@ class DetectionClient(RecognitionClient):
 
     def get_objects(self, page_url=None):
         """
-        Get paginated result of objects.
+        Get paginated result of all Detection Objects in your workspace.
         :param page_url: optional, select the specific page of images, default first page
         :return: (list of images, next_page)
         """
@@ -90,36 +90,40 @@ class DetectionClient(RecognitionClient):
 
     def get_objects_of_image(self, image_id):
         """
-        Get all objects which are located on image
+        Get all Detection Objects which are located on image.
         :param image_id: uuid of image
         :return: list, next_page, result
         """
-        result = self.get(OBJECT_ENDPOINT + "?image=" + image_id)
-        return (
-            [DetectionObject(self.token, self.endpoint, object_json) for object_json in result[RESULTS]],
-            result[NEXT],
-            RESULT_OK,
-        )
+        objects, status = self.get_all_paginated_items(OBJECT_ENDPOINT + "?image=" + image_id)
 
-    def get_all_labels(self):
+        if not objects and status[STATUS] == STATUS_ERROR:
+            return None, status
+
+        return [DetectionObject(self.token, self.endpoint, o_json) for o_json in objects], RESULT_OK
+
+    def get_all_tasks(self, suffix=""):
         """
-        Get all labels of the user(user is specified by client key).
+        Get all Detection Tasks of the user(user is specified by client key).
+        :return: List of Tasks
+        """
+        tasks, status = self.get_all_paginated_items(TASK_ENDPOINT + suffix)
+
+        if not tasks and status[STATUS] == STATUS_ERROR:
+            return None, status
+
+        return [DetectionTask(self.token, self.endpoint, t_json) for t_json in tasks], RESULT_OK
+
+    def get_all_labels(self, suffix=""):
+        """
+        Get all Detection Labels of the user(user is specified by client key).
         :return: List of labels
         """
-        url, labels = LABEL_ENDPOINT, []
+        labels, status = self.get_all_paginated_items(LABEL_ENDPOINT+suffix)
 
-        while True:
-            result = self.get(url)
+        if not labels and status[STATUS] == STATUS_ERROR:
+            return None, status
 
-            for label_json in result[RESULTS]:
-                labels.append(DetectionLabel(self.token, self.endpoint, label_json))
-
-            if result[NEXT] is None:
-                break
-
-            url = result[NEXT].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
-
-        return labels, RESULT_OK
+        return [DetectionLabel(self.token, self.endpoint, l_json) for l_json in labels], RESULT_OK
 
     def create_task(self, name):
         """
@@ -141,7 +145,6 @@ class DetectionClient(RecognitionClient):
         """
         label_json = self.post(LABEL_ENDPOINT, data={NAME: name})
         if ID not in label_json:
-            print(label_json)
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK
 
@@ -297,11 +300,11 @@ class DetectionObject(DetectionClient):
         :param label_id: id (uuid) of label
         :return: result
         """
-        return self.post(OBJECT_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
+        return self.post(OBJECT_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
 
     def detach_recognition_label(self, label_id):
         """
-        Detech recognition label from the object.
+        Detach recognition label from the object.
         :param label_id: id (uuid) of label
         :return: result
         """

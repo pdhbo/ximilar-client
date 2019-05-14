@@ -7,17 +7,8 @@ import numpy as np
 import concurrent.futures
 from tqdm import tqdm
 
-from ximilar.client.constants import (
-    FILE,
-    BASE64,
-    IMG_DATA,
-    RECORDS,
-    WORKSPACE,
-    DEFAULT_WORKSPACE,
-    ENDPOINT,
-    HTTP_NO_COTENT_204,
-    HTTP_UNAVAILABLE_503,
-)
+from ximilar.client.constants import *
+
 
 CONFIG_ENDPOINT = "account/v2/config/"
 
@@ -29,12 +20,13 @@ class RestClient(object):
     All objects contains TOKEN and ENDPOINT information.
     """
 
-    def __init__(self, token, endpoint=ENDPOINT):
+    def __init__(self, token, endpoint=ENDPOINT, resource_name=""):
         self.token = token
         self.cache = {}
         self.endpoint = endpoint
         self.max_size = 600
         self.headers = {"Content-Type": "application/json", "Authorization": "Token " + self.token}
+        self.check_resource(resource_name)
 
     def invalidate(self):
         self.cache = {}
@@ -68,6 +60,7 @@ class RestClient(object):
         result = requests.post(
             self.endpoint + api_endpoint, params=params, headers=headers, data=data, files=files, timeout=30
         )
+
         try:
             json_result = result.json()
             return json_result
@@ -91,6 +84,49 @@ class RestClient(object):
             return result
 
         return result.json()
+
+    def check_resource(self, resource_name):
+        """
+        Checks if the user has access (resource) to the service.
+        :param resource_name: name of the service
+        :return: True if user has access otherwise False
+        """
+        result = self.post("authorization/v2/authorize", data={"service_name": resource_name})
+
+        if result and USER_ID in result:
+            return True
+
+        raise Exception("User has no access for service: " + resource_name + ". Please contact tech@ximilar.com!")
+
+    def get_all_paginated_items(self, url):
+        """
+        Getting all paginated items from specific endpoint url
+        :param url: url path which will be queried
+        :return: items
+        """
+        items = []
+
+        while True:
+            result = self.get(url)
+            if RESULTS in result:
+                for item in result[RESULTS]:
+                    items.append(item)
+
+                if result[NEXT] is None:
+                    break
+            else:
+                if DETAIL in result:
+                    return None, {DETAIL: result[DETAIL], STATUS: STATUS_ERROR}
+                else:
+                    return None, RESULT_ERROR
+
+            # we need to replace the full url just with the end, because endpoint
+            # is automatically adde during the request
+            url = result[NEXT].replace(self.endpoint, "")\
+                .replace(self.endpoint.replace("https", "http"), "")\
+                .replace("http://localhost/api/", "")
+
+        return items, RESULT_OK
 
     def resize_image_data(self, image_data, aspect_ratio=False):
         """
@@ -130,7 +166,7 @@ class RestClient(object):
         image = self.cv2img_to_base64(image)
         return image
 
-    def cv2img_to_base64(self, image):
+    def cv2img_to_base64(self, image, resize=True):
         """
         Load raw numpy/cv2 data of image to base64. The input image to this method should have RGB order.
         The ximilar accepts base64 data to have BGR order that is why we convert it here.
@@ -139,18 +175,21 @@ class RestClient(object):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         :param image_data: numpy/cv2 data with RGB order
+        :param resize: if we want to resize image
         :return: base64 encoded string
         """
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        image = self.resize_image_data(image)
+        if resize:
+            image = self.resize_image_data(image)
         retval, buffer = cv2.imencode(".jpg", image)
         jpg_as_text = base64.b64encode(buffer).decode("utf-8")
         return jpg_as_text
 
-    def load_url_image(self, path):
+    def load_url_image(self, path, resize=True):
         """
         Load url file to base64 WITHOUT resizing (it is used in upload image for recognition).
         :param path: url path
+        :param resize: if we want to resize image
         :return: base64 encoded string
         """
         r = requests.get(str(path), headers={"Accept": "*/*", "User-Agent": "request"})
@@ -158,7 +197,7 @@ class RestClient(object):
         image = np.asarray(bytearray(img_bin), dtype="uint8")
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = self.cv2img_to_base64(image)
+        image = self.cv2img_to_base64(image, resize=resize)
         return image
 
     def preprocess_records(self, records):

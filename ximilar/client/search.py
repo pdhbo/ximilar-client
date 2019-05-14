@@ -29,8 +29,8 @@ PING = "ping"
 
 
 class SimilarityPhotosClient(RestClient):
-    def __init__(self, token, collection=None, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS):
-        super(SimilarityPhotosClient, self).__init__(token=token, endpoint=endpoint)
+    def __init__(self, token, collection=None, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS, resource_name=SIMILARITY_PHOTOS):
+        super(SimilarityPhotosClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
 
         self.max_size = 1000
         if collection_id:
@@ -109,5 +109,5 @@ class SimilarityPhotosClient(RestClient):
 
 
 class SimilarityProductsClient(SimilarityPhotosClient):
-    def __init__(self, token, collection, endpoint=ENDPOINT + SIMILARITY_PRODUCTS):
-        super(SimilarityProductsClient, self).__init__(token=token, collection=collection, endpoint=endpoint)
+    def __init__(self, token, collection, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=SIMILARITY_PRODUCTS):
+        super(SimilarityProductsClient, self).__init__(token=token, collection=collection, endpoint=endpoint, resource_name=resource_name)

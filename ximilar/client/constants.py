@@ -9,10 +9,25 @@ URL = "_url"
 BASE64 = "_base64"
 IMG_DATA = "_img_data"
 RESULT_OK = {"status": "OK"}
+RESULT_ERROR = {"status": "ERROR", "detail": "Unexpected error."}
 ENDPOINT = "https://api.ximilar.com/"
 
+# Services
+CUSTOM_IMAGE_RECOGNITION = "custom-recognition"
+CUSTOM_OBJECT_DETECTION = "custom-object-detection"
+PHOTO_SIMILARITY = "photo-similarity"
+PRODUCT_SIMILARITY = "product-similarity"
+GENERIC_TAGGING = "generic-tagging"
+FASHION_TAGGING = "fashion-tagging"
+SMART_PRODUCT_SEARCH = "smart-product-search"
+DOMINANT_COLORS_PRODUCT = "dominant-colors"
+DOMINANT_COLORS_GENERIC = "dominant-colors"
+
 # Recognition/Vize related
+USER_ID = "user_id"
+STATUS = "status"
 STATUS_OK = "OK"
+STATUS_ERROR = "ERROR"
 RESULTS = "results"
 ID = "id"
 NAME = "name"

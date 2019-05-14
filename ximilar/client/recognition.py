@@ -7,17 +7,15 @@ TASK_ENDPOINT = "recognition/v2/task/"
 MODEL_ENDPOINT = "recognition/v2/model/"
 IMAGE_ENDPOINT = "recognition/v2/training-image/"
 CLASSIFY_ENDPOINT = "recognition/v2/classify/"
-OBJECT_ENDPOINT = "detection/v2/object/"
 
 
 class RecognitionClient(RestClient):
     """
     Base Client for Ximilar Custom Image Recognition Service.
     """
-    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE):
-        super(RecognitionClient, self).__init__(token=token, endpoint=endpoint)
-
-        self.workspace_id = workspace_id
+    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE, resource_name=CUSTOM_IMAGE_RECOGNITION):
+        self.workspace_id = workspace_id # this must be set before calling supers
+        super(RecognitionClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
 
     def get(self, api_endpoint, data=None, params=None):
         """
@@ -92,25 +90,24 @@ class RecognitionClient(RestClient):
         Get all tasks of the user(user is specified by client key).
         :return: List of Tasks
         """
-        url, tasks = TASK_ENDPOINT + suffix, []
+        tasks, status = self.get_all_paginated_items(TASK_ENDPOINT + suffix)
 
-        while True:
-            result = self.get(url)
+        if not tasks and status[STATUS] == STATUS_ERROR:
+            return None, status
 
-            if RESULTS not in result:
-                if DETAIL in result:
-                    return None, {STATUS: result[DETAIL]}
-                return None, {STATUS: "unexpected error"}
+        return [Task(self.token, self.endpoint, t_json) for t_json in tasks], RESULT_OK
 
-            for task_json in result[RESULTS]:
-                tasks.append(Task(self.token, self.endpoint, task_json))
+    def get_all_labels(self, suffix=""):
+        """
+        Get all labels of the user(user is specified by client key).
+        :return: List of labels
+        """
+        labels, status = self.get_all_paginated_items(LABEL_ENDPOINT + suffix)
 
-            if result[NEXT] is None:
-                break
+        if not labels and status[STATUS] == STATUS_ERROR:
+            return None, status
 
-            url = result[NEXT].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
-
-        return tasks, RESULT_OK
+        return [Label(self.token, self.endpoint, l_json) for l_json in labels], RESULT_OK
 
     def get_tasks_by_name(self, name):
         """
@@ -131,30 +128,11 @@ class RecognitionClient(RestClient):
 
         return None, {STATUS: "Task with this name not found!"}
 
-    def get_all_labels(self, suffix=""):
-        """
-        Get all labels of the user(user is specified by client key).
-        :return: List of labels
-        """
-        url, labels = LABEL_ENDPOINT + suffix, []
-
-        while True:
-            result = self.get(url)
-
-            for label_json in result[RESULTS]:
-                labels.append(Label(self.token, self.endpoint, label_json))
-
-            if result[NEXT] is None:
-                break
-
-            url = result[NEXT].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
-
-        return labels, RESULT_OK
-
     def get_training_images(self, page_url=None, verification=None):
         """
         Get paginated result of images from workspace.
         :param page_url: optional, select the specific page of images, default first page
+        :param verification: optional, integer which says how many verifications should have the images
         :return: (list of images, next_page)
         """
         url = (
@@ -245,17 +223,18 @@ class RecognitionClient(RestClient):
         worst_status = RESULT_OK
         for record in records:
             files, data = None, None
-            rec_no_resize = NORESIZE in record and record[NORESIZE]
+            noresize = NORESIZE in record and record[NORESIZE]
 
             if FILE in record:
                 files = {"img_path": open(record[FILE], "rb")}
-                if rec_no_resize:
+                if noresize:
                     files[NORESIZE] = str(True)
             elif BASE64 in record:
-                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: rec_no_resize}
+                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize}
             elif URL in record:
                 # TODO: do not resize image when loading (right now we need to use self.max_size = 0)
-                data = {"base64": self.load_url_image(record[URL]), NORESIZE: rec_no_resize}
+                print('resizing:', noresize)
+                data = {"base64": self.load_url_image(record[URL], resize=not noresize), NORESIZE: noresize}
 
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
             if ID not in image_json:
@@ -412,25 +391,6 @@ class Label(RecognitionClient):
         :return: None
         """
         self.delete(LABEL_ENDPOINT + self.id + "/wipe")
-
-    def merge_label(self, label_b):
-        """
-        Get all photos of label_b and remove the label_b. Add this label to all the photos.
-        This will lead to merging these two labels.
-        """
-        next_page, images = None, []
-
-        while True:
-            images_m, next_page, status = label_b.get_training_images(page_url=next_page)
-            for image in images_m:
-                images.append(image)
-
-            if not next_page:
-                break
-
-        for image in images:
-            image.remove_label(label_b.id)
-            image.add_label(self.id)
 
     def get_images_count(self):
         """
