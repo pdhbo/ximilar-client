@@ -126,9 +126,12 @@ class RestClient(object):
 
             # we need to replace the full url just with the end, because endpoint
             # is automatically adde during the request
-            url = result[NEXT].replace(self.endpoint, "")\
-                .replace(self.endpoint.replace("https", "http"), "")\
+            url = (
+                result[NEXT]
+                .replace(self.endpoint, "")
+                .replace(self.endpoint.replace("https", "http"), "")
                 .replace("http://localhost/api/", "")
+            )
 
         return items, RESULT_OK
 

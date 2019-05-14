@@ -14,8 +14,9 @@ class RecognitionClient(RestClient):
     """
     Base Client for Ximilar Custom Image Recognition Service.
     """
+
     def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_IMAGE_RECOGNITION):
-        self.workspace = workspace # this must be set before calling supers
+        self.workspace = workspace  # this must be set before calling supers
         super(RecognitionClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
 
     def get(self, api_endpoint, data=None, params=None):
@@ -266,6 +267,7 @@ class Task(RecognitionClient):
     Task entity from /recognition/v2/task endpoint.
     Every task can have multiple recognition labels.
     """
+
     def __init__(self, token, endpoint, task_json):
         super(Task, self).__init__(token, endpoint)
 
@@ -362,6 +364,7 @@ class Model(RecognitionClient):
     Model entity from /recognition/v2/mode endpoint.
     Every model represents model/neural network which is trained or waiting for training.
     """
+
     def __init__(self, token, endpoint, model_json):
         super(Model, self).__init__(token, endpoint)
 
@@ -375,7 +378,7 @@ class Model(RecognitionClient):
         self.delete_model(self.id)
 
     def __str__(self):
-        return self.task_name + " (" + self.train_status +")"
+        return self.task_name + " (" + self.train_status + ")"
 
 
 class Label(RecognitionClient):
@@ -383,6 +386,7 @@ class Label(RecognitionClient):
     Label entity from /recognition/v2/label endpoint.
     Every label can be assigned to multiple tasks.
     """
+
     def __init__(self, token, endpoint, label_json):
         super(Label, self).__init__(token, endpoint)
 
@@ -464,6 +468,7 @@ class Image(RecognitionClient):
     Image entity from /recognition/v2/image endpoint.
     Every image can have multiple recognition labels.
     """
+
     def __init__(self, token, endpoint, image_json):
         super(Image, self).__init__(token, endpoint)
 
@@ -530,6 +535,7 @@ class Workspace(RecognitionClient):
     Workspace entity. All Task, Labels and Images are mapped to some workspace.
     Every workspace has some owner.
     """
+
     def __init__(self, token, endpoint, workspace_json):
         self.id = workspace_json[ID]
         self.name = workspace_json[NAME]

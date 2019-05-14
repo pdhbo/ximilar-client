@@ -9,7 +9,9 @@ DETECT_ENDPOINT = "detection/v2/detect/"
 
 class DetectionClient(RecognitionClient):
     def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_OBJECT_DETECTION):
-        super(DetectionClient, self).__init__(token=token, endpoint=endpoint, workspace=workspace, resource_name=resource_name)
+        super(DetectionClient, self).__init__(
+            token=token, endpoint=endpoint, workspace=workspace, resource_name=resource_name
+        )
 
     def get_object(self, object_id):
         """
@@ -118,7 +120,7 @@ class DetectionClient(RecognitionClient):
         Get all Detection Labels of the user(user is specified by client key).
         :return: List of labels
         """
-        labels, status = self.get_all_paginated_items(LABEL_ENDPOINT+suffix)
+        labels, status = self.get_all_paginated_items(LABEL_ENDPOINT + suffix)
 
         if not labels and status[STATUS] == STATUS_ERROR:
             return None, status
@@ -239,6 +241,7 @@ class DetectionLabel(DetectionClient):
     DetectionLabel entity from /detection/v2/label endpoint.
     DetectionLabel is connected to DetectionTasks and can also have Recognition Tasks.
     """
+
     def __init__(self, token, endpoint, label_json):
         super(DetectionLabel, self).__init__(token, endpoint)
 
@@ -279,6 +282,7 @@ class DetectionObject(DetectionClient):
     Coordinates are [xmin, ymin, xmax, ymax].
     Every object can also contain recognition labels.
     """
+
     def __init__(self, token, endpoint, object_json):
         super(DetectionObject, self).__init__(token, endpoint)
 

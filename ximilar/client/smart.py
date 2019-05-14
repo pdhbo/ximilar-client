@@ -1,4 +1,13 @@
-from ximilar.client.constants import _ID, K_COUNT,FIELDS_TO_RETURN, ENDPOINT, SMART_PRODUCT_SEARCH, RECORDS,COLLECTION, FILTER
+from ximilar.client.constants import (
+    _ID,
+    K_COUNT,
+    FIELDS_TO_RETURN,
+    ENDPOINT,
+    SMART_PRODUCT_SEARCH,
+    RECORDS,
+    COLLECTION,
+    FILTER,
+)
 from ximilar.client.search import SimilarityPhotosClient
 
 SMART_SEARCH = "smart/v2/"
@@ -12,9 +21,20 @@ PING = "ping"
 
 
 class SmartSearchClient(SimilarityPhotosClient):
-    def __init__(self, token, collection=None, collection_id=None, endpoint=ENDPOINT + SMART_SEARCH, resource_name=SMART_PRODUCT_SEARCH):
+    def __init__(
+        self,
+        token,
+        collection=None,
+        collection_id=None,
+        endpoint=ENDPOINT + SMART_SEARCH,
+        resource_name=SMART_PRODUCT_SEARCH,
+    ):
         super(SmartSearchClient, self).__init__(
-            token=token, collection=collection, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
+            token=token,
+            collection=collection,
+            collection_id=collection_id,
+            endpoint=endpoint,
+            resource_name=resource_name,
         )
 
     def search(self, records, filter=None, count=5, fields_to_return=[_ID]):

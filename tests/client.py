@@ -285,7 +285,7 @@ def test_13_detection_workflow(request):
     task.remove()
     label1.remove()
     label2.remove()
-    images1[0].remove() # this should delete also object
+    images1[0].remove()  # this should delete also object
     object1.remove()
 
     assert len(objects) == 1
