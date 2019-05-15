@@ -7,7 +7,7 @@ TASK_ENDPOINT = "recognition/v2/task/"
 MODEL_ENDPOINT = "recognition/v2/model/"
 IMAGE_ENDPOINT = "recognition/v2/training-image/"
 CLASSIFY_ENDPOINT = "recognition/v2/classify/"
-OBJECT_ENDPOINT = "detection/v2/object/"
+WORKSPACE_ENDPOINT = "account/v2/workspace/"
 
 
 class RecognitionClient(RestClient):
@@ -15,10 +15,18 @@ class RecognitionClient(RestClient):
     Base Client for Ximilar Custom Image Recognition Service.
     """
 
-    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE, max_image_size=512):
-        super(RecognitionClient, self).__init__(token=token, endpoint=endpoint, max_image_size=max_image_size)
-
-        self.workspace_id = workspace_id
+    def __init__(
+        self,
+        token,
+        endpoint=ENDPOINT,
+        workspace=DEFAULT_WORKSPACE,
+        max_image_size=512,
+        resource_name=CUSTOM_IMAGE_RECOGNITION,
+    ):
+        self.workspace = workspace  # this must be set before calling supers
+        super(RecognitionClient, self).__init__(
+            token=token, endpoint=endpoint, max_image_size=max_image_size, resource_name=resource_name
+        )
 
     def get(self, api_endpoint, data=None, params=None):
         """
@@ -44,11 +52,22 @@ class RecognitionClient(RestClient):
         :param data: dictionary/json data which will be send to endpoint
         :return: modified json data with workspace
         """
-        if self.workspace_id != DEFAULT_WORKSPACE:
+        if self.workspace != DEFAULT_WORKSPACE:
             if data is None:
                 data = {}
-            data[WORKSPACE] = self.workspace_id
+            data[WORKSPACE] = self.workspace
         return data
+
+    def get_workspaces(self):
+        """
+        Get all workspaces accessed by user.
+        """
+        workspaces, status = self.get_all_paginated_items(WORKSPACE_ENDPOINT)
+
+        if not workspaces and status[STATUS] == STATUS_ERROR:
+            return None, status
+
+        return [Workspace(self.token, self.endpoint, w_json) for w_json in workspaces], RESULT_OK
 
     def get_task(self, task_id):
         """
@@ -93,25 +112,24 @@ class RecognitionClient(RestClient):
         Get all tasks of the user(user is specified by client key).
         :return: List of Tasks
         """
-        url, tasks = TASK_ENDPOINT + suffix, []
+        tasks, status = self.get_all_paginated_items(TASK_ENDPOINT + suffix)
 
-        while True:
-            result = self.get(url)
+        if not tasks and status[STATUS] == STATUS_ERROR:
+            return None, status
 
-            if RESULTS not in result:
-                if DETAIL in result:
-                    return None, {STATUS: result[DETAIL]}
-                return None, {STATUS: "unexpected error"}
+        return [Task(self.token, self.endpoint, t_json) for t_json in tasks], RESULT_OK
 
-            for task_json in result[RESULTS]:
-                tasks.append(Task(self.token, self.endpoint, task_json))
+    def get_all_labels(self, suffix=""):
+        """
+        Get all labels of the user(user is specified by client key).
+        :return: List of labels
+        """
+        labels, status = self.get_all_paginated_items(LABEL_ENDPOINT + suffix)
 
-            if result[NEXT] is None:
-                break
+        if not labels and status[STATUS] == STATUS_ERROR:
+            return None, status
 
-            url = result[NEXT].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
-
-        return tasks, RESULT_OK
+        return [Label(self.token, self.endpoint, l_json) for l_json in labels], RESULT_OK
 
     def get_tasks_by_name(self, name):
         """
@@ -132,30 +150,11 @@ class RecognitionClient(RestClient):
 
         return None, {STATUS: "Task with this name not found!"}
 
-    def get_all_labels(self, suffix=""):
-        """
-        Get all labels of the user(user is specified by client key).
-        :return: List of labels
-        """
-        url, labels = LABEL_ENDPOINT + suffix, []
-
-        while True:
-            result = self.get(url)
-
-            for label_json in result[RESULTS]:
-                labels.append(Label(self.token, self.endpoint, label_json))
-
-            if result[NEXT] is None:
-                break
-
-            url = result[NEXT].replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
-
-        return labels, RESULT_OK
-
     def get_training_images(self, page_url=None, verification=None):
         """
         Get paginated result of images from workspace.
         :param page_url: optional, select the specific page of images, default first page
+        :param verification: optional, integer which says how many verifications should have the images
         :return: (list of images, next_page)
         """
         url = (
@@ -246,17 +245,16 @@ class RecognitionClient(RestClient):
         worst_status = RESULT_OK
         for record in records:
             files, data = None, None
-            rec_no_resize = NORESIZE in record and record[NORESIZE]
+            noresize = NORESIZE in record and record[NORESIZE]
 
             if FILE in record:
-                files = {"img_path": open(record[FILE], "rb")}
-                if rec_no_resize:
-                    files[NORESIZE] = str(True)
+                # We cannot send files to request along with json data (for workspace)
+                # That is why we load image from disk to base64 representation
+                data = {"base64": self.load_base64_file(record[FILE], resize=not noresize), NORESIZE: noresize}
             elif BASE64 in record:
-                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: rec_no_resize}
+                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize}
             elif URL in record:
-                # TODO: do not resize image when loading (right now we need to use self.max_size = 0)
-                data = {"base64": self.load_url_image(record[URL]), NORESIZE: rec_no_resize}
+                data = {"base64": self.load_url_image(record[URL], resize=not noresize), NORESIZE: noresize}
 
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
             if ID not in image_json:
@@ -303,6 +301,18 @@ class Task(RecognitionClient):
         Delete the recognition task from ximilar.
         """
         self.remove_task(self.id)
+
+    def get_negative_label(self):
+        """
+        If the task is Tagging/Multi-Label then this will return the negative label of the Task.
+        """
+        labels = self.get_labels()
+
+        for label in labels:
+            if label.negative_for_task:
+                return label, RESULT_OK
+
+        return None, RESULT_OK
 
     def get_labels(self):
         """
@@ -417,25 +427,6 @@ class Label(RecognitionClient):
         """
         self.delete(LABEL_ENDPOINT + self.id + "/wipe")
 
-    def merge_label(self, label_b):
-        """
-        Get all photos of label_b and remove the label_b. Add this label to all the photos.
-        This will lead to merging these two labels.
-        """
-        next_page, images = None, []
-
-        while True:
-            images_m, next_page, status = label_b.get_training_images(page_url=next_page)
-            for image in images_m:
-                images.append(image)
-
-            if not next_page:
-                break
-
-        for image in images:
-            image.remove_label(label_b.id)
-            image.add_label(self.id)
-
     def get_images_count(self):
         """
         Get count of the images connected to this label.
@@ -448,7 +439,7 @@ class Label(RecognitionClient):
 
         return self.images_count
 
-    def get_training_images(self, page_url=None):
+    def get_training_images(self, page_url=None, verification=None):
         """
         Get paginated result of images for specific label.
 
@@ -557,3 +548,17 @@ class Image(RecognitionClient):
         """
         self._file = super().download_image(self.img_path, destination=destination)
         return self._file
+
+
+class Workspace(RecognitionClient):
+    """
+    Workspace entity. All Task, Labels and Images are mapped to some workspace.
+    Every workspace has some owner.
+    """
+
+    def __init__(self, token, endpoint, workspace_json):
+        self.id = workspace_json[ID]
+        self.name = workspace_json[NAME]
+
+    def __str__(self):
+        return "Worskpace: (%s) (%s)" % (self.name, self.id)
