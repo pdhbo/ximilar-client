@@ -17,6 +17,7 @@ from ximilar.client.constants import (
     ENDPOINT,
     HTTP_NO_COTENT_204,
     HTTP_UNAVAILABLE_503,
+    COLOR_SPACE,
 )
 
 CONFIG_ENDPOINT = "account/v2/config/"
@@ -29,11 +30,11 @@ class RestClient(object):
     All objects contains TOKEN and ENDPOINT information.
     """
 
-    def __init__(self, token, endpoint=ENDPOINT):
+    def __init__(self, token, endpoint=ENDPOINT, max_image_size=600):
         self.token = token
         self.cache = {}
         self.endpoint = endpoint
-        self.max_size = 600
+        self.max_image_size = max_image_size
         self.headers = {"Content-Type": "application/json", "Authorization": "Token " + self.token}
 
     def invalidate(self):
@@ -99,14 +100,14 @@ class RestClient(object):
         :return: cv2/np ndarray
         """
         # do not resize image if set to 0
-        if self.max_size == 0:
+        if self.max_image_size == 0:
             return image_data
 
         height, width, _ = image_data.shape
-        if height > self.max_size and width > self.max_size and not aspect_ratio:
-            image_data = cv2.resize(image_data, (self.max_size, self.max_size))
-        if height > self.max_size and width > self.max_size and aspect_ratio:
-            image_data = cv2.resize(image_data, self.get_aspect_ratio_dim(image_data, self.max_size))
+        if height > self.max_image_size and width > self.max_image_size and not aspect_ratio:
+            image_data = cv2.resize(image_data, (self.max_image_size, self.max_image_size))
+        if height > self.max_image_size and width > self.max_image_size and aspect_ratio:
+            image_data = cv2.resize(image_data, self.get_aspect_ratio_dim(image_data, self.max_image_size))
         return image_data
 
     def get_aspect_ratio_dim(self, image, img_size):
@@ -125,12 +126,12 @@ class RestClient(object):
         :return: base64 encoded string
         """
         image = cv2.imread(str(path))
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = self.resize_image_data(image)
-        image = self.cv2img_to_base64(image)
+        image = self.cv2img_to_base64(image, image_space="BGR")
         return image
 
-    def cv2img_to_base64(self, image):
+    def cv2img_to_base64(self, image, image_space="RGB"):
         """
         Load raw numpy/cv2 data of image to base64. The input image to this method should have RGB order.
         The ximilar accepts base64 data to have BGR order that is why we convert it here.
@@ -141,7 +142,8 @@ class RestClient(object):
         :param image_data: numpy/cv2 data with RGB order
         :return: base64 encoded string
         """
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        if image_space == "RGB":
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         image = self.resize_image_data(image)
         retval, buffer = cv2.imencode(".jpg", image)
         jpg_as_text = base64.b64encode(buffer).decode("utf-8")
@@ -172,7 +174,9 @@ class RestClient(object):
             if FILE in records[i] and BASE64 not in records[i] and IMG_DATA not in records[i]:
                 records[i][BASE64] = self.load_base64_file(records[i][FILE])
             elif IMG_DATA in records[i]:
-                records[i][BASE64] = self.cv2img_to_base64(records[i][IMG_DATA])
+                records[i][BASE64] = self.cv2img_to_base64(
+                    records[i][IMG_DATA], image_space=records[i][COLOR_SPACE] if COLOR_SPACE in records[i] else "RGB"
+                )
 
             # finally we need to delete the image data and just send url or base64
             if IMG_DATA in records[i]:

@@ -8,6 +8,7 @@ FILE = "_file"
 URL = "_url"
 BASE64 = "_base64"
 IMG_DATA = "_img_data"
+COLOR_SPACE = "_color_space"
 RESULT_OK = {"status": "OK"}
 ENDPOINT = "https://api.ximilar.com/"
 

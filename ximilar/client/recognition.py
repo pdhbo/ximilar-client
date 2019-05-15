@@ -14,8 +14,9 @@ class RecognitionClient(RestClient):
     """
     Base Client for Ximilar Custom Image Recognition Service.
     """
-    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE):
-        super(RecognitionClient, self).__init__(token=token, endpoint=endpoint)
+
+    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE, max_image_size=512):
+        super(RecognitionClient, self).__init__(token=token, endpoint=endpoint, max_image_size=max_image_size)
 
         self.workspace_id = workspace_id
 
@@ -277,6 +278,7 @@ class Task(RecognitionClient):
     Task entity from /recognition/v2/task endpoint.
     Every task can have multiple recognition labels.
     """
+
     def __init__(self, token, endpoint, task_json):
         super(Task, self).__init__(token, endpoint)
 
@@ -372,6 +374,7 @@ class Model(RecognitionClient):
     Model entity from /recognition/v2/mode endpoint.
     Every model represents model/neural network which is trained or waiting for training.
     """
+
     def __init__(self, token, endpoint, model_json):
         super(Model, self).__init__(token, endpoint)
 
@@ -385,7 +388,7 @@ class Model(RecognitionClient):
         self.delete_model(self.id)
 
     def __str__(self):
-        return self.task_name + " (" + self.train_status +")"
+        return self.task_name + " (" + self.train_status + ")"
 
 
 class Label(RecognitionClient):
@@ -393,6 +396,7 @@ class Label(RecognitionClient):
     Label entity from /recognition/v2/label endpoint.
     Every label can be assigned to multiple tasks.
     """
+
     def __init__(self, token, endpoint, label_json):
         super(Label, self).__init__(token, endpoint)
 
@@ -493,6 +497,7 @@ class Image(RecognitionClient):
     Image entity from /recognition/v2/image endpoint.
     Every image can have multiple recognition labels.
     """
+
     def __init__(self, token, endpoint, image_json):
         super(Image, self).__init__(token, endpoint)
 

@@ -8,8 +8,10 @@ DETECT_ENDPOINT = "detection/v2/detect/"
 
 
 class DetectionClient(RecognitionClient):
-    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE):
-        super(DetectionClient, self).__init__(token=token, endpoint=endpoint, workspace_id=workspace_id)
+    def __init__(self, token, endpoint=ENDPOINT, workspace_id=DEFAULT_WORKSPACE, max_image_size=1024):
+        super(DetectionClient, self).__init__(
+            token=token, endpoint=endpoint, workspace_id=workspace_id, max_image_size=max_image_size
+        )
 
     def get_object(self, object_id):
         """
@@ -236,6 +238,7 @@ class DetectionLabel(DetectionClient):
     DetectionLabel entity from /detection/v2/label endpoint.
     DetectionLabel is connected to DetectionTasks and can also have Recognition Tasks.
     """
+
     def __init__(self, token, endpoint, label_json):
         super(DetectionLabel, self).__init__(token, endpoint)
 
@@ -276,6 +279,7 @@ class DetectionObject(DetectionClient):
     Coordinates are [xmin, ymin, xmax, ymax].
     Every object can also contain recognition labels.
     """
+
     def __init__(self, token, endpoint, object_json):
         super(DetectionObject, self).__init__(token, endpoint)
 
