@@ -204,7 +204,7 @@ d_object, status = client.create_object("__DETECTION_LABEL_ID__", "__IMAGE_ID__"
 d_object, status = client.get_object(d_object.id)
 
 # get all objects of image
-d_objects, status = image.get_objects()
+d_objects, status = client.get_objects_of_image("__IMAGE_ID__")
 ```
 
 Then you can create your task:

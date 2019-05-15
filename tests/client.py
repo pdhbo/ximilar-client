@@ -1,4 +1,10 @@
+# ----------------- PLEASE READ -------------------
 # RUN THIS as pytest client.py --token __TOKEN_ID__
+# This test scenario suggest that you already:
+#     1. Have two Workspaces (Default, Other/Test)
+#     2. In your Default workspace you have on Tagging and one Categorization task trained
+#     3. Also that you have resources to almost all services
+#     4. In your Default workspace some images are present
 
 import pytest
 
