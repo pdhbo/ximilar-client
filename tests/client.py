@@ -14,7 +14,7 @@ TEST_IMG_BIG = "big_image.jpg"
 TEST_IMG_SMALL = "ximilar.png"
 
 
-def get_recognition_client(request):
+def get_recognition_client(request) -> RecognitionClient:
     token = request.config.getoption("--token")
     client = RecognitionClient(token)
     return client
@@ -173,8 +173,8 @@ def test_06_upload_image_url_file_big(request):
     images2[0].remove()
     images3[0][0][0].remove()
 
-    assert images2[0].img_height == client.max_size
-    assert images2[0].img_height == client.max_size
+    assert images2[0].img_height == client.max_image_size
+    assert images2[0].img_height == client.max_image_size
     assert images1[0].img_height > images2[0].img_height
     assert images3[0][0][0].img_height == images1[0].img_height
     assert 0 == 0
@@ -352,4 +352,4 @@ def test_15_upload_image_different_workspace(request):
 
     assert len(images1) > 0
     assert images1[0].workspace == oth_workspace.id
-    assert images1[0].img_height > client1.max_size
+    assert images1[0].img_height > client1.max_image_size

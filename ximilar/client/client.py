@@ -141,7 +141,7 @@ class RestClient(object):
         :return: cv2/np ndarray
         """
         # do not resize image if set to 0
-        if resize == False or self.max_size == 0:
+        if not resize or self.max_image_size == 0:
             return image_data
 
         height, width, _ = image_data.shape

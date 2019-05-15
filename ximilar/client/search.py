@@ -37,9 +37,9 @@ class SimilarityPhotosClient(RestClient):
         endpoint=ENDPOINT + SIMILARITY_PHOTOS,
         resource_name=SIMILARITY_PHOTOS,
     ):
-        super(SimilarityPhotosClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
-
-        self.max_size = 1000
+        super(SimilarityPhotosClient, self).__init__(
+            token=token, endpoint=endpoint, max_image_size=512, resource_name=resource_name
+        )
         if collection_id:
             self.headers[COLLECTION_ID] = collection_id
         else:
