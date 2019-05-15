@@ -258,21 +258,21 @@ class DetectionLabel(DetectionClient):
         """
         return self.remove_label(self.id)
 
-    def add_recognition_task(self, label_id):
+    def add_recognition_task(self, task_id):
         """
         Add recognition task to this label.
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(LABEL_ENDPOINT + self.id + "/add-task/", data={TASK_ID: label_id})
+        return self.post(LABEL_ENDPOINT + self.id + "/add-task/", data={TASK_ID: task_id})
 
-    def detach_recognition_task(self, label_id):
+    def detach_recognition_task(self, task_id):
         """
         Remove/Detach recognition task from label.
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(LABEL_ENDPOINT + self.id + "/remove-task/", data={TASK_ID: label_id})
+        return self.post(LABEL_ENDPOINT + self.id + "/remove-task/", data={TASK_ID: task_id})
 
 
 class DetectionObject(DetectionClient):

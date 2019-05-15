@@ -276,7 +276,6 @@ class Task(RecognitionClient):
         self.type = task_json[TYPE]
         self.production_version = task_json[PRODUCTION_VERSION]
         self.workspace = task_json[WORKSPACE] if WORKSPACE in task_json else DEFAULT_WORKSPACE
-        # TODO: negative task id
 
     def __str__(self):
         return self.name
@@ -293,6 +292,18 @@ class Task(RecognitionClient):
         Delete the recognition task from ximilar.
         """
         self.remove_task(self.id)
+
+    def get_negative_label(self):
+        """
+        If the task is Tagging/Multi-Label then this will return the negative label of the Task.
+        """
+        labels = self.get_labels()
+
+        for label in labels:
+            if label.negative_for_task:
+                return label, RESULT_OK
+
+        return None, RESULT_OK
 
     def get_labels(self):
         """
