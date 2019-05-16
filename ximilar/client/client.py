@@ -94,7 +94,19 @@ class RestClient(object):
         :param resource_name: name of the service
         :return: True if user has access otherwise False
         """
-        result = self.post("authorization/v2/authorize", data={"service_name": resource_name})
+        if "localhost" in self.endpoint:
+            return True
+
+        # we need to authorize it with FIXED Endpoint https://api.ximilar.com/authorization/v2/authorize
+        result = requests.post(
+            ENDPOINT + "authorization/v2/authorize", data=json.dumps({"service_name": resource_name}),
+            headers=self.headers,
+            timeout=10,
+        )
+        try:
+            result = result.json()
+        except:
+            result = None
 
         if result and USER_ID in result:
             return True

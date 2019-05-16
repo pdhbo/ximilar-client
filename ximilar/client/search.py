@@ -10,6 +10,8 @@ from ximilar.client.constants import (
     QUERY_RECORD,
     COLLECTION,
     COLLECTION_ID,
+    PHOTO_SIMILARITY,
+    PRODUCT_SIMILARITY
 )
 
 SIMILARITY_PHOTOS = "similarity/photos/v2/"
@@ -35,7 +37,7 @@ class SimilarityPhotosClient(RestClient):
         collection=None,
         collection_id=None,
         endpoint=ENDPOINT + SIMILARITY_PHOTOS,
-        resource_name=SIMILARITY_PHOTOS,
+        resource_name=PHOTO_SIMILARITY,
     ):
         super(SimilarityPhotosClient, self).__init__(
             token=token, endpoint=endpoint, max_image_size=512, resource_name=resource_name
@@ -116,7 +118,7 @@ class SimilarityPhotosClient(RestClient):
 
 
 class SimilarityProductsClient(SimilarityPhotosClient):
-    def __init__(self, token, collection, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=SIMILARITY_PRODUCTS):
+    def __init__(self, token, collection, endpoint=ENDPOINT+SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY):
         super(SimilarityProductsClient, self).__init__(
             token=token, collection=collection, endpoint=endpoint, resource_name=resource_name
         )
