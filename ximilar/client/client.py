@@ -41,7 +41,7 @@ class RestClient(object):
         result = requests.get(self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30)
         return result.json()
 
-    def post(self, api_endpoint, data=None, files=None, params=None):
+    def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post):
         """
         Call the http POST request with data.
 
@@ -49,6 +49,7 @@ class RestClient(object):
         :param data: optional data
         :param files: optional files to upload
         :param params: optional dictionary of URL params
+        :param method: POST or PUT method of request
         :return: json response
         """
         self.invalidate()
@@ -59,7 +60,7 @@ class RestClient(object):
         if data is not None:
             data = json.dumps(data)
 
-        result = requests.post(
+        result = method(
             self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, files=files, timeout=30
         )
 
@@ -68,6 +69,12 @@ class RestClient(object):
             return json_result
         except ValueError as e:
             return None
+
+    def put(self, api_endpoint, data=None, files=None, params=None):
+        """
+        Call the http PUT request with data
+        """
+        return self.post(api_endpoint, data=data, files=files, params=params, method=requests.put)
 
     def delete(self, api_endpoint, data=None, params=None):
         """

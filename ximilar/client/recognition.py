@@ -1,3 +1,5 @@
+import requests
+
 from ximilar.client import RestClient
 from ximilar.client.constants import *
 
@@ -34,11 +36,17 @@ class RecognitionClient(RestClient):
         """
         return super().get(api_endpoint, data=data, params=self.add_workspace(params))
 
-    def post(self, api_endpoint, data=None, files=None, params=None):
+    def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post):
         """
         Calling post request to the API.
         """
-        return super().post(api_endpoint, data=self.add_workspace(data), files=files, params=params)
+        return super().post(api_endpoint, data=self.add_workspace(data), files=files, params=params, method=method)
+
+    def put(self, api_endpoint, data=None, files=None, params=None):
+        """
+        Calling put request to the API.
+        """
+        return super().put(api_endpoint, data=self.add_workspace(data), files=files, params=params)
 
     def delete(self, api_endpoint, data=None, params=None):
         """
@@ -246,15 +254,16 @@ class RecognitionClient(RestClient):
         for record in records:
             files, data = None, None
             noresize = NORESIZE in record and record[NORESIZE]
+            metadata = record[META_DATA] if META_DATA in record and record[META_DATA] else {}
 
             if FILE in record:
                 # We cannot send files to request along with json data (for workspace)
                 # That is why we load image from disk to base64 representation
-                data = {"base64": self.load_base64_file(record[FILE], resize=not noresize), NORESIZE: noresize}
+                data = {"base64": self.load_base64_file(record[FILE], resize=not noresize), NORESIZE: noresize, META_DATA: metadata}
             elif BASE64 in record:
-                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize}
+                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize, META_DATA: metadata}
             elif URL in record:
-                data = {"base64": self.load_url_image(record[URL], resize=not noresize), NORESIZE: noresize}
+                data = {"base64": self.load_url_image(record[URL], resize=not noresize), NORESIZE: noresize, META_DATA: metadata}
 
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
             if ID not in image_json:
@@ -499,6 +508,7 @@ class Image(RecognitionClient):
         self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
         self.img_width = image_json[IMG_WIDTH]
         self.img_height = image_json[IMG_HEIGHT]
+        self.meta_data = image_json[META_DATA] if META_DATA in image_json and image_json[META_DATA] else {}
 
         # file path after calling download_image on this object
         self._file = None
@@ -548,6 +558,26 @@ class Image(RecognitionClient):
         """
         self._file = super().download_image(self.img_path, destination=destination)
         return self._file
+
+    def add_meta_data(self, meta_data):
+        """
+        Add some meta data to image (extends already present meta data).
+        """
+        if meta_data is None or not isinstance(meta_data, dict):
+            raise Exception("Please specify dictionary of meta_data as param!")
+
+        new_data = dict(list(self.meta_data.items()) + list(meta_data.items()))
+        result = self.put(IMAGE_ENDPOINT + self.id, data={META_DATA: new_data})
+        self.meta_data = result[META_DATA]
+        return True
+
+    def clear_meta_data(self):
+        """
+        Clear all meta data of image.
+        """
+        result = self.put(IMAGE_ENDPOINT + self.id, data={META_DATA: {}})
+        self.meta_data = result[META_DATA]
+        return True
 
 
 class Workspace(RecognitionClient):

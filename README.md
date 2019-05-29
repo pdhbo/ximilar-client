@@ -158,7 +158,7 @@ client.remove_image(image.id)
 Let's say you want to upload a training image and add several labels to this image:
 
 ```python
-images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', 'labels': [label.id for label in labels]},
+images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', 'labels': [label.id for label in labels], "meta_data": {"field": "key"}},
                                        {'_file': '__LOCAL_FILE_PATH__', 'labels': [label.id for label in labels]},
                                        {'_base64': '__BASE64_DATA__', 'labels': [label.id for label in labels]}])
 
@@ -170,6 +170,13 @@ Upload image without resizing it (for example Custom Object Detection requires h
 
 ```python
 images, status = client.upload_images([{'_url': '__URL_PATH_TO_IMAGE__', "noresize": True}])
+```
+
+Every image can have some meta data stored:
+
+```python
+image.add_meta_data({"__KEY_1__": "value", "__KEY_2__": {"THIS CAB BE":"COMPLEX"}})
+image.clear_meta_data()
 ```
 
 ## Ximilar Object Detection

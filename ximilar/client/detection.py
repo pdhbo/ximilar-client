@@ -302,6 +302,7 @@ class DetectionObject(DetectionClient):
         self.detection_label = object_json[DETECTION_LABEL]
         self.data = object_json[DATA]
         self.recognition_labels = object_json[RECOGNITION_LABELS]
+        self.meta_data = object_json[META_DATA] if META_DATA in object_json and object_json[META_DATA] else {}
 
     def remove(self):
         """
@@ -325,5 +326,25 @@ class DetectionObject(DetectionClient):
         """
         return self.post(OBJECT_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
+    def add_meta_data(self, meta_data):
+        """
+        Add some meta data to image (extends already present meta data).
+        """
+        if meta_data is None or not isinstance(meta_data, dict):
+            raise Exception("Please specify dictionary of meta_data as param!")
+
+        new_data = dict(list(self.meta_data.items()) + list(meta_data.items()))
+        result = self.put(OBJECT_ENDPOINT + self.id, data={DATA:self.data, DETECTION_LABEL: self.detection_label[ID], META_DATA: new_data})
+        self.meta_data = result[META_DATA]
+        return True
+
+    def clear_meta_data(self):
+        """
+        Clear all meta data of image.
+        """
+        result = self.put(OBJECT_ENDPOINT + self.id, data={DATA:self.data, DETECTION_LABEL: self.detection_label[ID], META_DATA: {}})
+        self.meta_data = result[META_DATA]
+        return True
+
     def __str__(self):
-        return self.id + " " + str(self.data)
+        return self.id + " " + self.detection_label[NAME] + " " + str(self.data)

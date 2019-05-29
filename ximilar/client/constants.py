@@ -11,7 +11,7 @@ IMG_DATA = "_img_data"
 COLOR_SPACE = "_color_space"
 RESULT_OK = {"status": "OK"}
 RESULT_ERROR = {"status": "ERROR", "detail": "Unexpected error."}
-ENDPOINT = "https://api.ximilar.com/"
+ENDPOINT = "http://api.ximilar.com/"
 
 # Services
 CUSTOM_IMAGE_RECOGNITION = "custom-recognition"
@@ -66,6 +66,7 @@ NEXT = "next"
 DATA = "data"
 DETECTION_LABEL = "detection_label"
 RECOGNITION_LABELS = "recognition_labels"
+META_DATA = "meta_data"
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"
