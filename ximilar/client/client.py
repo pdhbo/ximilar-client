@@ -106,7 +106,8 @@ class RestClient(object):
 
         # we need to authorize it with FIXED Endpoint https://api.ximilar.com/authorization/v2/authorize
         result = requests.post(
-            ENDPOINT + "authorization/v2/authorize", data=json.dumps({"service_name": resource_name}),
+            ENDPOINT + "authorization/v2/authorize",
+            data=json.dumps({"service_name": resource_name}),
             headers=self.headers,
             timeout=10,
         )

@@ -259,11 +259,19 @@ class RecognitionClient(RestClient):
             if FILE in record:
                 # We cannot send files to request along with json data (for workspace)
                 # That is why we load image from disk to base64 representation
-                data = {"base64": self.load_base64_file(record[FILE], resize=not noresize), NORESIZE: noresize, META_DATA: metadata}
+                data = {
+                    "base64": self.load_base64_file(record[FILE], resize=not noresize),
+                    NORESIZE: noresize,
+                    META_DATA: metadata,
+                }
             elif BASE64 in record:
                 data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize, META_DATA: metadata}
             elif URL in record:
-                data = {"base64": self.load_url_image(record[URL], resize=not noresize), NORESIZE: noresize, META_DATA: metadata}
+                data = {
+                    "base64": self.load_url_image(record[URL], resize=not noresize),
+                    NORESIZE: noresize,
+                    META_DATA: metadata,
+                }
 
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
             if ID not in image_json:

@@ -334,7 +334,10 @@ class DetectionObject(DetectionClient):
             raise Exception("Please specify dictionary of meta_data as param!")
 
         new_data = dict(list(self.meta_data.items()) + list(meta_data.items()))
-        result = self.put(OBJECT_ENDPOINT + self.id, data={DATA:self.data, DETECTION_LABEL: self.detection_label[ID], META_DATA: new_data})
+        result = self.put(
+            OBJECT_ENDPOINT + self.id,
+            data={DATA: self.data, DETECTION_LABEL: self.detection_label[ID], META_DATA: new_data},
+        )
         self.meta_data = result[META_DATA]
         return True
 
@@ -342,7 +345,9 @@ class DetectionObject(DetectionClient):
         """
         Clear all meta data of image.
         """
-        result = self.put(OBJECT_ENDPOINT + self.id, data={DATA:self.data, DETECTION_LABEL: self.detection_label[ID], META_DATA: {}})
+        result = self.put(
+            OBJECT_ENDPOINT + self.id, data={DATA: self.data, DETECTION_LABEL: self.detection_label[ID], META_DATA: {}}
+        )
         self.meta_data = result[META_DATA]
         return True
 

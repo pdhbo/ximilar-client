@@ -11,7 +11,7 @@ from ximilar.client.constants import (
     COLLECTION,
     COLLECTION_ID,
     PHOTO_SIMILARITY,
-    PRODUCT_SIMILARITY
+    PRODUCT_SIMILARITY,
 )
 
 SIMILARITY_PHOTOS = "similarity/photos/v2/"
@@ -118,7 +118,7 @@ class SimilarityPhotosClient(RestClient):
 
 
 class SimilarityProductsClient(SimilarityPhotosClient):
-    def __init__(self, token, collection, endpoint=ENDPOINT+SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY):
+    def __init__(self, token, collection, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY):
         super(SimilarityProductsClient, self).__init__(
             token=token, collection=collection, endpoint=endpoint, resource_name=resource_name
         )
