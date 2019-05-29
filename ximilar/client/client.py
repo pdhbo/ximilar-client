@@ -180,14 +180,17 @@ class RestClient(object):
             dim = (int(image.shape[1] * r), img_size)
         return dim
 
+    def cv2_imread(self, path):
+        image = cv2.imread(str(path))
+        return image
+
     def load_base64_file(self, path, resize=True):
         """
         Load file from disk to base64.
         :param path: local path to the image
         :return: base64 encoded string
         """
-        image = cv2.imread(str(path))
-        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = self.cv2_imread(path)
         image = self.resize_image_data(image, resize=resize)
         image = self.cv2img_to_base64(image, image_space="BGR", resize=resize)
         return image

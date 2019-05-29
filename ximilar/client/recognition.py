@@ -587,6 +587,21 @@ class Image(RecognitionClient):
         self.meta_data = result[META_DATA]
         return True
 
+    def extract_object_data(self, object_bbox):
+        """
+        Extracting object/bounding box data from image.
+        :param object_bbox: [xmin, ymin, xmax, ymax]
+        :return: dict / { "img_data": [[]...], "color_space": "RGB"}
+        """
+        assert len(object_bbox) == 4
+
+        self.download_image()
+        image = self.cv2_imread(self._file)
+        return {
+            IMG_DATA: image[int(object_bbox[1]) : int(object_bbox[3]), int(object_bbox[0]) : int(object_bbox[2])],
+            COLOR_SPACE: "BGR",
+        }
+
 
 class Workspace(RecognitionClient):
     """

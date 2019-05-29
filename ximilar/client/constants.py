@@ -11,7 +11,7 @@ IMG_DATA = "_img_data"
 COLOR_SPACE = "_color_space"
 RESULT_OK = {"status": "OK"}
 RESULT_ERROR = {"status": "ERROR", "detail": "Unexpected error."}
-ENDPOINT = "http://api.ximilar.com/"
+ENDPOINT = "https://api.ximilar.com/"
 
 # Services
 CUSTOM_IMAGE_RECOGNITION = "custom-recognition"

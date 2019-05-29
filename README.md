@@ -230,7 +230,7 @@ client.remove_image("__IMAGE_ID__")
 
 task.remove()
 label.remove()
-object.remove()
+object1.remove()
 image.remove()
 ```
 
@@ -238,6 +238,13 @@ Getting Detection Result:
 
 ```python
 result = detection_task.detect([{"_url": "__URL_PATH_TO_IMAGE__"}])
+```
+
+Extracting object from image:
+
+```python
+image,  status = client.get_image("59f7240d-ca86-436b-b0cd-30f4b94705df")
+extracted_image_record = image.extract_object_data(object1.data)
 ```
 
 ## Speeding it up with Parallel Processing
