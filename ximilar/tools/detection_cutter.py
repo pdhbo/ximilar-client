@@ -73,5 +73,6 @@ if __name__ == "__main__":
                     print("creating file " + str(object_file))
                 i += 1
 
-        if next_page:
-            images, next_page, status = detection_client.get_training_images(next_page)
+        if not next_page:
+            break
+        images, next_page, status = detection_client.get_training_images(next_page)

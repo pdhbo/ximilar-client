@@ -22,5 +22,6 @@ if __name__ == "__main__":
             print("removing image: " + str(image.id))
             image.remove()
 
-        if next_page:
-            images, next_page, status = client.get_training_images(next_page)
+        if not next_page:
+            break
+        images, next_page, status = client.get_training_images(next_page)

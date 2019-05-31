@@ -142,8 +142,9 @@ while images:
     for image in images:
         print(str(image.id))
 
-    if next_page:
-        images, next_page, status = label.get_training_images(next_page)
+    if not next_page:
+        break
+    images, next_page, status = label.get_training_images(next_page)
 
 # basic operations
 image, status = client.get_image(image_id=image.id)
