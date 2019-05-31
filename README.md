@@ -138,11 +138,12 @@ Image is main entity in Ximilar system. Every image can have multiple labels (Re
 ```python
 # getting all images of label (paginated result)
 images, next_page, status = label.get_training_images()
-while next_page:
+while images:
     for image in images:
         print(str(image.id))
 
-    images, next_page, status = label.get_training_images(next_page)
+    if next_page:
+        images, next_page, status = label.get_training_images(next_page)
 
 # basic operations
 image, status = client.get_image(image_id=image.id)
