@@ -22,7 +22,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace_id=args.workspace_id)
+    client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
 
     if not os.path.isdir(args.input_dir):
         print("directory does not exist: " + args.input_dir, file=sys.stderr)

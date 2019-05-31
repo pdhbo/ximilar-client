@@ -5,6 +5,8 @@ import cv2
 import os
 import numpy as np
 import concurrent.futures
+
+from botocore.exceptions import UnknownParameterError
 from tqdm import tqdm
 
 from ximilar.client.constants import *
@@ -184,6 +186,20 @@ class RestClient(object):
         image = cv2.imread(str(path))
         return image
 
+    def cv2_imwrite(self, image_record, path):
+        """
+        Writes image data into given file
+        :param image_record: dictionary with image data and color space
+        :param path: file to store the image to
+        :return: true if everything was fine
+        """
+        image = image_record[IMG_DATA]
+        image_space = image_record[COLOR_SPACE] if COLOR_SPACE in image_record else "RGB"
+        image = self._convert_image_to_bgr(image, image_space)
+
+        cv2.imwrite(path, image)
+        return True
+
     def load_base64_file(self, path, resize=True):
         """
         Load file from disk to base64.
@@ -203,12 +219,11 @@ class RestClient(object):
             image = cv2.imread(str(path))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        :param image_data: numpy/cv2 data with RGB order
+        :param image: numpy/cv2 data with RGB order
         :param resize: if we want to resize image
         :return: base64 encoded string
         """
-        if image_space == "RGB":
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        image = self._convert_image_to_bgr(image, image_space)
         image = self.resize_image_data(image, resize=resize)
         retval, buffer = cv2.imencode(".jpg", image)
         jpg_as_text = base64.b64encode(buffer).decode("utf-8")
@@ -273,7 +288,8 @@ class RestClient(object):
         version = "?version=" + str(version) if version else ""
         return self.get(CONFIG_ENDPOINT + config_type + version)
 
-    def download_image(self, url, destination=""):
+    @staticmethod
+    def download_image(url, destination=""):
         """
         Download image from url to the destination
         :param url: url to the image
@@ -281,7 +297,7 @@ class RestClient(object):
         :return: None
         """
         f_name = url.split("/")[-1]
-        f_dest = destination + f_name
+        f_dest = os.path.join(destination, f_name) + ".jpg"
 
         if os.path.isfile(f_dest):
             return f_dest
@@ -333,3 +349,21 @@ class RestClient(object):
         l = len(iterable)
         for ndx in range(0, l, n):
             yield iterable[ndx : min(ndx + n, l)]
+
+    @staticmethod
+    def _convert_image_to_bgr(image, image_space="RGB"):
+        """
+        Converts given image from given record to BGR
+        :param image: image data
+        :param image_space: string saying the image space
+        :return: image data in BGR
+        """
+        if image_space == "BGR":
+            return image
+        if image_space == "RGB":
+            return cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        elif image_space == "HSV":
+            return cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+        elif image_space == "LUV":
+            return cv2.cvtColor(image, cv2.COLOR_LUV2BGR)
+        raise ValueError("unknown image space: " + image_space)

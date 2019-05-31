@@ -558,7 +558,7 @@ class Image(RecognitionClient):
         """
         return self.post(IMAGE_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
-    def download_image(self, destination=""):
+    def download(self, destination=""):
         """
         Download image to the destination and store path to the _file of the object.
         :param destination: path on the disk
@@ -587,15 +587,16 @@ class Image(RecognitionClient):
         self.meta_data = result[META_DATA]
         return True
 
-    def extract_object_data(self, object_bbox):
+    def extract_object_data(self, object_bbox, image_download_dir=""):
         """
         Extracting object/bounding box data from image.
         :param object_bbox: [xmin, ymin, xmax, ymax]
+        :param image_download_dir directory to download the image before cutting the object
         :return: dict / { "img_data": [[]...], "color_space": "RGB"}
         """
         assert len(object_bbox) == 4
 
-        self.download_image()
+        self.download(image_download_dir)
         image = self.cv2_imread(self._file)
         return {
             IMG_DATA: image[int(object_bbox[1]) : int(object_bbox[3]), int(object_bbox[0]) : int(object_bbox[2])],
@@ -610,6 +611,7 @@ class Workspace(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, workspace_json):
+        super().__init__(token, endpoint, workspace_json[ID])
         self.id = workspace_json[ID]
         self.name = workspace_json[NAME]
 

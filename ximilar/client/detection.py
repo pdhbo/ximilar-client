@@ -105,7 +105,7 @@ class DetectionClient(RecognitionClient):
         """
         Get all Detection Objects which are located on image.
         :param image_id: uuid of image
-        :return: list, next_page, result
+        :return: list, result
         """
         objects, status = self.get_all_paginated_items(OBJECT_ENDPOINT + "?image=" + image_id)
 
@@ -350,6 +350,9 @@ class DetectionObject(DetectionClient):
         )
         self.meta_data = result[META_DATA]
         return True
+
+    def get_bbox(self):
+        return self.data
 
     def __str__(self):
         return self.id + " " + self.detection_label[NAME] + " " + str(self.data)
