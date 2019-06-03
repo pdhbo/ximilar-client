@@ -161,15 +161,16 @@ class DetectionClient(RecognitionClient):
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK
 
-    def create_object(self, label_id, image_id, data):
+    def create_object(self, label_id, image_id, data, meta_data):
         """
         Create detection object on some image with some label and coordinates.
         :param label_id: id of detection label
         :param image_id: id of image
-        :param data: [xmin, ymin, xmax, ymax]
+        :param data: [xmin, ymin, xmax, ymax] represent bounding box
+        :param meta_data: json/dict of additional meta data
         :return: DetectionObject
         """
-        label_json = self.post(OBJECT_ENDPOINT, data={DETECTION_LABEL: label_id, IMAGE: image_id, DATA: data})
+        label_json = self.post(OBJECT_ENDPOINT, data={DETECTION_LABEL: label_id, IMAGE: image_id, DATA: data, META_DATA: meta_data})
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return DetectionObject(self.token, self.endpoint, label_json), RESULT_OK
