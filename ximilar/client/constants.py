@@ -67,6 +67,8 @@ DATA = "data"
 DETECTION_LABEL = "detection_label"
 RECOGNITION_LABELS = "recognition_labels"
 META_DATA = "meta_data"
+DESCRIPTION = "description"
+OWNER = "owner"
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"

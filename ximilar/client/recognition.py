@@ -302,6 +302,7 @@ class Task(RecognitionClient):
         self.type = task_json[TYPE]
         self.production_version = task_json[PRODUCTION_VERSION]
         self.workspace = task_json[WORKSPACE] if WORKSPACE in task_json else DEFAULT_WORKSPACE
+        self.description = task_json[DESCRIPTION] if DESCRIPTION in task_json else ""
 
     def __str__(self):
         return self.name
@@ -433,6 +434,7 @@ class Label(RecognitionClient):
         self.negative_for_task = label_json[NEGATIVE_FOR_TASK] if NEGATIVE_FOR_TASK in label_json else None
         self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
         self.images_count = label_json[IMAGES_COUNT] if IMAGES_COUNT in label_json else 0
+        self.description = label_json[DESCRIPTION] if DESCRIPTION in label_json else ""
 
     def __str__(self):
         return self.name
@@ -614,6 +616,7 @@ class Workspace(RecognitionClient):
         super().__init__(token, endpoint, workspace_json[ID])
         self.id = workspace_json[ID]
         self.name = workspace_json[NAME]
+        self.owner = workspace_json[OWNER] if OWNER in workspace_json else None
 
     def __str__(self):
         return "Worskpace: (%s) (%s)" % (self.name, self.id)
