@@ -26,6 +26,8 @@ DOMINANT_COLORS_GENERIC = "dominant-colors"
 
 # Recognition/Vize related
 USER_ID = "user_id"
+USER = "user"
+IMAGE_ID = "image_id"
 STATUS = "status"
 STATUS_OK = "OK"
 STATUS_ERROR = "ERROR"

@@ -161,7 +161,7 @@ class DetectionClient(RecognitionClient):
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK
 
-    def create_object(self, label_id, image_id, data, meta_data):
+    def create_object(self, label_id, image_id, data, meta_data=None):
         """
         Create detection object on some image with some label and coordinates.
         :param label_id: id of detection label

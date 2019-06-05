@@ -32,6 +32,14 @@ class RestClient(object):
     def invalidate(self):
         self.cache = {}
 
+    def _type(self):
+        """
+        Returns the Class name of the object.
+        For example RecogntionClient._type() => "RecognitionClient"
+                    Image._type() => "Image"
+        """
+        return self.__class__.__name__
+
     def get(self, api_endpoint, data=None, params=None):
         """
         Call the http GET request with data.
@@ -106,7 +114,12 @@ class RestClient(object):
         if "localhost" in self.endpoint:
             return True
 
+        # we don't want to check resource for entities like Image, Task, Object, DetectionLabel, ...
+        if "Client" not in self._type():
+            return True
+
         # we need to authorize it with FIXED Endpoint https://api.ximilar.com/authorization/v2/authorize
+        # as the self.endpoint can be different size
         result = requests.post(
             ENDPOINT + "authorization/v2/authorize",
             data=json.dumps({"service_name": resource_name}),
@@ -297,7 +310,8 @@ class RestClient(object):
         :return: None
         """
         f_name = url.split("/")[-1]
-        f_dest = os.path.join(destination, f_name) + ".jpg"
+        f_dest = os.path.join(destination, f_name)
+        f_dest += ".jpg" if "." not in f_name else ""
 
         if os.path.isfile(f_dest):
             return f_dest

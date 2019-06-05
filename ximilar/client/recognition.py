@@ -34,7 +34,7 @@ class RecognitionClient(RestClient):
         """
         Calling get request to the API.
         """
-        return super().get(api_endpoint, data=data, params=self.add_workspace(params))
+        return super().get(api_endpoint, data=data, params=self.add_workspace(params, api_endpoint))
 
     def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post):
         """
@@ -54,16 +54,22 @@ class RecognitionClient(RestClient):
         """
         return super().delete(api_endpoint, data=data, params=self.add_workspace(params))
 
-    def add_workspace(self, data):
+    def add_workspace(self, data, url=None):
         """
         Add workspace uuid to the data.
         :param data: dictionary/json data which will be send to endpoint
         :return: modified json data with workspace
         """
+
         if self.workspace != DEFAULT_WORKSPACE:
             if data is None:
                 data = {}
-            data[WORKSPACE] = self.workspace
+
+            # if workspace is already in url then do not create the param
+            if url is not None and self.workspace not in url:
+                data[WORKSPACE] = self.workspace
+            elif url is None:
+                data[WORKSPACE] = self.workspace
         return data
 
     def get_workspaces(self):
@@ -604,6 +610,12 @@ class Image(RecognitionClient):
             IMG_DATA: image[int(object_bbox[1]) : int(object_bbox[3]), int(object_bbox[0]) : int(object_bbox[2])],
             COLOR_SPACE: "BGR",
         }
+
+    def verify(self, user_id):
+        """
+        Verify this image by some user.
+        """
+        return self.post("annotate/v2/verification/", data={USER: user_id, IMAGE_ID: self.id})
 
 
 class Workspace(RecognitionClient):
