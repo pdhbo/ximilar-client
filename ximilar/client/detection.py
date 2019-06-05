@@ -170,7 +170,9 @@ class DetectionClient(RecognitionClient):
         :param meta_data: json/dict of additional meta data
         :return: DetectionObject
         """
-        label_json = self.post(OBJECT_ENDPOINT, data={DETECTION_LABEL: label_id, IMAGE: image_id, DATA: data, META_DATA: meta_data})
+        label_json = self.post(
+            OBJECT_ENDPOINT, data={DETECTION_LABEL: label_id, IMAGE: image_id, DATA: data, META_DATA: meta_data}
+        )
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return DetectionObject(self.token, self.endpoint, label_json), RESULT_OK
