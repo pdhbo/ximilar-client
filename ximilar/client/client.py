@@ -6,7 +6,6 @@ import os
 import numpy as np
 import concurrent.futures
 
-from botocore.exceptions import UnknownParameterError
 from tqdm import tqdm
 
 from ximilar.client.constants import *

@@ -464,6 +464,9 @@ class Label(RecognitionClient):
 
         return self.images_count
 
+    # TODO: get object count
+    # TODO: get objects of given label
+
     def get_training_images(self, page_url=None, verification=None):
         """
         Get paginated result of images for specific label.
