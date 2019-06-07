@@ -1,4 +1,4 @@
-# Ximilar API Python Client
+# Ximilar API Python Client 1.10.0
 
 This Python 3.X Client library is lightweight wrapper for `ximilar.com` and `vize.ai`. 
 
