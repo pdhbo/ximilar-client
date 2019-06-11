@@ -510,6 +510,27 @@ class Label(RecognitionClient):
     def remove(self):
         return self.remove_label(self.id)
 
+    def add_annotate_task(self, task_id):
+        """
+        Add task to this label.
+        ! this is only for ANNOTATE (parent => child mapping behaviour)
+        
+        :param task_id: identification of label
+        :return: json/dict result
+        """
+        return self.post(LABEL_ENDPOINT + self.id + "/add-task/", data={TASK_ID: task_id})
+
+    def detach_annotate_task(self, task_id):
+        """
+        Remove/Detach task from the label.
+        ! this is only for ANNOTATE (parent => child mapping behaviour)
+
+        :param task_id: identification of label
+        :return: json/dict result
+        """
+        return self.post(LABEL_ENDPOINT + self.id + "/remove-task/", data={TASK_ID: task_id})
+
+
 
 class Image(RecognitionClient):
     """
