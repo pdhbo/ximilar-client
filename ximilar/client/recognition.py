@@ -220,14 +220,14 @@ class RecognitionClient(RestClient):
         """
         return self.delete(IMAGE_ENDPOINT + image_id)
 
-    def create_task(self, name, task_type=MULTI_CLASS):
+    def create_task(self, name, description=None, task_type=MULTI_CLASS):
         """
         Create task with given name.
         :param name: name of the task
         :param task_type: 'multi_class' (CATEGORIZATION default) or 'multi_label' (TAGGING)
         :return: Task object, status
         """
-        data = {NAME: name, TASK_TYPE: task_type}
+        data = {NAME: name, TASK_TYPE: task_type, DESCRIPTION: description}
         task_json = self.post(TASK_ENDPOINT, data=data)
         if ID not in task_json:
             msg = task_json[DETAIL] if DETAIL in task_json else "unexpected error"
