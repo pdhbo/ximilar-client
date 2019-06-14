@@ -40,9 +40,9 @@ if __name__ == "__main__":
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
-    parser.add_argument("--label_id", help="directory to print the images to")
+    parser.add_argument("--label_id", help="id of detection label to be considered (None = all labels)")
     parser.add_argument("--output_dir", help="directory to print the images to")
-    parser.add_argument("--resize", help="if not 0 or negative, the image is resized and filled with white", type=int)
+    parser.add_argument("--resize", help="if positive, the image is resized and filled with white", type=int, default=0)
     parser.add_argument("--print_details", help="if true, info about each image is printed out", action="store_true")
 
     args = parser.parse_args()
@@ -58,6 +58,7 @@ if __name__ == "__main__":
     while images:
         image: Image
         for image in images:
+            print(f"checking image {image.id}")
             objects, status = detection_client.get_objects_of_image(image.id)
             obj: DetectionObject
             i = 1
@@ -75,4 +76,5 @@ if __name__ == "__main__":
 
         if not next_page:
             break
+        print(f"loading next page")
         images, next_page, status = detection_client.get_training_images(next_page)
