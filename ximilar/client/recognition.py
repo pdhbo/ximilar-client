@@ -534,6 +534,7 @@ class Label(RecognitionClient):
         data = self.get(LABEL_ENDPOINT + self.id)
         return [self.get_task(task["id"])[0] for task in data[RECOGNITION_TASKS]], STATUS_OK
 
+
 class Image(RecognitionClient):
     """
     Image entity from /recognition/v2/image endpoint.
