@@ -262,6 +262,7 @@ class DetectionLabel(DetectionClient):
         self.id = label_json[ID]
         self.name = label_json[NAME]
         self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
+        self.recognition_tasks = label_json[RECOGNITION_TASKS] if RECOGNITION_TASKS in label_json else None
 
     def __str__(self):
         return self.name

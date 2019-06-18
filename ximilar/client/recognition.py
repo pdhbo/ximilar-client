@@ -530,7 +530,9 @@ class Label(RecognitionClient):
         """
         return self.post(LABEL_ENDPOINT + self.id + "/remove-task/", data={TASK_ID: task_id})
 
-
+    def get_annotate_tasks(self):
+        data = self.get(LABEL_ENDPOINT + self.id)
+        return [self.get_task(task["id"])[0] for task in data[RECOGNITION_TASKS]], STATUS_OK
 
 class Image(RecognitionClient):
     """
