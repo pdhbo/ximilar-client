@@ -309,6 +309,7 @@ class Task(RecognitionClient):
         self.production_version = task_json[PRODUCTION_VERSION]
         self.workspace = task_json[WORKSPACE] if WORKSPACE in task_json else DEFAULT_WORKSPACE
         self.description = task_json[DESCRIPTION] if DESCRIPTION in task_json else ""
+        self.last_train_status = task_json[LAST_TRAIN_STATUS] if LAST_TRAIN_STATUS in task_json else ""
 
     def __str__(self):
         return self.name
