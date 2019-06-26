@@ -1,5 +1,7 @@
 # Ximilar API Python Client 1.10.0
 
+![](logo.png)
+
 This Python 3.X Client library is lightweight wrapper for `ximilar.com` and `vize.ai`. 
 
 ## Installation
