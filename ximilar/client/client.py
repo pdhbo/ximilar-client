@@ -135,6 +135,13 @@ class RestClient(object):
 
         raise Exception("User has no access for service: " + resource_name + ". Please contact tech@ximilar.com!")
 
+    def get_user_details(self):
+        """
+        Get Basic information of actual user.
+        :return: json response if success
+        """
+        return self.get("account/v2/user/")
+
     def get_all_paginated_items(self, url):
         """
         Getting all paginated items from specific endpoint url
