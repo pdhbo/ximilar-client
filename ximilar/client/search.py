@@ -62,7 +62,7 @@ class SimilarityPhotosClient(RestClient):
 
         return self.post(KNN_VISUAL, data=data)
 
-    def random(self, filter=None, count=10, fields_to_return=[]):
+    def random(self, filter=None, count=10, fields_to_return=[_ID]):
         """
         Call random endpoint which returns random(X=count) records from your collection.
         :param filter: how to filter picked items (mongodb syntax)
