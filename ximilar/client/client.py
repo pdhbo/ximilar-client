@@ -69,10 +69,12 @@ class RestClient(object):
         if data is not None:
             data = json.dumps(data)
 
+        print(self.endpoint + api_endpoint, self.headers)
         result = method(
             self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, files=files, timeout=30
         )
 
+        print(result)
         try:
             json_result = result.json()
             return json_result
@@ -99,6 +101,7 @@ class RestClient(object):
             self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30
         )
 
+        print(result)
         if result.status_code == HTTP_NO_COTENT_204:
             return result
 
@@ -115,6 +118,9 @@ class RestClient(object):
 
         # we don't want to check resource for entities like Image, Task, Object, DetectionLabel, ...
         if "Client" not in self._type():
+            return True
+
+        if not self.token:
             return True
 
         # we need to authorize it with FIXED Endpoint https://api.ximilar.com/authorization/v2/authorize
