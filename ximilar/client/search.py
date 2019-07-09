@@ -47,7 +47,7 @@ class SimilarityPhotosClient(RestClient):
         else:
             self.headers[COLLECTION] = collection
 
-    def search(self, record, filter=None, count=5, fields_to_return=[]):
+    def search(self, record, filter=None, count=5, fields_to_return=[_ID]):
         """
         Calls visual knn
         :param record: dictionary with field '_id' (from your collection) or '_url' or "_base64' data

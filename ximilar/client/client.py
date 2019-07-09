@@ -69,12 +69,10 @@ class RestClient(object):
         if data is not None:
             data = json.dumps(data)
 
-        print(self.endpoint + api_endpoint, self.headers)
         result = method(
             self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, files=files, timeout=30
         )
 
-        print(result)
         try:
             json_result = result.json()
             return json_result
@@ -101,7 +99,6 @@ class RestClient(object):
             self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30
         )
 
-        print(result)
         if result.status_code == HTTP_NO_COTENT_204:
             return result
 
