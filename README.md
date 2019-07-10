@@ -343,3 +343,12 @@ result = client.remove([{'_id': '__ITEM_ID__'}])
 # update item in index with all additional fields and meta-info
 result = client.update([{'_id': '__ITEM_ID__', 'some-additional-field': '__VALUE__'}])
 ```
+
+# Tools
+
+In our `tools` folder you can find some useful scripts for:
+
+* `uploader.py` for uploading all images from specific folder
+* `data_saver.py` for saving entire recognition and detection workspace including images
+* `data_wiper.py` for removing entire workspace and all your data in workspace
+* `detection_cutter.py` cutting objects from images
