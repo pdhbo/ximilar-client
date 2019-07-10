@@ -1,4 +1,5 @@
 import requests
+import json
 
 from ximilar.client import RestClient
 from ximilar.client.constants import *
@@ -403,6 +404,16 @@ class Task(RecognitionClient):
         """
         return self.post(TASK_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
+    def to_json(self):
+        labels, status = self.get_labels()
+        return {
+            TASK_ID: self.id,
+            NAME: self.name,
+            TASK_TYPE: self.type,
+            DESCRIPTION: self.description,
+            LABELS: [label.id for label in labels],
+        }
+
 
 class Model(RecognitionClient):
     """
@@ -535,6 +546,14 @@ class Label(RecognitionClient):
         data = self.get(LABEL_ENDPOINT + self.id)
         return [self.get_task(task["id"])[0] for task in data[RECOGNITION_TASKS]], STATUS_OK
 
+    def to_json(self):
+        return {
+            LABEL_ID: self.id,
+            NAME: self.name,
+            NEGATIVE_FOR_TASK: self.negative_for_task,
+            DESCRIPTION: self.description,
+        }
+
 
 class Image(RecognitionClient):
     """
@@ -644,6 +663,18 @@ class Image(RecognitionClient):
         Verify this image by some user.
         """
         return self.post("annotate/v2/verification/", data={USER: user_id, IMAGE_ID: self.id})
+
+    def to_json(self):
+        labels, status = self.get_labels()
+        return {
+            IMAGE: self.id,
+            LABELS: [label.id for label in labels],
+            META_DATA: self.meta_data,
+            IMG_HEIGHT: self.img_height,
+            IMG_WIDTH: self.img_width,
+            VERIFY_COUNT: self.verifyCount,
+            FILE: self._file,
+        }
 
 
 class Workspace(RecognitionClient):
