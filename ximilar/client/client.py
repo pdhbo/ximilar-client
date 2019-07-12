@@ -117,6 +117,9 @@ class RestClient(object):
         if "Client" not in self._type():
             return True
 
+        if not self.token:
+            return True
+
         # we need to authorize it with FIXED Endpoint https://api.ximilar.com/authorization/v2/authorize
         # as the self.endpoint can be different size
         result = requests.post(
@@ -134,6 +137,13 @@ class RestClient(object):
             return True
 
         raise Exception("User has no access for service: " + resource_name + ". Please contact tech@ximilar.com!")
+
+    def get_user_details(self):
+        """
+        Get Basic information of actual user.
+        :return: json response if success
+        """
+        return self.get("account/v2/user/")
 
     def get_all_paginated_items(self, url):
         """

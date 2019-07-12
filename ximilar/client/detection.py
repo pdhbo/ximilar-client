@@ -249,6 +249,10 @@ class DetectionTask(DetectionClient):
         data = {RECORDS: records, TASK_ID: self.id, VERSION: version}
         return self.post(DETECT_ENDPOINT, data=data)
 
+    def to_json(self):
+        labels, status = self.get_labels()
+        return {TASK_ID: self.id, NAME: self.name, LABELS: [label.id for label in labels]}
+
 
 class DetectionLabel(DetectionClient):
     """
@@ -288,6 +292,9 @@ class DetectionLabel(DetectionClient):
         :return: json/dict result
         """
         return self.post(LABEL_ENDPOINT + self.id + "/remove-task/", data={TASK_ID: task_id})
+
+    def to_json(self):
+        return {LABEL_ID: self.id, NAME: self.name, RECOGNITION_TASKS: self.recognition_tasks}
 
 
 class DetectionObject(DetectionClient):
@@ -354,6 +361,15 @@ class DetectionObject(DetectionClient):
         )
         self.meta_data = result[META_DATA]
         return True
+
+    def to_json(self):
+        return {
+            IMAGE: self.image,
+            ID: self.id,
+            DATA: self.data,
+            LABELS: self.recognition_labels,
+            META_DATA: self.meta_data,
+        }
 
     def get_bbox(self):
         return self.data

@@ -47,7 +47,7 @@ class SimilarityPhotosClient(RestClient):
         else:
             self.headers[COLLECTION] = collection
 
-    def search(self, record, filter=None, count=5, fields_to_return=[]):
+    def search(self, record, filter=None, count=5, fields_to_return=[_ID]):
         """
         Calls visual knn
         :param record: dictionary with field '_id' (from your collection) or '_url' or "_base64' data
@@ -62,7 +62,7 @@ class SimilarityPhotosClient(RestClient):
 
         return self.post(KNN_VISUAL, data=data)
 
-    def random(self, filter=None, count=10, fields_to_return=[]):
+    def random(self, filter=None, count=10, fields_to_return=[_ID]):
         """
         Call random endpoint which returns random(X=count) records from your collection.
         :param filter: how to filter picked items (mongodb syntax)

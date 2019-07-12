@@ -1,7 +1,7 @@
 # ----------------- PLEASE READ -------------------
 # RUN THIS as pytest client.py --token __TOKEN_ID__
 # This test scenario suggest that you already:
-#     1. Have two Workspaces (Default, Other/Test)
+#     1. Have two Workspaces (Default, 'Test')
 #     2. In your Default workspace you have on Tagging and one Categorization task trained
 #     3. Also that you have resources to almost all services
 #     4. In your Default workspace some images are present
@@ -309,9 +309,9 @@ def test_14_recognition_workspace(request):
 
     def_workspace, oth_workspace = None, None
     for workspace in result:
-        if workspace.name == "Default":
+        if workspace.id == client.get_user_details()["default_workspace"]:
             def_workspace = workspace
-        else:
+        elif workspace.name == "Test":
             oth_workspace = workspace
 
     if len(result) > 1:
@@ -345,11 +345,9 @@ def test_15_upload_image_different_workspace(request):
     if len(result) < 2:
         return
 
-    def_workspace, oth_workspace = None, None
+    oth_workspace = None
     for workspace in result:
-        if workspace.name == "Default":
-            def_workspace = workspace
-        else:
+        if workspace.name == "Test":
             oth_workspace = workspace
 
     client1 = RecognitionClient(request.config.getoption("--token"), workspace=oth_workspace.id)

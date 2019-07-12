@@ -72,6 +72,8 @@ META_DATA = "meta_data"
 DESCRIPTION = "description"
 OWNER = "owner"
 RECOGNITION_TASKS = "recognition_tasks"
+LAST_TRAIN_STATUS = "last_train_status"
+OBJECTS = "objects"
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"
