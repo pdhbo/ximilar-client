@@ -20,13 +20,14 @@ class RestClient(object):
     All objects contains TOKEN and ENDPOINT information.
     """
 
-    def __init__(self, token, endpoint=ENDPOINT, max_image_size=600, resource_name=""):
+    def __init__(self, token, endpoint=ENDPOINT, max_image_size=600, resource_name="", request_timeout=30):
         self.token = token
         self.cache = {}
         self.endpoint = endpoint
         self.max_image_size = max_image_size
         self.headers = {"Content-Type": "application/json", "Authorization": "Token " + self.token}
         self.check_resource(resource_name)
+        self.request_timeout = request_timeout
 
     def invalidate(self):
         self.cache = {}
@@ -47,7 +48,9 @@ class RestClient(object):
         :param params: optional dictionary of URL params
         :return: json response
         """
-        result = requests.get(self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30)
+        result = requests.get(
+            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=self.request_timeout
+        )
         return result.json()
 
     def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post):
@@ -70,7 +73,12 @@ class RestClient(object):
             data = json.dumps(data)
 
         result = method(
-            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, files=files, timeout=30
+            self.endpoint + api_endpoint,
+            params=params,
+            headers=self.headers,
+            data=data,
+            files=files,
+            timeout=self.request_timeout,
         )
 
         try:
@@ -96,7 +104,7 @@ class RestClient(object):
         self.invalidate()
 
         result = requests.delete(
-            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=30
+            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=self.request_timeout
         )
 
         if result.status_code == HTTP_NO_COTENT_204:
