@@ -110,14 +110,8 @@ class RestClient(object):
         :param resource_name: name of the service
         :return: True if user has access otherwise False
         """
-        if "localhost" in self.endpoint:
-            return True
-
         # we don't want to check resource for entities like Image, Task, Object, DetectionLabel, ...
-        if "Client" not in self._type():
-            return True
-
-        if not self.token:
+        if "localhost" in self.endpoint or "Client" not in self._type() or not self.token or not resource_name:
             return True
 
         # we need to authorize it with FIXED Endpoint https://api.ximilar.com/authorization/v2/authorize
