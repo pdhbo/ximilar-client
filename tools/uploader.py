@@ -5,7 +5,6 @@ from argparse import ArgumentParser
 from ximilar.client import RecognitionClient
 from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE
 
-
 if __name__ == "__main__":
     parser = ArgumentParser(description="Image uploader into Ximilar App")
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
@@ -13,6 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
     parser.add_argument("--input_dir", help="directory with the images (recursively)")
     parser.add_argument("--no_resize", help="flag whether to preserve image size", action="store_true")
+    parser.add_argument("--resize", type=int, default=1024, help="size of uploaded images, default: 1024")
     parser.add_argument("--print_details", help="if true, info about each image is printed out", action="store_true")
     parser.add_argument(
         "--extensions",
@@ -22,7 +22,9 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
+    client = RecognitionClient(
+        token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id, max_image_size=args.resize
+    )
 
     if not os.path.isdir(args.input_dir):
         print("directory does not exist: " + args.input_dir, file=sys.stderr)

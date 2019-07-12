@@ -260,6 +260,7 @@ class RecognitionClient(RestClient):
         for record in records:
             files, data = None, None
             noresize = NORESIZE in record and record[NORESIZE]
+            noresize_on_server = noresize or self.max_image_size > 1024
             metadata = record[META_DATA] if META_DATA in record and record[META_DATA] else {}
 
             if FILE in record:
@@ -267,15 +268,15 @@ class RecognitionClient(RestClient):
                 # That is why we load image from disk to base64 representation
                 data = {
                     "base64": self.load_base64_file(record[FILE], resize=not noresize),
-                    NORESIZE: noresize,
+                    NORESIZE: noresize_on_server,
                     META_DATA: metadata,
                 }
             elif BASE64 in record:
-                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize, META_DATA: metadata}
+                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize_on_server, META_DATA: metadata}
             elif URL in record:
                 data = {
                     "base64": self.load_url_image(record[URL], resize=not noresize),
-                    NORESIZE: noresize,
+                    NORESIZE: noresize_on_server,
                     META_DATA: metadata,
                 }
 

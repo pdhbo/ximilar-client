@@ -1,9 +1,7 @@
-import os
-import sys
 from argparse import ArgumentParser
 
 from ximilar.client import RecognitionClient
-from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE
+from ximilar.client.constants import DEFAULT_WORKSPACE
 from ximilar.client.recognition import Image
 
 if __name__ == "__main__":

@@ -168,7 +168,7 @@ class RestClient(object):
 
         return items, RESULT_OK
 
-    def resize_image_data(self, image_data, aspect_ratio=False, resize=True):
+    def resize_image_data(self, image_data, aspect_ratio=True, resize=True):
         """
         Resize image data that are no bigger than max_size.
         :param image_data: cv2/np ndarray
@@ -219,7 +219,7 @@ class RestClient(object):
         :return: base64 encoded string
         """
         image = self.cv2_imread(path)
-        image = self.resize_image_data(image, resize=resize)
+        # image = self.resize_image_data(image, resize=resize)
         image = self.cv2img_to_base64(image, image_space="BGR", resize=resize)
         return image
 
