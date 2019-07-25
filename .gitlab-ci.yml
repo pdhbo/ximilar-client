@@ -10,6 +10,7 @@ black:
   script:
     - pip install black
     - black --check --line-length 120 .
+  allow_failure: true
 
 deploy_production:
   stage: deploy
