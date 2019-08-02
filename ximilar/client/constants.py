@@ -74,6 +74,7 @@ OWNER = "owner"
 RECOGNITION_TASKS = "recognition_tasks"
 LAST_TRAIN_STATUS = "last_train_status"
 OBJECTS = "objects"
+BEST_LABEL = "best_label"
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"
