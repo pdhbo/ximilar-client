@@ -50,6 +50,9 @@ if __name__ == "__main__":
     # client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
     detection_client = DetectionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
 
+    if not args.output_dir:
+        raise Exception("Please specify directory (output_dir)!")
+
     image_dir = os.path.join(args.output_dir, "images")
     os.makedirs(image_dir, exist_ok=True)
 
