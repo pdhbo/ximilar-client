@@ -249,7 +249,7 @@ class RestClient(object):
         """
         image = self._convert_image_to_bgr(image, image_space)
         image = self.resize_image_data(image, resize=resize)
-        retval, buffer = cv2.imencode(".jpg", image)
+        retval, buffer = cv2.imencode(".png", image)
         jpg_as_text = base64.b64encode(buffer).decode("utf-8")
         return jpg_as_text
 
