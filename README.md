@@ -194,14 +194,14 @@ First you need to create/get Detection Task:
 
 ```python
 client = DetectionClient("__API_TOKEN__")
-detection_task, status = client.create_task("__DETECTION_TASK_ID__")
-detection_task, status = client.get_task("__DETECTION_TASK_ID__")
+detection_task, status = client.create_task("__DETECTION_TASK_NAME__")
+detection_task, status = client.get_task(task.id)
 ```
 
 Second you need to create Detection Label and connect it to the task:
 
 ```python
-detection_label, status = client.create_label("__DETECTION_LABEL_ID__")
+detection_label, status = client.create_label("__DETECTION_LABEL_NAME__")
 detection_label, status = client.get_label("__DETECTION_LABEL_ID__")
 
 detection_task.add_label(detection_label.id)
@@ -234,6 +234,8 @@ client.remove_image("__IMAGE_ID__")
 
 task.remove()
 label.remove()
+
+object1 = client.get_object("__DETECTION_OBJECT_ID__")
 object1.remove()
 image.remove()
 ```
@@ -248,6 +250,8 @@ Extracting object from image:
 
 ```python
 image,  status = client.get_image("59f7240d-ca86-436b-b0cd-30f4b94705df")
+
+object1 = client.get_object("__DETECTION_OBJECT_ID__")
 extracted_image_record = image.extract_object_data(object1.data)
 ```
 
