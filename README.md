@@ -251,7 +251,7 @@ Extracting object from image:
 ```python
 image,  status = client.get_image("59f7240d-ca86-436b-b0cd-30f4b94705df")
 
-object1 = client.get_object("__DETECTION_OBJECT_ID__")
+object1, status = client.get_object("__DETECTION_OBJECT_ID__")
 extracted_image_record = image.extract_object_data(object1.data)
 ```
 
