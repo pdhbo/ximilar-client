@@ -9,7 +9,9 @@ if __name__ == "__main__":
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
-    parser.add_argument("--train_all", help="Train all tasks (even if they are trained)", default=False, action='store_true')
+    parser.add_argument(
+        "--train_all", help="Train all tasks (even if they are trained)", default=False, action="store_true"
+    )
     args = parser.parse_args()
 
     client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)

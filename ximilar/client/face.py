@@ -3,6 +3,7 @@ from ximilar.client.constants import *
 
 FACE_DETECTION_ENDPOINT = "v2/detect"
 
+
 class FaceClient(RestClient):
     def detect(self, records):
         records = self.preprocess_records(records)
