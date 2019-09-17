@@ -255,7 +255,7 @@ class RestClient(object):
         # retval, buffer = cv2.imencode(".png", image, params=[cv2.IMWRITE_PNG_COMPRESSION, 3])
         # the cv2.IMWRITE_JPEG_QUALITY is from [0, 100] where 100 is probably almost without compression; default: 95
         retval, buffer = cv2.imencode(".jpg", image, params=[cv2.IMWRITE_JPEG_QUALITY, 96])
-        jpg_as_text = base64.b64encode(buffer).decode("utf-8")
+        jpg_as_text = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
         return jpg_as_text
 
     def load_url_image(self, path, resize=True):
