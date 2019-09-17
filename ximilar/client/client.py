@@ -20,7 +20,7 @@ class RestClient(object):
     All objects contains TOKEN and ENDPOINT information.
     """
 
-    def __init__(self, token, endpoint=ENDPOINT, max_image_size=600, resource_name="", request_timeout=30):
+    def __init__(self, token, endpoint=ENDPOINT, max_image_size=600, resource_name="", request_timeout=90):
         self.token = token
         self.cache = {}
         self.endpoint = endpoint

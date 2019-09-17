@@ -118,7 +118,18 @@ class SimilarityPhotosClient(RestClient):
 
 
 class SimilarityProductsClient(SimilarityPhotosClient):
-    def __init__(self, token, collection, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY):
+    def __init__(
+        self,
+        token,
+        collection=None,
+        collection_id=None,
+        endpoint=ENDPOINT + SIMILARITY_PRODUCTS,
+        resource_name=PRODUCT_SIMILARITY,
+    ):
         super(SimilarityProductsClient, self).__init__(
-            token=token, collection=collection, endpoint=endpoint, resource_name=resource_name
+            token=token,
+            collection=collection,
+            collection_id=collection_id,
+            endpoint=endpoint,
+            resource_name=resource_name,
         )
