@@ -72,6 +72,7 @@ class RestClient(object):
         if data is not None:
             data = json.dumps(data)
 
+        # print("input (size " + str(int(len(data))) + "): " + str(data)[:1000] + " ... " + str(data)[-100:])
         result = method(
             self.endpoint + api_endpoint,
             params=params,
@@ -82,6 +83,7 @@ class RestClient(object):
         )
 
         try:
+            # print(str(result.text))
             json_result = result.json()
             return json_result
         except ValueError as e:
@@ -249,7 +251,10 @@ class RestClient(object):
         """
         image = self._convert_image_to_bgr(image, image_space)
         image = self.resize_image_data(image, resize=resize)
-        retval, buffer = cv2.imencode(".png", image)
+        # the cv2.IMWRITE_PNG_COMPRESSION
+        # retval, buffer = cv2.imencode(".png", image, params=[cv2.IMWRITE_PNG_COMPRESSION, 3])
+        # the cv2.IMWRITE_JPEG_QUALITY is from [0, 100] where 100 is probably almost without compression; default: 95
+        retval, buffer = cv2.imencode(".jpg", image, params=[cv2.IMWRITE_JPEG_QUALITY, 96])
         jpg_as_text = base64.b64encode(buffer).decode("utf-8")
         return jpg_as_text
 
