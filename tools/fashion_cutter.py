@@ -171,6 +171,6 @@ if __name__ == "__main__":
 
         if not next_page:
             break
-        # print(f"loading next page")
-        # images, next_page, status = detection_client.get_training_images(next_page)
-        images = None
+        print(f"loading next page")
+        images, next_page, status = detection_client.get_training_images(next_page)
+        # images = None
