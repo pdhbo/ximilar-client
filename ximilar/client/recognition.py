@@ -264,7 +264,13 @@ class RecognitionClient(RestClient):
             noresize_on_server = noresize or self.max_image_size > 1024
             metadata = record[META_DATA] if META_DATA in record and record[META_DATA] else {}
 
-            if FILE in record:
+            if IMG_DATA in record:
+                data = {
+                    "base64": self.cv2img_to_base64(record[IMG_DATA], record[COLOR_SPACE], resize=not noresize),
+                    NORESIZE: noresize_on_server,
+                    META_DATA: metadata,
+                }
+            elif FILE in record:
                 # We cannot send files to request along with json data (for workspace)
                 # That is why we load image from disk to base64 representation
                 data = {
@@ -572,8 +578,10 @@ class Image(RecognitionClient):
         self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
         self.img_width = image_json[IMG_WIDTH]
         self.img_height = image_json[IMG_HEIGHT]
-        self.meta_data = image_json[META_DATA] if META_DATA in image_json and image_json[META_DATA] else {}
-
+        # if the meta data was downloaded from the server, this field is never None
+        self.meta_data = (
+            None if META_DATA not in image_json else (image_json[META_DATA] if image_json[META_DATA] else {})
+        )
         # file path after calling download_image on this object
         self._file = None
 
@@ -623,10 +631,28 @@ class Image(RecognitionClient):
         self._file = super().download_image(self.img_path, destination=destination)
         return self._file
 
+    def _ensure_meta_data(self):
+        """
+        If the meta_data were not downloaded yet, do so
+        """
+        if not self.meta_data:
+            self.meta_data = self.get(IMAGE_ENDPOINT + self.id)[META_DATA]
+        if not self.meta_data:
+            self.meta_data = {}
+
+    def get_meta_data(self):
+        """
+        Return the image meta data (dictionary) or empty dictionary
+        :return: None is never returned
+        """
+        self._ensure_meta_data()
+        return self.meta_data
+
     def add_meta_data(self, meta_data):
         """
         Add some meta data to image (extends already present meta data).
         """
+        self._ensure_meta_data()
         if meta_data is None or not isinstance(meta_data, dict):
             raise Exception("Please specify dictionary of meta_data as param!")
 

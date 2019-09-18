@@ -313,7 +313,10 @@ class DetectionObject(DetectionClient):
         self.detection_label = object_json[DETECTION_LABEL]
         self.data = object_json[DATA]
         self.recognition_labels = object_json[RECOGNITION_LABELS]
-        self.meta_data = object_json[META_DATA] if META_DATA in object_json and object_json[META_DATA] else {}
+        # if the meta data was downloaded from the server, this field is never None
+        self.meta_data = (
+            None if META_DATA not in object_json else (object_json[META_DATA] if object_json[META_DATA] else {})
+        )
 
     def remove(self):
         """
@@ -337,10 +340,28 @@ class DetectionObject(DetectionClient):
         """
         return self.post(OBJECT_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
+    def _ensure_meta_data(self):
+        """
+        If the meta_data were not downloaded yet, do so
+        """
+        if not self.meta_data:
+            self.meta_data = self.get(OBJECT_ENDPOINT + self.id)[META_DATA]
+        if not self.meta_data:
+            self.meta_data = {}
+
+    def get_meta_data(self):
+        """
+        Return the image meta data (dictionary) or empty dictionary
+        :return: None is never returned
+        """
+        self._ensure_meta_data()
+        return self.meta_data
+
     def add_meta_data(self, meta_data):
         """
         Add some meta data to image (extends already present meta data).
         """
+        self._ensure_meta_data()
         if meta_data is None or not isinstance(meta_data, dict):
             raise Exception("Please specify dictionary of meta_data as param!")
 
