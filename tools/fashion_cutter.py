@@ -10,7 +10,7 @@ from ximilar.client.detection import DetectionObject
 from ximilar.client.recognition import Image
 
 
-# python ~/ximilar-recognition/ximilar-client/tools/fashion_cutter.py --auth_token <token> --workspace_id 041049f9-f564-456b-8c73-dbb77181d700 --output_dir . --resize 512 --object_resize 384 --min_size 196 --print_details --out_workspace d64fd027-b76c-4cbe-b292-c0f7a47781c9 --max_per_label 1000 --label_to_add 251748fe-e772-46ef-bf21-a0e65fcbe6cc
+# python ~/ximilar-recognition/ximilar-client/tools/fashion_cutter.py --auth_token <token> --workspace_id 041049f9-f564-456b-8c73-dbb77181d700 --output_dir . --resize 512 --object_resize 448 --min_size 256 --print_details --out_workspace d64fd027-b76c-4cbe-b292-c0f7a47781c9 --max_per_label 1000 --label_to_add 251748fe-e772-46ef-bf21-a0e65fcbe6cc
 
 
 def resize(image_data, rect_size, object_resize):
@@ -151,7 +151,7 @@ if __name__ == "__main__":
                         "source_image": image.id,
                         "sqlite_id": image.get_meta_data()["id"],
                     }
-                    if "id_product" in obj.get_meta_data():
+                    if "id_product" in obj.get_meta_data() and obj.get_meta_data()["id_product"]:
                         image_record[META_DATA]["id_product"] = obj.get_meta_data()["id_product"]
                     # find label in the target output workspace
                     if obj.detection_label["name"] not in output_ws_labels:
