@@ -281,11 +281,14 @@ class RestClient(object):
         :return: modified list of dictionaries
         """
         for i in range(len(records)):
+            noresize = NORESIZE in records[i] and records[i][NORESIZE]
+
             if FILE in records[i] and BASE64 not in records[i] and IMG_DATA not in records[i]:
-                records[i][BASE64] = self.load_base64_file(records[i][FILE])
+                records[i][BASE64] = self.load_base64_file(records[i][FILE], resize=not noresize)
             elif IMG_DATA in records[i]:
                 records[i][BASE64] = self.cv2img_to_base64(
-                    records[i][IMG_DATA], image_space=records[i][COLOR_SPACE] if COLOR_SPACE in records[i] else "RGB"
+                    records[i][IMG_DATA], image_space=records[i][COLOR_SPACE] if COLOR_SPACE in records[i] else "RGB",
+                    resize=not noresize
                 )
 
             # finally we need to delete the image data and just send url or base64
