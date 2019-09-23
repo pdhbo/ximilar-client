@@ -72,7 +72,6 @@ class RestClient(object):
         if data is not None:
             data = json.dumps(data)
 
-        # print("input (size " + str(int(len(data))) + "): " + str(data)[:1000] + " ... " + str(data)[-100:])
         result = method(
             self.endpoint + api_endpoint,
             params=params,
@@ -83,7 +82,6 @@ class RestClient(object):
         )
 
         try:
-            # print(str(result.text))
             json_result = result.json()
             return json_result
         except ValueError as e:
@@ -281,14 +279,23 @@ class RestClient(object):
         :return: modified list of dictionaries
         """
         for i in range(len(records)):
+            if (
+                FILE not in records[i]
+                and BASE64 not in records[i]
+                and URL not in records[i]
+                and IMG_DATA not in records[i]
+            ):
+                raise Exception("Please specify one of '_file', '_base64', '_url', '_img_data' field in record")
+
             noresize = NORESIZE in records[i] and records[i][NORESIZE]
 
             if FILE in records[i] and BASE64 not in records[i] and IMG_DATA not in records[i]:
                 records[i][BASE64] = self.load_base64_file(records[i][FILE], resize=not noresize)
             elif IMG_DATA in records[i]:
                 records[i][BASE64] = self.cv2img_to_base64(
-                    records[i][IMG_DATA], image_space=records[i][COLOR_SPACE] if COLOR_SPACE in records[i] else "RGB",
-                    resize=not noresize
+                    records[i][IMG_DATA],
+                    image_space=records[i][COLOR_SPACE] if COLOR_SPACE in records[i] else "RGB",
+                    resize=not noresize,
                 )
 
             # finally we need to delete the image data and just send url or base64
