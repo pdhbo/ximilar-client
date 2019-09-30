@@ -187,6 +187,7 @@ def test_06_upload_image_url_file_big(request):
     assert images3[0][0][0].img_width == images1[0].img_width
     assert 0 == 0
 
+
 def test_07_upload_image_url_file_small(request):
     """
     Test uploading images with resize and no resize
