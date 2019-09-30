@@ -179,12 +179,13 @@ def test_06_upload_image_url_file_big(request):
     images2[0].remove()
     images3[0][0][0].remove()
 
-    assert images2[0].img_height == client.max_image_size
-    assert images2[0].img_height == client.max_image_size
+    assert images2[0].img_width == client.max_image_size
+    assert images2[0].img_height >= client.max_image_size
     assert images1[0].img_height > images2[0].img_height
+    assert images1[0].img_width > images2[0].img_width
     assert images3[0][0][0].img_height == images1[0].img_height
+    assert images3[0][0][0].img_width == images1[0].img_width
     assert 0 == 0
-
 
 def test_07_upload_image_url_file_small(request):
     """
@@ -357,3 +358,23 @@ def test_15_upload_image_different_workspace(request):
     assert len(images1) > 0
     assert images1[0].workspace == oth_workspace.id
     assert images1[0].img_height > client1.max_image_size
+
+
+def test_16_upload_and_verify_image(request):
+    """
+    Test uploading images, verify and unverify them.
+    """
+    client = get_recognition_client(request)
+    user = client.get_user_details()
+
+    images1, status = client.upload_images([{URL: TEST_IMG_URL}])
+
+    images1[0].verify(user["id"])
+    verify_cnt = images1[0].verifyCount
+    images1[0].unverify()
+    unverify_cnt = images1[0].verifyCount
+
+    images1[0].remove()
+
+    assert verify_cnt == 1
+    assert unverify_cnt == 0

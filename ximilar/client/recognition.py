@@ -77,7 +77,7 @@ class RecognitionClient(RestClient):
         """
         Get all workspaces accessed by user.
         """
-        workspaces, status = self.get_all_paginated_items(WORKSPACE_ENDPOINT)
+        workspaces = self.get(WORKSPACE_ENDPOINT)
 
         if not workspaces and status[STATUS] == STATUS_ERROR:
             return None, status
@@ -177,7 +177,7 @@ class RecognitionClient(RestClient):
             if page_url
             else IMAGE_ENDPOINT + "?page=1"
         )
-        url += "&verification=" + str(verification) if verification is not None else ""
+        url += "&verified=" + str(verification) if verification is not None else ""
 
         result = self.get(url)
         return (
@@ -699,11 +699,28 @@ class Image(RecognitionClient):
             COLOR_SPACE: "BGR",
         }
 
+    def get_verifications(self):
+        json_results = self.get("annotate/v2/verification/?image=" + self.id)
+        self.verifyCount = len(json_results["results"])
+        return json_results["results"]
+
     def verify(self, user_id):
         """
         Verify this image by some user.
         """
-        return self.post("annotate/v2/verification/", data={USER: user_id, IMAGE_ID: self.id})
+        result = self.post("annotate/v2/verification/", data={USER: user_id, IMAGE_ID: self.id})
+        self.get_verifications()
+        return result
+
+    def unverify(self):
+        """
+        Unverify all users from image.
+        """
+        results = self.get_verifications()
+        for result in results:
+            self.delete("annotate/v2/verification/" + str(result["id"]))
+        self.verifyCount = 0
+        return True
 
     def to_json(self):
         labels, status = self.get_labels()
