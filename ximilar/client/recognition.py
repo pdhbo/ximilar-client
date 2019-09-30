@@ -186,6 +186,20 @@ class RecognitionClient(RestClient):
             RESULT_OK,
         )
 
+    def training_images_iter(self, verification=None):
+        """
+        Get iterator overall all of images from workspace.
+        :param verification: optional, integer which says how many verifications should have the images
+        :return: iterator
+        """
+        images, next_page, status = self.get_training_images(verification=verification)
+        while images:
+            for image in images:
+                yield image
+            if not next_page:
+                break
+            images, next_page, status = self.get_training_images(next_page)
+
     def get_labels_by_substring(self, name):
         """
         Return all labels of the workspace which contains the substring.

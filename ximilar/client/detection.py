@@ -230,6 +230,14 @@ class DetectionTask(DetectionClient):
 
             return self.cache[LABELS], result
 
+    def add_negative_image(self, image_id):
+        """
+        Add negative image to the detection task
+        :param image_id: negative image ID to link with detection task
+        :return: json/dict result
+        """
+        return self.post(TASK_ENDPOINT + self.id + "/add-image/", data={IMAGE_ID: image_id})
+
     def detect(self, records, version=None):
         """
         Takes the images and calls the ximilar client for detecting these images on the task.
