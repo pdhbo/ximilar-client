@@ -302,7 +302,12 @@ class RecognitionClient(RestClient):
                 }
 
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
-            if ID not in image_json:
+
+            if image_json is None:
+                worst_status = {STATUS: "image not uploaded " + str(record)}
+                print("Unable to upload image", record)
+                continue
+            elif ID not in image_json:
                 worst_status = {STATUS: "image not uploaded " + str(record)}
                 continue
 
