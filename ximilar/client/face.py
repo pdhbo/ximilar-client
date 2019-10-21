@@ -1,7 +1,7 @@
 from ximilar.client import RestClient
 from ximilar.client.constants import *
 
-FACE_DETECTION_ENDPOINT = "v2/detect"
+FACE_DETECTION_ENDPOINT = "face/v2/detect"
 
 
 class FaceClient(RestClient):

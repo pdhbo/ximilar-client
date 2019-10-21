@@ -81,6 +81,7 @@ class RestClient(object):
             timeout=self.request_timeout,
         )
 
+        print(result)
         try:
             json_result = result.json()
             return json_result
@@ -130,6 +131,7 @@ class RestClient(object):
             headers=self.headers,
             timeout=10,
         )
+
         try:
             result = result.json()
         except:
@@ -138,6 +140,8 @@ class RestClient(object):
         if result and USER_ID in result:
             return True
 
+        if "detail" in result:
+            raise Exception(result["detail"] + " " + resource_name + ". Please contact tech@ximilar.com!")
         raise Exception("User has no access for service: " + resource_name + ". Please contact tech@ximilar.com!")
 
     def get_user_details(self):
