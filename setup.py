@@ -7,7 +7,7 @@ with open("requirements.txt") as f:
 if os.environ.get("CI_COMMIT_TAG"):
     version = os.environ["CI_COMMIT_TAG"]
 else:
-    version = "2.0.dev1"
+    version = "2.0"
 
 
 setup(
