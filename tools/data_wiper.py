@@ -9,7 +9,7 @@ if __name__ == "__main__":
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
-    parser.add_argument("--doit", help="Are you sure you wanna do this?", action='store_true')
+    parser.add_argument("--doit", help="Are you sure you wanna do this?", action="store_true")
     args = parser.parse_args()
 
     if args.doit:
