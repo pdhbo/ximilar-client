@@ -320,6 +320,27 @@ class RecognitionClient(RestClient):
             images.append(image)
         return images, worst_status
 
+    def classify_on_task(self, records, task_id=None, version=None):
+        """
+        Takes the images and calls the ximilar client for classifying these images on the task.
+
+        Usage:
+            client = RecognitionClient('__YOUR_API_TOKEN__')
+            result = client.classify({'_url':'__SOME_IMG_URL__'})
+
+        :param records: array of json/dicts [{'_url':'url-path'}, {'_file': ''}, {'_base64': 'base64encodeimg'}]
+        :param version: optional(integer of specific version), default None/production_version
+        :return: json response
+        """
+        if task_id is None:
+            raise Exception("Please specify task")
+
+        records = self.preprocess_records(records)
+
+        # version is default set to None, so ximilar will determine which one to take
+        data = {RECORDS: records, TASK_ID: task_id, VERSION: version}
+        return self.post(CLASSIFY_ENDPOINT, data=data)
+
 
 class Task(RecognitionClient):
     """

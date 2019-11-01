@@ -184,6 +184,10 @@ class RestClient(object):
 
         return items, RESULT_OK
 
+    def add_header(self, header):
+        """ Add header to the every request """
+        self.headers.update(header)
+
     def resize_image_data(self, image_data, aspect_ratio=True, resize=True):
         """
         Resize image data that are no bigger than max_size.
