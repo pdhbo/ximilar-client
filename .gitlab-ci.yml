@@ -8,6 +8,8 @@ black:
   stage: test
   image: python:alpine
   script:
+    - apk update
+    - apk add gcc musl-dev
     - pip install black
     - black --check --line-length 120 .
   allow_failure: true
