@@ -286,6 +286,8 @@ class RestClient(object):
         :param records: list of dictionaries
         :return: modified list of dictionaries
         """
+        # (shallow) copy the records in order not to modify the incoming dictionaries
+        records = [rec.copy() for rec in records]
         for i in range(len(records)):
             if (
                 FILE not in records[i]
