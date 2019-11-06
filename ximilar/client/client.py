@@ -81,7 +81,6 @@ class RestClient(object):
             timeout=self.request_timeout,
         )
 
-        print(result)
         try:
             json_result = result.json()
             return json_result
