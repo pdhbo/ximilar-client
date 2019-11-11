@@ -100,6 +100,7 @@ class SimilarityPhotosClient(RestClient):
         :param records: dictionary with your "_id" and with one of "_url", "_file" or "_base64" to extract descriptor.
         :return: json response
         """
+        records = self.preprocess_records(records)
         data = {RECORDS: records}
         return self.post(INSERT, data=data)
 

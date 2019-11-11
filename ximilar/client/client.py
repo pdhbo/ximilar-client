@@ -81,7 +81,6 @@ class RestClient(object):
             timeout=self.request_timeout,
         )
 
-        print(result)
         try:
             json_result = result.json()
             return json_result
@@ -286,6 +285,8 @@ class RestClient(object):
         :param records: list of dictionaries
         :return: modified list of dictionaries
         """
+        # (shallow) copy the records in order not to modify the incoming dictionaries
+        records = [rec.copy() for rec in records]
         for i in range(len(records)):
             if (
                 FILE not in records[i]
