@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser
 
 from ximilar.client import RecognitionClient
-from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE, LABELS, ID, NAME
+from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE, LABELS, ID, NAME, TEST_IMAGE
 from ximilar.client.recognition import Label
 
 
@@ -20,6 +20,7 @@ if __name__ == "__main__":
     parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
     parser.add_argument("--input_dir", help="directory with the images (recursively)")
     parser.add_argument("--no_resize", help="flag whether to preserve image size", action="store_true")
+    parser.add_argument("--test_image", help="mark the image as test", action="store_true")
     parser.add_argument("--resize", type=int, default=1024, help="size of uploaded images, default: 1024")
     parser.add_argument("--print_details", help="if true, info about each image is printed out", action="store_true")
     parser.add_argument(
@@ -60,7 +61,10 @@ if __name__ == "__main__":
                     labels[subdir], _ = client.create_label(subdir, "automatically created label for dir: " + subdir)
 
         files = filter(lambda x: os.path.splitext(x)[1].lower() in args.extensions, files)
-        records = [{FILE: os.path.join(root, filename), NORESIZE: args.no_resize} for filename in files]
+        records = [
+            {FILE: os.path.join(root, filename), NORESIZE: args.no_resize, TEST_IMAGE: args.test_image}
+            for filename in files
+        ]
         if args.labels_by_dir:
             # find the label matching the directory name
             label_name = root.strip("./")

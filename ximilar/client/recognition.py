@@ -277,11 +277,13 @@ class RecognitionClient(RestClient):
             noresize = NORESIZE in record and record[NORESIZE]
             noresize_on_server = noresize or self.max_image_size > 1024
             metadata = record[META_DATA] if META_DATA in record and record[META_DATA] else {}
+            test_image = record[TEST_IMAGE] if TEST_IMAGE in record else False
 
             if IMG_DATA in record:
                 data = {
                     "base64": self.cv2img_to_base64(record[IMG_DATA], record[COLOR_SPACE], resize=not noresize),
                     NORESIZE: noresize_on_server,
+                    TEST_IMAGE: test_image,
                     META_DATA: metadata,
                 }
             elif FILE in record:
@@ -290,14 +292,21 @@ class RecognitionClient(RestClient):
                 data = {
                     "base64": self.load_base64_file(record[FILE], resize=not noresize),
                     NORESIZE: noresize_on_server,
+                    TEST_IMAGE: test_image,
                     META_DATA: metadata,
                 }
             elif BASE64 in record:
-                data = {"base64": record[BASE64].decode("utf-8"), NORESIZE: noresize_on_server, META_DATA: metadata}
+                data = {
+                    "base64": record[BASE64].decode("utf-8"),
+                    NORESIZE: noresize_on_server,
+                    TEST_IMAGE: test_image,
+                    META_DATA: metadata,
+                }
             elif URL in record:
                 data = {
                     "base64": self.load_url_image(record[URL], resize=not noresize),
                     NORESIZE: noresize_on_server,
+                    TEST_IMAGE: test_image,
                     META_DATA: metadata,
                 }
 
@@ -305,7 +314,6 @@ class RecognitionClient(RestClient):
 
             if image_json is None:
                 worst_status = {STATUS: "image not uploaded " + str(record)}
-                print("Unable to upload image", record)
                 continue
             elif ID not in image_json:
                 worst_status = {STATUS: "image not uploaded " + str(record)}
