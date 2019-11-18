@@ -22,8 +22,8 @@ if __name__ == "__main__":
     records = []
 
     with JSONWriter(args.output_file) as writer:
-        for rec in read_json_file_iterator(args.input_file):
-            print("Processing record", rec)
+        for index, rec in enumerate(read_json_file_iterator(args.input_file)):
+            print("Processing record", index, rec)
             result = client.tags([rec])
             if "_status" in result["records"][0]:
                 del result["records"][0]["_status"]
