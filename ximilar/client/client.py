@@ -237,8 +237,14 @@ class RestClient(object):
         :param path: local path to the image
         :return: base64 encoded string
         """
+        # if the image is quite small then just convert it to base64
+        if (not resize) or os.stat(path).st_size / (1024 * 1024) < 0.1:
+            with open(path, "rb") as image_file: 
+                encoded_string = base64.b64encode(image_file.read()).decode("utf-8") 
+            return encoded_string
+
+        # otherwise convert it to cv2 matrix, then encode it  and then to base64
         image = self.cv2_imread(path)
-        # image = self.resize_image_data(image, resize=resize)
         image = self.cv2img_to_base64(image, image_space="BGR", resize=resize)
         return image
 
