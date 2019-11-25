@@ -21,7 +21,7 @@ deploy_production:
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
     - apk update
-    - apk add gcc musl-dev libffi-dev openssl-devel
+    - apk add gcc musl-dev libffi-dev libressl-dev
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload dist/*
