@@ -1,4 +1,4 @@
-# Ximilar API Python Client 1.10.3
+# Ximilar API Python Client 1.10.5
 
 ![](logo.png)
 
