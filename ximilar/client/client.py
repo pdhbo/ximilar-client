@@ -239,8 +239,8 @@ class RestClient(object):
         """
         # if the image is quite small then just convert it to base64
         if (not resize) or os.stat(path).st_size / (1024 * 1024) < 0.1:
-            with open(path, "rb") as image_file: 
-                encoded_string = base64.b64encode(image_file.read()).decode("utf-8") 
+            with open(path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
             return encoded_string
 
         # otherwise convert it to cv2 matrix, then encode it  and then to base64

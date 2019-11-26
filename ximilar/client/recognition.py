@@ -30,6 +30,7 @@ class RecognitionClient(RestClient):
         super(RecognitionClient, self).__init__(
             token=token, endpoint=endpoint, max_image_size=max_image_size, resource_name=resource_name
         )
+        self.PREDICT_ENDPOINT = CLASSIFY_ENDPOINT
 
     def get(self, api_endpoint, data=None, params=None):
         """
@@ -328,7 +329,17 @@ class RecognitionClient(RestClient):
             images.append(image)
         return images, worst_status
 
-    def classify_on_task(self, records, task_id=None, version=None):
+    def construct_data(self, records=[], task_id=None, version=None):
+        if len(records) == 0:
+            raise Exception("Please specify at least one record in classify method!")
+
+        if task_id is None:
+            raise Exception("Please specify task")
+
+        data = {RECORDS: self.preprocess_records(records), TASK_ID: task_id, VERSION: version}
+        return data
+
+    def classify_on_task(self, records=[], task_id=None, version=None):
         """
         Takes the images and calls the ximilar client for classifying these images on the task.
 
@@ -340,14 +351,9 @@ class RecognitionClient(RestClient):
         :param version: optional(integer of specific version), default None/production_version
         :return: json response
         """
-        if task_id is None:
-            raise Exception("Please specify task")
-
-        records = self.preprocess_records(records)
-
         # version is default set to None, so ximilar will determine which one to take
-        data = {RECORDS: records, TASK_ID: task_id, VERSION: version}
-        return self.post(CLASSIFY_ENDPOINT, data=data)
+        data = self.construct_data(records=records, task_id=task_id, version=version)
+        return self.post(self.PREDICT_ENDPOINT, data=data)
 
 
 class Task(RecognitionClient):
@@ -437,11 +443,9 @@ class Task(RecognitionClient):
         :param version: optional(integer of specific version), default None/production_version
         :return: json response
         """
-        records = self.preprocess_records(records)
-
         # version is default set to None, so ximilar will determine which one to take
-        data = {RECORDS: records, TASK_ID: self.id, VERSION: version}
-        return self.post(CLASSIFY_ENDPOINT, data=data)
+        data = self.construct_data(records=records, task_id=self.id, version=version)
+        return self.post(self.PREDICT_ENDPOINT, data=data)
 
     def add_label(self, label_id):
         """

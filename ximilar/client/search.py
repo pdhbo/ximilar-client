@@ -47,7 +47,18 @@ class SimilarityPhotosClient(RestClient):
         else:
             self.headers[COLLECTION] = collection
 
-    def search(self, record, filter=None, count=5, fields_to_return=[_ID]):
+        self.PREDICT_ENDPOINT = KNN_VISUAL
+
+    def construct_data(self, record=None, filter=None, k=5, fields_to_return=[_ID]):
+        if record is None:
+            raise Exception("Please specify record when using search method.")
+
+        data = {QUERY_RECORD: record, K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
+        if filter:
+            data[FILTER] = filter
+        return data
+
+    def search(self, record, filter=None, k=5, fields_to_return=[_ID]):
         """
         Calls visual knn
         :param record: dictionary with field '_id' (from your collection) or '_url' or "_base64' data
@@ -56,11 +67,8 @@ class SimilarityPhotosClient(RestClient):
         :param filter: how to filter picked items (mongodb syntax)
         :return: json response
         """
-        data = {QUERY_RECORD: record, K_COUNT: count, FIELDS_TO_RETURN: fields_to_return}
-        if filter:
-            data[FILTER] = filter
-
-        return self.post(KNN_VISUAL, data=data)
+        data = self.construct_data(record, filter=filter, k=k, fields_to_return=fields_to_return)
+        return self.post(self.PREDICT_ENDPOINT, data=data)
 
     def random(self, filter=None, count=10, fields_to_return=[_ID]):
         """

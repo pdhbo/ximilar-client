@@ -36,21 +36,29 @@ class SmartSearchClient(SimilarityPhotosClient):
             endpoint=endpoint,
             resource_name=resource_name,
         )
+        self.PREDICT_ENDPOINT = SEARCH_PRODUCT
 
-    def search(self, records, filter=None, count=5, fields_to_return=[_ID]):
+    def construct_data(self, records=[], filter=None, k=5, fields_to_return=[_ID]):
+        if len(records) == 0:
+            raise Exception("Please specify at least on record when using search method.")
+
+        data = {RECORDS: self.preprocess_records(records), K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
+        if filter:
+            data[FILTER] = filter
+
+        return data
+
+    def search(self, records, filter=None, k=5, fields_to_return=[_ID]):
         """
         Detects Objects and Tags and find for the largest object most visually similar items in your collection.
         :param records: array with one record (dictionary) with '_url' or "_base64' data
-        :param count: how many similar items to return
+        :param k: how many similar items to return
         :param fields_to_return: fields to return in every record
         :param filter: how to filter picked items (mongodb syntax)
         :return:
         """
-        data = {RECORDS: self.preprocess_records(records), K_COUNT: count, FIELDS_TO_RETURN: fields_to_return}
-        if filter:
-            data[FILTER] = filter
-
-        return self.post(SEARCH_PRODUCT, data=data)
+        data = self.construct_data(records=records, filter=filter, k=k, fields_to_return=fields_to_return)
+        return self.post(self.PREDICT_ENDPOINT, data=data)
 
     def detect(self, records):
         """
