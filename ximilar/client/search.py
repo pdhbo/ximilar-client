@@ -49,25 +49,25 @@ class SimilarityPhotosClient(RestClient):
 
         self.PREDICT_ENDPOINT = KNN_VISUAL
 
-    def construct_data(self, record=None, filter=None, k=5, fields_to_return=[_ID]):
-        if record is None:
+    def construct_data(self, query_record=None, filter=None, k=5, fields_to_return=[_ID]):
+        if query_record is None:
             raise Exception("Please specify record when using search method.")
 
-        data = {QUERY_RECORD: record, K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
+        data = {QUERY_RECORD: query_record, K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
         if filter:
             data[FILTER] = filter
         return data
 
-    def search(self, record, filter=None, k=5, fields_to_return=[_ID]):
+    def search(self, query_record, filter=None, k=5, fields_to_return=[_ID]):
         """
         Calls visual knn
-        :param record: dictionary with field '_id' (from your collection) or '_url' or "_base64' data
+        :param query_record: dictionary with field '_id' (from your collection) or '_url' or "_base64' data
         :param k: how many similar items to return
         :param fields_to_return: fields to return in every record
         :param filter: how to filter picked items (mongodb syntax)
         :return: json response
         """
-        data = self.construct_data(record, filter=filter, k=k, fields_to_return=fields_to_return)
+        data = self.construct_data(query_record, filter=filter, k=k, fields_to_return=fields_to_return)
         return self.post(self.PREDICT_ENDPOINT, data=data)
 
     def random(self, filter=None, count=10, fields_to_return=[_ID]):
