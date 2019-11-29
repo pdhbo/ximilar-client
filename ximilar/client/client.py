@@ -316,9 +316,9 @@ class RestClient(object):
             # finally we need to delete the image data and just send url or base64
             if IMG_DATA in records[i]:
                 del records[i][IMG_DATA]
-
-            if FILE in records[i]:
-                del records[i][FILE]
+            #
+            # if FILE in records[i]:
+            #     del records[i][FILE]
 
         return records
 
