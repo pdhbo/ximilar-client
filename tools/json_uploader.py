@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from ximilar.client import RecognitionClient
 from ximilar.client.constants import DEFAULT_WORKSPACE, NORESIZE, LABELS, TEST_IMAGE, META_DATA
-from ximilar.tools.json_data import read_json_file_iterator
+from ximilar.client.utils.json_data import read_json_file_iterator
 
 
 class LabelMock:

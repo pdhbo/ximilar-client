@@ -315,10 +315,10 @@ client = SimilarityProductsClient(token='__API_TOKEN__', collection='__COLLECTIO
 result = client.random(count=7, fields_to_return=['_id', '_url'])
 
 # search 10 most visually similar items for item in your index
-result = client.search({'_id': '__ITEM_ID__'}, count=10)
+result = client.search({'_id': '__ITEM_ID__'}, k=10)
 
 # search 5 most visually similar items for external item (not in index) defined by _url field
-result = client.search({'_url': '__URL_PATH_TO_IMAGE__'}, count=5)
+result = client.search({'_url': '__URL_PATH_TO_IMAGE__'}, k=5)
 
 # search visually similar items, return also _url field if present in item and 
 # search only for items defined by filter (mongodb syntax)

@@ -5,8 +5,6 @@ import string
 import sys
 from os.path import splitext
 
-from ximilar.api.python_api import Record
-
 
 def read_json_array(file_name):
     with open(file_name, "r", encoding="utf-8") as f:
@@ -121,6 +119,6 @@ def traverse_dir_to_json(output_file, directory):
     try:
         for subdir, dirs, files in os.walk(directory):
             for file_name in files:
-                output.write({Record.FILE: os.path.join(subdir, file_name)})
+                output.write({"_file": os.path.join(subdir, file_name)})
     finally:
         output.close()

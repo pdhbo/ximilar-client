@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from ximilar.client import FashionTaggingClient, GenericTaggingClient
 from ximilar.client.constants import DEFAULT_WORKSPACE, NORESIZE, LABELS, TEST_IMAGE, META_DATA
-from json_data import read_json_file_iterator, JSONWriter
+from ximilar.client.utils.json_data import read_json_file_iterator, JSONWriter
 
 
 def process_batch(tagging_client, record_batch, output_writer):
