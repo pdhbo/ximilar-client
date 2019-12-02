@@ -62,7 +62,6 @@ class RecognitionClient(RestClient):
         :param data: dictionary/json data which will be send to endpoint
         :return: modified json data with workspace
         """
-
         if self.workspace != DEFAULT_WORKSPACE:
             if data is None:
                 data = {}
@@ -144,6 +143,9 @@ class RecognitionClient(RestClient):
 
         if not labels and status[STATUS] == STATUS_ERROR:
             return None, status
+
+        for label in labels:
+            label["workspace"] = self.workspace
 
         return [Label(self.token, self.endpoint, l_json) for l_json in labels], RESULT_OK
 
@@ -552,6 +554,7 @@ class Label(RecognitionClient):
             else IMAGE_ENDPOINT + "?label=" + self.id
         )
         result = self.get(url)
+
         return (
             [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]],
             result[NEXT],
