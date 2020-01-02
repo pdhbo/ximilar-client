@@ -395,7 +395,7 @@ class Task(RecognitionClient):
         """
         If the task is Tagging/Multi-Label then this will return the negative label of the Task.
         """
-        labels = self.get_labels()
+        labels, _ = self.get_labels()
 
         for label in labels:
             if label.negative_for_task:
@@ -509,6 +509,7 @@ class Label(RecognitionClient):
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
+        self.type = label_json[TYPE] if TYPE in label_json else None
         self.tasks_count = label_json[TASKS_COUNT] if TASKS_COUNT in label_json else 0
         self.negative_for_task = label_json[NEGATIVE_FOR_TASK] if NEGATIVE_FOR_TASK in label_json else None
         self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
