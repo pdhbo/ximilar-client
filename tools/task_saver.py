@@ -49,7 +49,12 @@ if __name__ == "__main__":
                     image: Image
                     if image.id not in futures:
                         img_labels, _ = image.get_labels()
-                        futures[image.id] = {"future": executor.submit(image.download, os.path.join(args.folder, args.task_id, "images")), "labels": img_labels}
+                        futures[image.id] = {
+                            "future": executor.submit(
+                                image.download, os.path.join(args.folder, args.task_id, "images")
+                            ),
+                            "labels": img_labels,
+                        }
                     pbar.update(1)
 
     print("Downloading ....")

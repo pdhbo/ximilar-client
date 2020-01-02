@@ -10,11 +10,13 @@ from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE, OBJECTS,
 from ximilar.client.recognition import Image, Label
 from ximilar.client.utils.json_data import read_json_file_list, JSONWriter
 
+
 def get_label_id(labels, id, negative):
     for label in labels:
         if id == label.name:
             return label.id
     return negative.id
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Save all images from a workspace and their metadata to json")
