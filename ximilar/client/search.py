@@ -58,6 +58,10 @@ class SimilarityPhotosClient(RestClient):
             data[FILTER] = filter
         return data
 
+    def allRecords(self, size=1000, page=1):
+        result = self.post("allRecords?size=%s&page=%s" % (size, page), data={})
+        return result
+
     def search(self, query_record, filter=None, k=5, fields_to_return=[_ID]):
         """
         Calls visual knn
@@ -112,7 +116,7 @@ class SimilarityPhotosClient(RestClient):
         data = {RECORDS: records}
         return self.post(INSERT, data=data)
 
-    def get(self, records, fields_to_return=[_ID]):
+    def get_records(self, records, fields_to_return=[_ID]):
         """
         Get the records from your collection.
         :param records: list of dictionaries with "_id" (identification of your records)

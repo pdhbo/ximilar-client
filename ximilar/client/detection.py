@@ -57,7 +57,7 @@ class DetectionClient(RecognitionClient):
         if ID not in task_json:
             status = {STATUS: task_json[DETAIL]} if DETAIL in task_json else {STATUS: "Not Found"}
             return None, status
-        return DetectionTask(self.token, self.endpoint, task_json), RESULT_OK
+        return DetectionTask(self.token, self.endpoint, task_json, self.max_image_size), RESULT_OK
 
     def get_model(self, model_id):
         pass
@@ -124,7 +124,7 @@ class DetectionClient(RecognitionClient):
         if not tasks and status[STATUS] == STATUS_ERROR:
             return None, status
 
-        return [DetectionTask(self.token, self.endpoint, t_json) for t_json in tasks], RESULT_OK
+        return [DetectionTask(self.token, self.endpoint, t_json, self.max_image_size) for t_json in tasks], RESULT_OK
 
     def get_all_labels(self, suffix=""):
         """
@@ -148,7 +148,7 @@ class DetectionClient(RecognitionClient):
         if ID not in task_json:
             msg = task_json[DETAIL] if DETAIL in task_json else "unexpected error"
             return None, {STATUS: msg}
-        return DetectionTask(self.token, self.endpoint, task_json), RESULT_OK
+        return DetectionTask(self.token, self.endpoint, task_json, self.max_image_size), RESULT_OK
 
     def create_label(self, name):
         """
@@ -179,8 +179,8 @@ class DetectionClient(RecognitionClient):
 
 
 class DetectionTask(DetectionClient):
-    def __init__(self, token, endpoint, task_json):
-        super(DetectionTask, self).__init__(token, endpoint)
+    def __init__(self, token, endpoint, task_json, max_image_size):
+        super(DetectionTask, self).__init__(token, endpoint, max_image_size=max_image_size)
 
         self.id = task_json[ID]
         self.name = task_json[NAME]

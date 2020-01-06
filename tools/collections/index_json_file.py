@@ -18,9 +18,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.type == "generic":
-        client = SimilarityPhotosClient(token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id)
+        client = SimilarityPhotosClient(
+            token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
+        )
     else:
-        client = SimilarityProductsClient(token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id)
+        client = SimilarityProductsClient(
+            token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
+        )
 
     index_images = read_json_file_list(args.path)
 

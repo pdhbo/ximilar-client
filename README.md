@@ -1,4 +1,4 @@
-# Ximilar API Python Client 1.10.7
+# Ximilar API Python Client 1.10.12
 
 ![](logo.png)
 
@@ -333,7 +333,7 @@ All crud operations:
 
 ```python
 # get list of items from index
-result = client.get([{'_id': '__ITEM_ID__'}, {'_id': '__ITEM_ID__'}])
+result = client.get_records([{'_id': '__ITEM_ID__'}, {'_id': '__ITEM_ID__'}])
 
 # insert item tot he index with your _id, and onr of _url | _base64, and other fields (meta-info) which you can 
 # then use when applying filter in search or random menthods
