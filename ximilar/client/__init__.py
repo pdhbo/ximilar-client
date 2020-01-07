@@ -1,4 +1,4 @@
-from .client import RestClient
+from .client import RestClient, XimilarClientException
 from .recognition import RecognitionClient
 from .tagging import GenericTaggingClient, FashionTaggingClient
 from .colors import DominantColorProductClient, DominantColorGenericClient

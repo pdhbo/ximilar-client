@@ -13,9 +13,15 @@ class TaggingClient(RestClient):
         data = {RECORDS: self.preprocess_records(records)}
         return data
 
-    def tags(self, records, endpoint):
+    def tags(self, records, endpoint, aggregate_labels=False):
         data = self.construct_data(records=records)
-        return self.post(endpoint, data=data)
+
+        if aggregate_labels:
+            data["aggregate_labels"] = True
+
+        result = self.post(endpoint, data=data)
+        self.check_json_status(result)
+        return result
 
 
 class FashionTaggingClient(TaggingClient):
@@ -23,8 +29,8 @@ class FashionTaggingClient(TaggingClient):
         super(FashionTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = FASHION_TAGGING_ENDPOINT
 
-    def tags(self, records):
-        return super().tags(records, self.PREDICT_ENDPOINT)
+    def tags(self, records, aggregate_labels=False):
+        return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=aggregate_labels)
 
 
 class GenericTaggingClient(TaggingClient):

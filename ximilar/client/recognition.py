@@ -355,7 +355,10 @@ class RecognitionClient(RestClient):
         """
         # version is default set to None, so ximilar will determine which one to take
         data = self.construct_data(records=records, task_id=task_id, version=version)
-        return self.post(self.PREDICT_ENDPOINT, data=data)
+        result = self.post(self.PREDICT_ENDPOINT, data=data)
+
+        self.check_json_status(result)
+        return result
 
 
 class Task(RecognitionClient):
@@ -447,7 +450,10 @@ class Task(RecognitionClient):
         """
         # version is default set to None, so ximilar will determine which one to take
         data = self.construct_data(records=records, task_id=self.id, version=version)
-        return self.post(self.PREDICT_ENDPOINT, data=data)
+        result = self.post(self.PREDICT_ENDPOINT, data=data)
+
+        self.check_json_status(result)
+        return result
 
     def add_label(self, label_id):
         """

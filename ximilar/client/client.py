@@ -13,6 +13,17 @@ from ximilar.client.constants import *
 CONFIG_ENDPOINT = "account/v2/config/"
 
 
+class XimilarClientException(Exception):
+    def __init__(self, code, msg=None):
+        Exception.__init__(self, msg)
+
+        self.code = code
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
 class RestClient(object):
     """
     Parent class that implements HTTP GET, POST, DELETE methods with requests lib and loading images to base64.
@@ -80,6 +91,9 @@ class RestClient(object):
             files=files,
             timeout=self.request_timeout,
         )
+
+        # todo: check JSON RESULT CODES -> raise XimilarClientException
+        # todo: check HTTP STATUS CODES -> raise XimilarClientException
 
         try:
             json_result = result.json()
@@ -186,6 +200,19 @@ class RestClient(object):
     def add_header(self, header):
         """ Add header to the every request """
         self.headers.update(header)
+
+    def check_json_status(self, result):
+        """
+        Check status code in json result, if not 200 then raises exception!
+        :param result: json dictionary
+        :raises XimilarClientException: returned status code from endpoint, text
+        :raises XimilarClientException: 500, text
+        """
+        if result is not None and "status" in result:
+            if "code" in result["status"] and result["status"]["code"] != 200:
+                if result["status"]["text"]:
+                    raise XimilarClientException(result["status"]["code"], result["status"]["text"])
+                raise XimilarClientException(500, "Unexpected error when getting result from endpoint!")
 
     def resize_image_data(self, image_data, aspect_ratio=True, resize=True):
         """
