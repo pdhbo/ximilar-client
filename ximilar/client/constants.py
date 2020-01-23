@@ -76,6 +76,7 @@ LAST_TRAIN_STATUS = "last_train_status"
 OBJECTS = "objects"
 BEST_LABEL = "best_label"
 TEST_IMAGE = "test_image"
+STORE_IMAGES = "store_images"
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"
