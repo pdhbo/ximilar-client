@@ -52,6 +52,16 @@ class RestClient(object):
         """
         return self.__class__.__name__
 
+    @staticmethod
+    def urljoin(*args):
+        """
+        Joins given arguments into an url. Trailing but not leading slashes are
+        stripped for each argument.
+        """
+
+        url = "/".join(map(lambda x: str(x).rstrip('/'), args))
+        return url
+
     def get(self, api_endpoint, data=None, params=None):
         """
         Call the http GET request with data.
@@ -61,7 +71,7 @@ class RestClient(object):
         :return: json response
         """
         result = requests.get(
-            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=self.request_timeout
+            self.urljoin(self.endpoint, api_endpoint), params=params, headers=self.headers, data=data, timeout=self.request_timeout
         )
         return result.json()
 
@@ -85,7 +95,7 @@ class RestClient(object):
             data = json.dumps(data)
 
         result = method(
-            self.endpoint + api_endpoint,
+            self.urljoin(self.endpoint, api_endpoint),
             params=params,
             headers=self.headers,
             data=data,
@@ -95,7 +105,6 @@ class RestClient(object):
 
         # todo: check JSON RESULT CODES -> raise XimilarClientException
         # todo: check HTTP STATUS CODES -> raise XimilarClientException
-
         try:
             json_result = result.json()
             return json_result
