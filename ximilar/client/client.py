@@ -14,6 +14,7 @@ from ximilar.client.constants import *
 CONFIG_ENDPOINT = "account/v2/config/"
 BASE64_HEADER_PATTERN = re.compile(r"^data:image/(\w+);base64,")
 
+
 class XimilarClientException(Exception):
     def __init__(self, code, msg=None):
         Exception.__init__(self, msg)
@@ -59,7 +60,7 @@ class RestClient(object):
         stripped for each argument.
         """
 
-        url = "/".join(map(lambda x: str(x).rstrip('/'), args))
+        url = "/".join(map(lambda x: str(x).rstrip("/"), args))
         return url
 
     def get(self, api_endpoint, data=None, params=None):
@@ -71,7 +72,11 @@ class RestClient(object):
         :return: json response
         """
         result = requests.get(
-            self.urljoin(self.endpoint, api_endpoint), params=params, headers=self.headers, data=data, timeout=self.request_timeout
+            self.urljoin(self.endpoint, api_endpoint),
+            params=params,
+            headers=self.headers,
+            data=data,
+            timeout=self.request_timeout,
         )
         return result.json()
 
@@ -369,11 +374,7 @@ class RestClient(object):
             elif BASE64 in records[i]:
                 # if we have base64 and we need to resize it
                 image = self.base64_to_cv2img(records[i][BASE64])
-                records[i][BASE64] = self.cv2img_to_base64(
-                    image,
-                    image_space="BGR",
-                    resize=not noresize,
-                )
+                records[i][BASE64] = self.cv2img_to_base64(image, image_space="BGR", resize=not noresize)
             elif IMG_DATA in records[i]:
                 records[i][BASE64] = self.cv2img_to_base64(
                     records[i][IMG_DATA],
