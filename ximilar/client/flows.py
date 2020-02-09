@@ -17,7 +17,7 @@ from ximilar.client.constants import (
     COLLECTION_ID,
     PHOTO_SIMILARITY,
     PRODUCT_SIMILARITY,
-    RESULT_OK
+    RESULT_OK,
 )
 
 SIMILARITY_PHOTOS = "similarity/photos/v2/"
@@ -37,13 +37,7 @@ PING = "ping"
 
 
 class FlowsClient(RestClient):
-    def __init__(
-        self,
-        token,
-        endpoint=ENDPOINT,
-        resource_name=PHOTO_SIMILARITY,
-        max_image_size=512
-    ):
+    def __init__(self, token, endpoint=ENDPOINT, resource_name=PHOTO_SIMILARITY, max_image_size=512):
         super(FlowsClient, self).__init__(
             token=token, endpoint=endpoint, max_image_size=max_image_size, resource_name=resource_name
         )
@@ -65,6 +59,7 @@ class Flow(FlowsClient):
     """
     Flow entity from /flows/v2/flow endpoint.
     """
+
     def __init__(self, token, endpoint, flow_json, max_image_size=512):
         super(Flow, self).__init__(token, endpoint=endpoint, max_image_size=max_image_size, resource_name="")
 

@@ -528,7 +528,9 @@ class Label(RecognitionClient):
         self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
         self.images_count = label_json[IMAGES_COUNT] if IMAGES_COUNT in label_json else -1
         self.description = label_json[DESCRIPTION] if DESCRIPTION in label_json else ""
-        self.output_name = label_json[OUTPUT_NAME] if OUTPUT_NAME in label_json and label_json[OUTPUT_NAME] else self.name
+        self.output_name = (
+            label_json[OUTPUT_NAME] if OUTPUT_NAME in label_json and label_json[OUTPUT_NAME] else self.name
+        )
 
     def __str__(self):
         return self.name
