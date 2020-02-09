@@ -78,6 +78,7 @@ BEST_LABEL = "best_label"
 TEST_IMAGE = "test_image"
 STORE_IMAGES = "store_images"
 OUTPUT_NAME = "output_name"
+TOP_NODE = "top_node"
 
 # Similarity search
 FIELDS_TO_RETURN = "fields_to_return"

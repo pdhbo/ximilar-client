@@ -5,3 +5,4 @@ from .colors import DominantColorProductClient, DominantColorGenericClient
 from .smart import SmartSearchClient
 from .detection import DetectionClient
 from .search import SimilarityPhotosClient, SimilarityProductsClient
+from .flows import FlowsClient

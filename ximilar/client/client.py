@@ -56,11 +56,11 @@ class RestClient(object):
     @staticmethod
     def urljoin(*args):
         """
-        Joins given arguments into an url. Trailing but not leading slashes are
+        Joins given arguments into an url. Trailing and leading slashes are
         stripped for each argument.
         """
 
-        url = "/".join(map(lambda x: str(x).rstrip("/"), args))
+        url = "/".join(map(lambda x: str(x).rstrip("/").lstrip("/"), args))
         return url
 
     def get(self, api_endpoint, data=None, params=None):
