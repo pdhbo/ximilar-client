@@ -781,11 +781,12 @@ class Image(RecognitionClient):
         self.verifyCount = 0
         return True
 
-    def to_json(self, label_names=False):
+    def to_json(self):
         labels, status = self.get_labels()
         return {
             IMAGE: self.id,
-            LABELS: [label.name if label_names else label.id for label in labels],
+            LABELS: [label.id for label in labels],
+            LABEL_NAMES: [label.output_name for label in labels],
             META_DATA: self.meta_data,
             IMG_HEIGHT: self.img_height,
             IMG_WIDTH: self.img_width,
