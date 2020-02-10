@@ -3,6 +3,7 @@ import json
 import base64
 import cv2
 import os
+import re
 import numpy as np
 import concurrent.futures
 
@@ -11,6 +12,7 @@ from tqdm import tqdm
 from ximilar.client.constants import *
 
 CONFIG_ENDPOINT = "account/v2/config/"
+BASE64_HEADER_PATTERN = re.compile(r"^data:image/(\w+);base64,")
 
 
 class XimilarClientException(Exception):
@@ -51,6 +53,16 @@ class RestClient(object):
         """
         return self.__class__.__name__
 
+    @staticmethod
+    def urljoin(*args):
+        """
+        Joins given arguments into an url. Trailing and leading slashes are
+        stripped for each argument.
+        """
+
+        url = "/".join(map(lambda x: str(x).rstrip("/").lstrip("/"), args))
+        return url
+
     def get(self, api_endpoint, data=None, params=None):
         """
         Call the http GET request with data.
@@ -60,7 +72,11 @@ class RestClient(object):
         :return: json response
         """
         result = requests.get(
-            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=self.request_timeout
+            self.urljoin(self.endpoint, api_endpoint),
+            params=params,
+            headers=self.headers,
+            data=data,
+            timeout=self.request_timeout,
         )
         return result.json()
 
@@ -84,7 +100,7 @@ class RestClient(object):
             data = json.dumps(data)
 
         result = method(
-            self.endpoint + api_endpoint,
+            self.urljoin(self.endpoint, api_endpoint),
             params=params,
             headers=self.headers,
             data=data,
@@ -94,7 +110,6 @@ class RestClient(object):
 
         # todo: check JSON RESULT CODES -> raise XimilarClientException
         # todo: check HTTP STATUS CODES -> raise XimilarClientException
-
         try:
             json_result = result.json()
             return json_result
@@ -284,17 +299,37 @@ class RestClient(object):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         :param image: numpy/cv2 data with RGB order
+        :param image_space: from which color space we are converting (default RGB)
         :param resize: if we want to resize image
         :return: base64 encoded string
         """
         image = self._convert_image_to_bgr(image, image_space)
         image = self.resize_image_data(image, resize=resize)
-        # the cv2.IMWRITE_PNG_COMPRESSION
-        # retval, buffer = cv2.imencode(".png", image, params=[cv2.IMWRITE_PNG_COMPRESSION, 3])
-        # the cv2.IMWRITE_JPEG_QUALITY is from [0, 100] where 100 is probably almost without compression; default: 95
         retval, buffer = cv2.imencode(".jpg", image, params=[cv2.IMWRITE_JPEG_QUALITY, 96])
         jpg_as_text = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
         return jpg_as_text
+
+    def base64_to_cv2img(self, base64image):
+        """
+        Convert base64 data to image in BGR format.
+        :param base64image: base64 image encoded
+        :return: opencv2/numpy image
+        """
+        try:
+            header = BASE64_HEADER_PATTERN.match(base64image)
+            if header:
+                base64data = BASE64_HEADER_PATTERN.sub("", base64image)
+                base64image = base64data
+
+            img_array = base64.b64decode(json_record[Record.BASE64])
+
+            image = np.frombuffer(img_array, dtype=np.uint8)
+            image = cv2.imdecode(image, 1)
+            if image.shape[2] != 3:
+                raise Exception("Image has not shape (height, width, 3)")
+            return image
+        except Exception as e:
+            raise Exception("Unable to read base64:" + str(e))
 
     def load_url_image(self, path, resize=True):
         """
@@ -333,6 +368,13 @@ class RestClient(object):
 
             if FILE in records[i] and BASE64 not in records[i] and IMG_DATA not in records[i]:
                 records[i][BASE64] = self.load_base64_file(records[i][FILE], resize=not noresize)
+            elif BASE64 in records[i] and (noresize or self.max_image_size == 0):
+                # if we have base64 and we do not want to resize it at all
+                pass
+            elif BASE64 in records[i]:
+                # if we have base64 and we need to resize it
+                image = self.base64_to_cv2img(records[i][BASE64])
+                records[i][BASE64] = self.cv2img_to_base64(image, image_space="BGR", resize=not noresize)
             elif IMG_DATA in records[i]:
                 records[i][BASE64] = self.cv2img_to_base64(
                     records[i][IMG_DATA],
@@ -343,9 +385,6 @@ class RestClient(object):
             # finally we need to delete the image data and just send url or base64
             if IMG_DATA in records[i]:
                 del records[i][IMG_DATA]
-            #
-            # if FILE in records[i]:
-            #     del records[i][FILE]
 
         return records
 

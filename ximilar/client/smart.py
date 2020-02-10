@@ -14,6 +14,7 @@ SMART_SEARCH = "smart/v2/"
 
 SEARCH_OBJ_ENDPOINT = "product/search_by_object"
 SEARCH_PRODUCT = "product/search"
+TOP_CATEGORIES = "product/top_categories"
 DETECT_PRODUCT = "product/detect"
 INSERT_PRODUCT = "product/insert"
 ALL_IDS = "allIDs"
@@ -48,6 +49,13 @@ class SmartSearchClient(SimilarityPhotosClient):
 
         return data
 
+    def get_categories(self):
+        """
+        Return available top categories for products.
+        """
+        result = self.get(TOP_CATEGORIES)
+        return result["labels"]
+
     def search(self, records, filter=None, k=5, fields_to_return=[_ID]):
         """
         Detects Objects and Tags and find for the largest object most visually similar items in your collection.
@@ -68,17 +76,6 @@ class SmartSearchClient(SimilarityPhotosClient):
         """
         records = self.preprocess_records(records)
         return self.post(DETECT_PRODUCT, data={RECORDS: records})
-
-    def search_by_object(self, records, filter=None, count=5, fields_to_return=[_ID]):
-        """
-        Detects Objects and Tags without searching items.
-        :param records: list of dictionaries with _url|_file|_base64
-        :return: json response
-        """
-        data = {RECORDS: self.preprocess_records(records), K_COUNT: count, FIELDS_TO_RETURN: fields_to_return}
-        if filter:
-            data[FILTER] = filter
-        return self.post(SEARCH_OBJ_ENDPOINT, data={RECORDS: records, COLLECTION: self.headers[COLLECTION]})
 
     def insert(self, records):
         """

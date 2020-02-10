@@ -10,9 +10,6 @@ from ximilar.client.detection import DetectionObject
 from ximilar.client.recognition import Image
 
 
-# python ~/ximilar-recognition/ximilar-client/tools/fashion_cutter.py --auth_token <token> --workspace_id 041049f9-f564-456b-8c73-dbb77181d700 --output_dir . --resize 512 --object_resize 448 --min_size 256 --print_details --out_workspace d64fd027-b76c-4cbe-b292-c0f7a47781c9 --max_per_label 1000 --label_to_add 251748fe-e772-46ef-bf21-a0e65fcbe6cc
-
-
 def resize(image_data, rect_size, object_resize):
     (origH, origW) = image_data.shape[:2]
 
@@ -25,7 +22,6 @@ def resize(image_data, rect_size, object_resize):
     else:
         rW = rH = origH / float(object_resize)
 
-    # print(f"origH {origH}, origW {origW}, rW{rW}, rect_size {rect_size}")
     # resize the image
     resized_image = cv2.resize(image_data, (int(origW / rW), int(origH / rH))) if rW >= 1.0 else image_data
 
