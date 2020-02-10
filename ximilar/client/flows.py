@@ -68,6 +68,7 @@ class Flow(FlowsClient):
         self.description = flow_json[DESCRIPTION]
         self.workspace = flow_json[WORKSPACE]
         self.top_node = flow_json[TOP_NODE]
+        self.image_size = 512
 
     def to_json(self):
         """
