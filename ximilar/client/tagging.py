@@ -29,7 +29,10 @@ class FashionTaggingClient(TaggingClient):
         super(FashionTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = FASHION_TAGGING_ENDPOINT
 
-    def tags(self, records, aggregate_labels=False):
+    def tags(self, records, aggregate_labels=False, predict_endpoint=None):
+        # todo: remove this if, just for dev
+        if predict_endpoint:
+            return super().tags(records, predict_endpoint, aggregate_labels=aggregate_labels)
         return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=aggregate_labels)
 
 
