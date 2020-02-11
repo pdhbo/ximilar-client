@@ -8,7 +8,7 @@ from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE, OBJECTS
 from ximilar.client.recognition import Image, Label
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Save all images from a workspace and their metadata to json")
+    parser = ArgumentParser(description="Save all images from a workspace, label and their metadata to json")
     parser.add_argument("--folder", default="folder to images and annotations")
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
@@ -40,14 +40,14 @@ if __name__ == "__main__":
         json.dump(rec_json, outfile, indent=2)
 
     # get detection entities
-    tasks, status = client_d.get_all_tasks()
-    labels, status = client_d.get_all_labels()
+    det_tasks, status = client_d.get_all_tasks()
+    det_labels, status = client_d.get_all_labels()
 
-    if tasks is not None:
-        for task in tasks:
+    if det_tasks is not None:
+        for task in det_tasks:
             det_json.append(task.to_json())
 
-        for label in labels:
+        for label in det_labels:
             det_json.append(label.to_json())
 
         with open(args.folder + "/detection.json", "w") as outfile:

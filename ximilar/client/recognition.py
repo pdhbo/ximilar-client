@@ -786,11 +786,13 @@ class Image(RecognitionClient):
         return {
             IMAGE: self.id,
             LABELS: [label.id for label in labels],
+            LABEL_NAMES: [label.output_name for label in labels],
             META_DATA: self.meta_data,
             IMG_HEIGHT: self.img_height,
             IMG_WIDTH: self.img_width,
             VERIFY_COUNT: self.verifyCount,
             FILE: self._file,
+            IMG_PATH: self.img_path,
         }
 
 
