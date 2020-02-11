@@ -38,9 +38,14 @@ class RestClient(object):
         self.cache = {}
         self.endpoint = endpoint
         self.max_image_size = max_image_size
-        self.headers = {"Content-Type": "application/json", "Authorization": "Token " + self.token}
+        self.headers = {"Content-Type": "application/json", "Authorization": self.get_token_header(self.token)}
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
+
+    def get_token_header(self, token):
+        if len(token) < 70:
+            return "Token " + token
+        return "JWT " + token
 
     def invalidate(self):
         self.cache = {}
