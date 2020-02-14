@@ -112,7 +112,6 @@ class RestClient(object):
             files=files,
             timeout=self.request_timeout,
         )
-
         # todo: check JSON RESULT CODES -> raise XimilarClientException
         # todo: check HTTP STATUS CODES -> raise XimilarClientException
         try:
