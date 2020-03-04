@@ -183,6 +183,24 @@ image.add_meta_data({"__KEY_1__": "value", "__KEY_2__": {"THIS CAB BE":"COMPLEX"
 image.clear_meta_data()
 ```
 
+## Ximilar Flows
+
+The client is able to get flow of the json or process images/records by the flow.
+
+```python
+from ximilar.client import FlowsClient
+
+client = FlowsClient("__API_TOKEN__")
+
+# get flow
+flow, _ = client.get_flow("__FLOW_ID__")
+
+# two way to call the flow on records
+client.process_flow(flow.id, records)
+flow.proces(records)
+```
+
+
 ## Ximilar Object Detection
 
 This service is in BETA version.
