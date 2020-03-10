@@ -54,7 +54,7 @@ class SmartSearchClient(SimilarityPhotosClient):
         Return available top categories for products.
         """
         result = self.get(TOP_CATEGORIES)
-        return result["labels"]
+        return result
 
     def search(self, records, filter=None, k=5, fields_to_return=[_ID]):
         """
