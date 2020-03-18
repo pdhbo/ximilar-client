@@ -325,7 +325,7 @@ class RestClient(object):
                 base64data = BASE64_HEADER_PATTERN.sub("", base64image)
                 base64image = base64data
 
-            img_array = base64.b64decode(json_record[Record.BASE64])
+            img_array = base64.b64decode(base64image)
 
             image = np.frombuffer(img_array, dtype=np.uint8)
             image = cv2.imdecode(image, 1)

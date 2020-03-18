@@ -53,7 +53,7 @@ class SimilarityPhotosClient(RestClient):
         if query_record is None:
             raise Exception("Please specify record when using search method.")
 
-        data = {QUERY_RECORD: query_record, K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
+        data = {QUERY_RECORD: self.preprocess_records([query_record])[0], K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
         if filter:
             data[FILTER] = filter
         return data
