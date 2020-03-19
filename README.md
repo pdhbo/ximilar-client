@@ -292,11 +292,18 @@ This method works only for getting result for classification, tagging, detection
 
 ## Ximilar Visual Search
 
+Service for visual fashion search. For more information see docs.ximilar.com
+
 ```python
 from ximilar.client.visual import VisualSearchClient
 
 client = VisualSearchClient(token='__API_TOKEN__', collection='__COLLECTION_ID__')
+
+# inserting image requires _id and product_id
 client.insert([{"_id": "__IMAGE_ID__", "product_id": "__PRODUCT_ID__", "_url": "__URL_PATH_TO_IMAGE__"}])
+result = client.detect([{"_url": "__URL_PATH_TO_IMAGE__"}])
+
+# search in collection
 result = client.search([{"_url": "__URL_PATH_TO_IMAGE__"}])
 ```
 
