@@ -365,6 +365,7 @@ class RestClient(object):
                 and BASE64 not in records[i]
                 and URL not in records[i]
                 and IMG_DATA not in records[i]
+                and "_id" not in records[i]
             ):
                 raise Exception("Please specify one of '_file', '_base64', '_url', '_img_data' field in record")
 
