@@ -3,14 +3,14 @@ from ximilar.client.constants import (
     K_COUNT,
     FIELDS_TO_RETURN,
     ENDPOINT,
-    SMART_PRODUCT_SEARCH,
+    VISUAL_SEARCH,
     RECORDS,
     COLLECTION,
     FILTER,
 )
 from ximilar.client.search import SimilarityPhotosClient
 
-SMART_SEARCH = "smart/v2/"
+VISUAL_SEARCH_V2 = "visual-search/v2/"
 
 SEARCH_OBJ_ENDPOINT = "product/search_by_object"
 SEARCH_PRODUCT = "product/search"
@@ -21,16 +21,16 @@ ALL_IDS = "allIDs"
 PING = "ping"
 
 
-class SmartSearchClient(SimilarityPhotosClient):
+class VisualSearchClient(SimilarityPhotosClient):
     def __init__(
         self,
         token,
         collection=None,
         collection_id=None,
-        endpoint=ENDPOINT + SMART_SEARCH,
-        resource_name=SMART_PRODUCT_SEARCH,
+        endpoint=ENDPOINT + VISUAL_SEARCH_V2,
+        resource_name=VISUAL_SEARCH,
     ):
-        super(SmartSearchClient, self).__init__(
+        super(VisualSearchClient, self).__init__(
             token=token,
             collection=collection,
             collection_id=collection_id,
@@ -87,7 +87,7 @@ class SmartSearchClient(SimilarityPhotosClient):
         return self.post(INSERT_PRODUCT, data=data)
 
     def random(self, filter=None, count=10, fields_to_return=[]):
-        raise NotImplementedError("random operation does not work for Smart Search")
+        raise NotImplementedError("random operation does not work for Visual Search")
 
     def get_all_ids(self):
         """

@@ -20,7 +20,7 @@ PHOTO_SIMILARITY = "photo-similarity"
 PRODUCT_SIMILARITY = "product-similarity"
 GENERIC_TAGGING = "generic-tagging"
 FASHION_TAGGING = "fashion-tagging"
-SMART_PRODUCT_SEARCH = "smart-product-search"
+VISUAL_SEARCH = "visual-search"
 DOMINANT_COLORS_PRODUCT = "dominant-colors"
 DOMINANT_COLORS_GENERIC = "dominant-colors"
 

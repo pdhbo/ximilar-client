@@ -290,6 +290,17 @@ result = client.parallel_records_processing([{"_url": image, "labels": ["__LABEL
 
 This method works only for getting result for classification, tagging, detection, color extraction or uploading images (All methods which use json records as input).
 
+## Ximilar Visual Search
+
+```python
+from ximilar.client.visual import VisualSearchClient
+
+client = VisualSearchClient(token='__API_TOKEN__', collection='__COLLECTION_ID__')
+client.insert([{"_id": "__IMAGE_ID__", "product_id": "__PRODUCT_ID__", "_url": "__URL_PATH_TO_IMAGE__"}])
+result = client.search([{"_url": "__URL_PATH_TO_IMAGE__"}])
+```
+
+
 ## Ximilar Dominant Colors
 
 You can select the service for extracting dominant colors by type of your image. If the image is from Product/Fashion domain, which means that product is tipically on some solid background then us `DominanColorProductClient`.
