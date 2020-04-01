@@ -10,11 +10,15 @@ class FlowsClient(RestClient):
 
         self.PREDICT_ENDPOINT = "/flows/v2/process"
 
-    def construct_data(self, flow=None, records=None):
+    def construct_data(self, flow=None, records=None, store_images=None):
         if flow is None or records is None or len(records) == 0:
             raise Exception("Please specify flow and records!")
 
-        return {"flow": flow, RECORDS: self.preprocess_records(records)}
+        data = {"flow": flow, RECORDS: self.preprocess_records(records)}
+        if store_images is not None:
+            data[STORE_IMAGES] = store_images
+
+        return data
 
     def get_flow(self, flow_id):
         flow_json = self.get("/flows/v2/flow/" + flow_id)
@@ -22,9 +26,10 @@ class FlowsClient(RestClient):
             return None, RESULT_ERROR
         return Flow(self.token, self.endpoint, flow_json, max_image_size=self.max_image_size), RESULT_OK
 
-    def process_flow(self, flow, records):
-        data = self.construct_data(flow=flow, records=records)
+    def process_flow(self, flow, records, store_images=None):
+        data = self.construct_data(flow=flow, records=records, store_images=store_images)
         return self.post(self.PREDICT_ENDPOINT, data=data)
+
 
 class Flow(FlowsClient):
     """
@@ -48,8 +53,8 @@ class Flow(FlowsClient):
         """
         return self.get("/flows/v2/flow/" + str(self.id) + "/json")
 
-    def process(self, records):
+    def process(self, records, store_images=None):
         """
         Call processing of the flow.
         """
-        return self.process_flow(self.id, records)
+        return self.process_flow(self.id, records, store_images=store_images)

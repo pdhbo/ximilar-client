@@ -45,6 +45,7 @@ class FashionTaggingClient(TaggingClient):
         result = requests.get(self.urljoin(self.endpoint, "tagging/fashion/v2/categories"))
         return result.json()["labels"]
 
+
 class GenericTaggingClient(TaggingClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name=GENERIC_TAGGING):
         super(GenericTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
