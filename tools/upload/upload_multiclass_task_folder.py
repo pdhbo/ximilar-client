@@ -25,13 +25,16 @@ if __name__ == "__main__":
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
+    parser.add_argument("--image_size", help="max_image_size", default=800, type=int)
+    parser.add_argument("--name", default="Uploaded")
     args = parser.parse_args()
 
-    client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
-    client.max_image_size = 0
+    client = RecognitionClient(
+        token=args.auth_token, endpoint=args.api_prefix, max_image_size=args.image_size, workspace=args.workspace_id
+    )
 
-    add_label, _ = client.create_label("Uploaded_LABEL_"+str(uuid.uuid4()), label_type="category")
-    task, _ = client.create_task("Uploaded", task_type="multi_class")
+    add_label, _ = client.create_label(args.name + "_LABEL_" + str(uuid.uuid4()), label_type="category")
+    task, _ = client.create_task(args.name, task_type="multi_class")
 
     for label_create in os.listdir(args.folder):
         label, _ = client.create_label(label_create, label_type="category")
@@ -39,7 +42,9 @@ if __name__ == "__main__":
 
         records = []
         for file_path in os.listdir(os.path.join(args.folder, label_create)):
-            records.append({"_file": os.path.join(args.folder, label_create, file_path), "labels":[label.id, add_label.id]})
+            records.append(
+                {"_file": os.path.join(args.folder, label_create, file_path), "labels": [label.id, add_label.id]}
+            )
 
         client.parallel_records_processing(records, client.upload_images, max_workers=5, output=True)
         print("uploaded", label_create)
