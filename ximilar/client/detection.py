@@ -1,4 +1,5 @@
 from ximilar.client import RecognitionClient
+from ximilar.client.recognition import Image, IMAGE_ENDPOINT
 from ximilar.client.constants import *
 
 OBJECT_ENDPOINT = "detection/v2/object/"
@@ -285,6 +286,13 @@ class DetectionLabel(DetectionClient):
         """
         return self.remove_label(self.id)
 
+    def get_images(self):
+        images, status = self.get_all_paginated_items(IMAGE_ENDPOINT+"?detection_labels="+self.id)
+        if not images and status[STATUS] == STATUS_ERROR:
+            return None, status
+        return [Image(self.token, self.endpoint, image) for image in images], RESULT_OK
+
+
     def add_recognition_task(self, task_id):
         """
         Add recognition task to this label.
@@ -404,4 +412,4 @@ class DetectionObject(DetectionClient):
         return self.data
 
     def __str__(self):
-        return self.id + " " + self.detection_label[NAME] + " " + str(self.data)
+        return self.id + " " + self.detection_label
