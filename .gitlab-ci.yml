@@ -6,11 +6,8 @@ stages:
 
 black:
   stage: test
-  image: python:alpine
+  image: kiwicom/black:19.10b0
   script:
-    - apk update
-    - apk add gcc musl-dev
-    - pip install black
     - black --check --line-length 120 .
   allow_failure: true
 
