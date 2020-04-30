@@ -62,9 +62,19 @@ class SimilarityPhotosClient(RestClient):
             data[FILTER] = filter
         return data
 
-    def allRecords(self, size=1000, page=1):
-        result = self.post("allRecords?size=%s&page=%s" % (size, page), data={})
+    def allRecords(self, size=1000, page=1, fields_to_return=[_ID]):
+        if size > 0:
+            result = self.post("allRecords?size=%s&page=%s" % (size, page), data={FIELDS_TO_RETURN: fields_to_return})
+        else:
+            result = self.post("allRecords", data={FIELDS_TO_RETURN: fields_to_return})
         return result
+
+    def get_all_ids(self):
+        """
+        Returns an array with records with "_id" fields.
+        :return: {"answer_records": [an array with records with "_id" fields], "answer_count": "# of records"}
+        """
+        return self.allRecords(size=0, fields_to_return=[_ID])
 
     def search(self, query_record, filter=None, k=5, fields_to_return=[_ID]):
         """
