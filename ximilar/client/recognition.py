@@ -552,7 +552,6 @@ class Label(RecognitionClient):
 
         label_json = self.get(LABEL_ENDPOINT + self.id)
         self.images_count = label_json[IMAGES_COUNT]
-
         return self.images_count
 
     # TODO: get object count

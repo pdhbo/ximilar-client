@@ -1,10 +1,10 @@
 # ----------------- PLEASE READ -------------------
 # RUN THIS as pytest client.py --token __TOKEN_ID__
 # This test scenario suggest that you already:
-#     1. Have two Workspaces (Default, 'Test')
-#     2. In your Default workspace you have on Tagging and one Categorization task trained
-#     3. Also that you have resources to almost all services
-#     4. In your Default workspace some images are present
+#     1. In your Default workspace you have on Tagging and one Categorization task trained
+#     2. Also that you have resources to almost all services
+#     3. In your Default workspace some images are present
+#     4. You have valid flow
 
 import pytest
 
@@ -12,6 +12,8 @@ from ximilar.client.constants import *
 from ximilar.client.recognition import RecognitionClient, Image, Label, Task
 from ximilar.client.detection import DetectionClient, DetectionObject, DetectionLabel, DetectionTask
 from ximilar.client.tagging import FashionTaggingClient, GenericTaggingClient
+from ximilar.client.colors import DominantColorProductClient, DominantColorGenericClient
+from ximilar.client.flows import FlowsClient
 
 TASK_NAME = "Test-Task-In-Vize-X-1"
 LABEL_NAME = "Test-Task-In-Vize-Label-X-1"
@@ -85,23 +87,21 @@ def test_04_client_create_task_label_image(request):
     task, status = client.create_task(TASK_NAME)
     label, status = task.create_label(LABEL_NAME)
     images0, n_page, status = label.get_training_images()
-    label_count1 = label.images_count
     images, status = label.upload_images([{FILE: TEST_IMG_SMALL}])
+    images1, n_page, status = label.get_training_images()
     added_labels, status = images[0].get_labels()
     cached_labels, status = images[0].get_labels()
-
-    label_count2 = label.get_images_count()
 
     # Query after creating
     task1, status = client.get_task(task.id)
     labels1, status = task1.get_labels()
-    images1, n_page, status = label.get_training_images()
     label.detach_image(images[0].id)
     tasksX, status = client.get_tasks_by_name(TASK_NAME)
     labelsX, status = client.get_labels_by_substring(LABEL_NAME)
 
     # then delete everything
     client.remove_image(images[0].id)
+    images2, n_page, status = label.get_training_images()
     task.detach_label(label.id)
 
     for task_to_delete in tasksX:
@@ -120,8 +120,6 @@ def test_04_client_create_task_label_image(request):
     # check the label had connected images
     assert len(added_labels) == 1
     assert len(cached_labels) == 1
-    assert label_count1 == 0
-    assert label_count2 == 1
 
     # and check it
     assert labels is None
@@ -144,6 +142,7 @@ def test_04_client_create_task_label_image(request):
     assert len(labelsX) == 1
     assert len(images0) == 0
     assert len(images1) == 1
+    assert len(images2) == 0
 
 
 def test_05_paginated_methods_recognition_1(request):
@@ -301,67 +300,7 @@ def test_13_detection_workflow(request):
     assert len(labels1) != len(labels2)
 
 
-def test_14_recognition_workspace(request):
-    """
-    This test will be skipped if you do not have at least 2 workspaces.
-    Test of creating new task to different workspace.
-    """
-    client = get_recognition_client(request)
-    result, status = client.get_workspaces()
-
-    def_workspace, oth_workspace = None, None
-    for workspace in result:
-        if workspace.id == client.get_user_details()["default_workspace"]:
-            def_workspace = workspace
-        elif workspace.name == "Test":
-            oth_workspace = workspace
-
-    if len(result) > 1:
-        client1 = RecognitionClient(request.config.getoption("--token"), workspace=def_workspace.id)
-        client2 = RecognitionClient(request.config.getoption("--token"), workspace=oth_workspace.id)
-
-        tasks1, status = client1.get_all_tasks()
-        clean_tasks2, status = client2.get_all_tasks()
-
-        for task in clean_tasks2:
-            task.remove()
-
-        task2, status = client2.create_task("Other Workspace Task")
-        tasks2_other_workspace, status = client2.get_all_tasks()
-        client2.remove_task(task2.id)
-        tasks2_other_workspace_after_remove, status = client2.get_all_tasks()
-
-        assert len(tasks1) > 1
-        assert len(tasks2_other_workspace) == 1
-        assert len(tasks2_other_workspace_after_remove) == 0
-
-
-def test_15_upload_image_different_workspace(request):
-    """
-    This test will be skipped if you do not have at least 2 workspaces.
-    Test of uploading image to different workspace.
-    """
-    client = get_recognition_client(request)
-    result, status = client.get_workspaces()
-
-    if len(result) < 2:
-        return
-
-    oth_workspace = None
-    for workspace in result:
-        if workspace.name == "Test":
-            oth_workspace = workspace
-
-    client1 = RecognitionClient(request.config.getoption("--token"), workspace=oth_workspace.id)
-    images1, status = client1.upload_images([{FILE: TEST_IMG_BIG, "noresize": True}])
-    images1[0].remove()
-
-    assert len(images1) > 0
-    assert images1[0].workspace == oth_workspace.id
-    assert images1[0].img_height > client1.max_image_size
-
-
-def test_16_upload_and_verify_image(request):
+def test_14_upload_and_verify_image(request):
     """
     Test uploading images, verify and unverify them.
     """
@@ -379,3 +318,42 @@ def test_16_upload_and_verify_image(request):
 
     assert verify_cnt == 1
     assert unverify_cnt == 0
+
+
+def test_15_dominant_color_product(request):
+    """
+    Test dominant color product system for prediction.
+    """
+    client = DominantColorProductClient(request.config.getoption("--token"))
+    result = client.dominantcolor([{FILE: TEST_IMG_SMALL}])
+
+    assert RECORDS in result and len(result[RECORDS]) > 0
+    assert "_dominant_colors" in result[RECORDS][0]
+
+
+def test_16_dominant_color_generic(request):
+    """
+    Test dominant color generic system for prediction.
+    """
+    client = DominantColorGenericClient(request.config.getoption("--token"))
+    result = client.dominantcolor([{FILE: TEST_IMG_SMALL}])
+
+    assert RECORDS in result and len(result[RECORDS]) > 0
+    assert "_dominant_colors" in result[RECORDS][0]
+
+
+def test_17_test_flow(request):
+    """
+    Test flow for prediction.
+    """
+    client = FlowsClient(request.config.getoption("--token"))
+    flows, _ = client.get_all_flows()
+
+    for flow in flows:
+        if flow.valid:
+            result = flow.process([{FILE: TEST_IMG_SMALL}])
+            json_flow = flow.to_json()
+
+            assert RECORDS in result and len(result[RECORDS]) > 0
+            assert "type" in json_flow and "id" in json_flow
+            break
