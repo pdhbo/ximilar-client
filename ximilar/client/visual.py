@@ -39,13 +39,20 @@ class VisualSearchClient(SimilarityPhotosClient):
         )
         self.PREDICT_ENDPOINT = SEARCH_PRODUCT
 
-    def construct_data(self, records=[], filter=None, k=5, fields_to_return=[_ID]):
+    def construct_data(self, records=[], filter=None, k=5, fields_to_return=[_ID], custom_flow=None):
         if len(records) == 0:
             raise Exception("Please specify at least on record when using search method.")
 
         data = {RECORDS: self.preprocess_records(records), K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
         if filter:
             data[FILTER] = filter
+
+        data = self.fill_data(data, custom_flow)
+        return data
+
+    def fill_data(self, data, custom_flow):
+        if custom_flow is not None:
+            data["custom_flow"] = custom_flow
 
         return data
 
@@ -56,7 +63,7 @@ class VisualSearchClient(SimilarityPhotosClient):
         result = self.get(TOP_CATEGORIES)
         return result
 
-    def search(self, records, filter=None, k=5, fields_to_return=[_ID]):
+    def search(self, records, filter=None, k=5, fields_to_return=[_ID], custom_flow=None):
         """
         Detects Objects and Tags and find for the largest object most visually similar items in your collection.
         :param records: array with one record (dictionary) with '_url' or "_base64' data
@@ -65,25 +72,26 @@ class VisualSearchClient(SimilarityPhotosClient):
         :param filter: how to filter picked items (mongodb syntax)
         :return:
         """
-        data = self.construct_data(records=records, filter=filter, k=k, fields_to_return=fields_to_return)
+        data = self.construct_data(records=records, filter=filter, k=k, fields_to_return=fields_to_return, custom_flow=custom_flow)
         return self.post(self.PREDICT_ENDPOINT, data=data)
 
-    def detect(self, records):
+    def detect(self, records, custom_flow=None):
         """
         Detects Objects and Tags without searching items.
         :param records: list of dictionaries with _url|_file|_base64
         :return: json response
         """
         records = self.preprocess_records(records)
-        return self.post(DETECT_PRODUCT, data={RECORDS: records})
+        data = self.fill_data({RECORDS: records}, custom_flow)
+        return self.post(DETECT_PRODUCT, data=data)
 
-    def insert(self, records):
+    def insert(self, records, custom_flow=None):
         """
         Insert records into collection with all meta information.
         :param records: dictionary with your "_id" and with one of "_url", "_file" or "_base64" to extract descriptor.
         :return: json response
         """
-        data = {RECORDS: records}
+        data = self.fill_data({RECORDS: records}, custom_flow)
         return self.post(INSERT_PRODUCT, data=data)
 
     def random(self, filter=None, count=10, fields_to_return=[]):
