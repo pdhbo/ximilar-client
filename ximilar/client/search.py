@@ -12,10 +12,12 @@ from ximilar.client.constants import (
     COLLECTION_ID,
     PHOTO_SIMILARITY,
     PRODUCT_SIMILARITY,
+    PRODUCT_SIMILARITY_TAGS,
 )
 
 SIMILARITY_PHOTOS = "similarity/photos/v2/"
 SIMILARITY_PRODUCTS = "similarity/products/v2/"
+SIMILARITY_PRODUCTS_TAGS = "similarity/products_tags/v2/"
 SMART_SEARCH = "smart/v2/product/"
 
 SEARCH_OBJ_ENDPOINT = "search_by_object"
@@ -154,6 +156,24 @@ class SimilarityProductsClient(SimilarityPhotosClient):
         resource_name=PRODUCT_SIMILARITY,
     ):
         super(SimilarityProductsClient, self).__init__(
+            token=token,
+            collection=collection,
+            collection_id=collection_id,
+            endpoint=endpoint,
+            resource_name=resource_name,
+        )
+
+
+class SimilarityProductsTagsClient(SimilarityPhotosClient):
+    def __init__(
+        self,
+        token,
+        collection=None,
+        collection_id=None,
+        endpoint=ENDPOINT + SIMILARITY_PRODUCTS_TAGS,
+        resource_name=PRODUCT_SIMILARITY_TAGS,
+    ):
+        super(SimilarityProductsTagsClient, self).__init__(
             token=token,
             collection=collection,
             collection_id=collection_id,
