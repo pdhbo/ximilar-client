@@ -392,12 +392,6 @@ class RestClient(object):
 
         return records
 
-    def fill_data(self, data, custom_flow):
-        if custom_flow is not None:
-            data["custom_flow"] = custom_flow
-
-        return data
-
     def custom_endpoint_processing(self, records, endpoint):
         """
         Records processing for your custom endpoint.

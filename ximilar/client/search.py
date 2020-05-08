@@ -189,5 +189,11 @@ class SimilarityProductsTagsClient(SimilarityPhotosClient):
         :return: json response
         """
         records = self.preprocess_records(records)
-        data = self.fill_data({RECORDS: records}, custom_flow)
+        data = {RECORDS: self.fill_data(records, custom_flow)}
         return self.post(INSERT, data=data)
+
+    def fill_data(self, records, custom_flow):
+        if custom_flow is not None:
+            for r in records:
+                r["custom_flow"] = custom_flow
+        return records

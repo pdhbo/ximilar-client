@@ -100,3 +100,9 @@ class VisualSearchClient(SimilarityPhotosClient):
         :return: an array with records with "_id" fields.
         """
         return self.post(ALL_IDS, data={"something": "value"})
+
+    def fill_data(self, data, custom_flow):
+        if custom_flow is not None:
+            data["custom_flow"] = custom_flow
+
+        return data
