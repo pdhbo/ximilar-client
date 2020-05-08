@@ -392,6 +392,12 @@ class RestClient(object):
 
         return records
 
+    def fill_data(self, data, custom_flow):
+        if custom_flow is not None:
+            data["custom_flow"] = custom_flow
+
+        return data
+
     def custom_endpoint_processing(self, records, endpoint):
         """
         Records processing for your custom endpoint.
@@ -458,7 +464,7 @@ class RestClient(object):
 
         results = []
         if output:
-            status = {'answer_records': 0, "records": 0, 'error': 0, 'skipped_records': 0}
+            status = {"answer_records": 0, "records": 0, "error": 0, "skipped_records": 0}
             with tqdm(total=len(records)) as pbar:
                 for future in futures:
                     result = future["future"].result()
@@ -471,20 +477,20 @@ class RestClient(object):
         return results
 
     def update_status(self, status, result):
-        if 'status' in result:
-            if isinstance(result['status'], int):
-                if result['status'] >= 300:
+        if "status" in result:
+            if isinstance(result["status"], int):
+                if result["status"] >= 300:
                     status["error"] += 1
-            if isinstance(result['status'], dict):
-                if 'code' in result['status']:
-                    if result['status']['code'] >= 300:
+            if isinstance(result["status"], dict):
+                if "code" in result["status"]:
+                    if result["status"]["code"] >= 300:
                         status["error"] += 1
-        if 'records' in result:
-            status["records"] += len(result['records'])
-        if 'skipped_records' in result:
-            status["skipped_records"] += len(result['skipped_records'])
-        if 'answer_records' in result:
-            status["answer_records"] += len(result['answer_records'])
+        if "records" in result:
+            status["records"] += len(result["records"])
+        if "skipped_records" in result:
+            status["skipped_records"] += len(result["skipped_records"])
+        if "answer_records" in result:
+            status["answer_records"] += len(result["answer_records"])
 
     def batch(self, iterable, n=1):
         """

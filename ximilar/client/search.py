@@ -180,3 +180,14 @@ class SimilarityProductsTagsClient(SimilarityPhotosClient):
             endpoint=endpoint,
             resource_name=resource_name,
         )
+
+    def insert(self, records, custom_flow=None):
+        """
+        Insert records into collection with all meta information.
+        :param custom_flow: string ID of the flow that should be called during the insert (in extractor)
+        :param records: dictionary with your "_id" and with one of "_url", "_file" or "_base64" to extract descriptor.
+        :return: json response
+        """
+        records = self.preprocess_records(records)
+        data = self.fill_data({RECORDS: records}, custom_flow)
+        return self.post(INSERT, data=data)

@@ -50,12 +50,6 @@ class VisualSearchClient(SimilarityPhotosClient):
         data = self.fill_data(data, custom_flow)
         return data
 
-    def fill_data(self, data, custom_flow):
-        if custom_flow is not None:
-            data["custom_flow"] = custom_flow
-
-        return data
-
     def get_categories(self):
         """
         Return available top categories for products.
@@ -72,7 +66,9 @@ class VisualSearchClient(SimilarityPhotosClient):
         :param filter: how to filter picked items (mongodb syntax)
         :return:
         """
-        data = self.construct_data(records=records, filter=filter, k=k, fields_to_return=fields_to_return, custom_flow=custom_flow)
+        data = self.construct_data(
+            records=records, filter=filter, k=k, fields_to_return=fields_to_return, custom_flow=custom_flow
+        )
         return self.post(self.PREDICT_ENDPOINT, data=data)
 
     def detect(self, records, custom_flow=None):
@@ -89,6 +85,7 @@ class VisualSearchClient(SimilarityPhotosClient):
         """
         Insert records into collection with all meta information.
         :param records: dictionary with your "_id" and with one of "_url", "_file" or "_base64" to extract descriptor.
+        :param custom_flow: string ID of the flow that should be called during the insert (in extractor)
         :return: json response
         """
         data = self.fill_data({RECORDS: records}, custom_flow)
