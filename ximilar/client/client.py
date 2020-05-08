@@ -103,7 +103,6 @@ class RestClient(object):
 
         if data is not None:
             data = json.dumps(data)
-
         result = method(
             self.urljoin(self.endpoint, api_endpoint),
             params=params,
@@ -459,14 +458,33 @@ class RestClient(object):
 
         results = []
         if output:
+            status = {'answer_records': 0, "records": 0, 'error': 0, 'skipped_records': 0}
             with tqdm(total=len(records)) as pbar:
                 for future in futures:
                     result = future["future"].result()
+                    self.update_status(status, result)
                     results.append(result)
                     pbar.update(future["size"])
+            print(status)
         else:
             results = [future["future"].result() for future in futures]
         return results
+
+    def update_status(self, status, result):
+        if 'status' in result:
+            if isinstance(result['status'], int):
+                if result['status'] >= 300:
+                    status["error"] += 1
+            if isinstance(result['status'], dict):
+                if 'code' in result['status']:
+                    if result['status']['code'] >= 300:
+                        status["error"] += 1
+        if 'records' in result:
+            status["records"] += len(result['records'])
+        if 'skipped_records' in result:
+            status["skipped_records"] += len(result['skipped_records'])
+        if 'answer_records' in result:
+            status["answer_records"] += len(result['answer_records'])
 
     def batch(self, iterable, n=1):
         """

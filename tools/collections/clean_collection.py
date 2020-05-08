@@ -1,28 +1,16 @@
 import os
 from argparse import ArgumentParser
 
-from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient
+from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient, VisualSearchClient
 from ximilar.client.constants import DEFAULT_WORKSPACE
 from ximilar.client.recognition import Image
 
-from ximilar.client.utils.json_data import read_json_file_list
-
-
-def clean_fields(index_images, fields):
-    fields = fields.split(" ")
-    for img in index_images:
-        for field in fields:
-            if field in img:
-                del img[field]
-    return index_images
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Train all non trained tasks of workspace")
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
-    parser.add_argument("--clean_fields", type=str, help="list of field to remove from records", default=[])
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--collection_id", help="ID of collection to upload the images into", default="")
-    parser.add_argument("--path", help="path to the json file", default="")
     parser.add_argument("--type", help="product or generic", default="generic")
 
     args = parser.parse_args()
@@ -36,14 +24,18 @@ if __name__ == "__main__":
             token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
         )
     elif args.type == "visual":
-        client = SimilarityProductsClient(
+        client = VisualSearchClient(
             token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
         )
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 
+    page, records = 1, []
+    while True:
+        result = client.allRecords(page=page)
+        records += result["answer_records"]
+        page += 1
+        if "next" not in result:
+            break
 
-    index_images = read_json_file_list(args.path)
-    index_images = clean_fields(index_images, args.clean_fields)
-
-    client.parallel_records_processing(index_images, client.insert, batch_size=10, output=True)
+    client.parallel_records_processing(records, client.remove, batch_size=10, output=True)
