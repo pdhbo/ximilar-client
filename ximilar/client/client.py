@@ -23,7 +23,7 @@ class XimilarClientException(Exception):
         self.msg = msg
 
     def __str__(self):
-        return self.msg
+        return str(self.msg)
 
 
 class RestClient(object):
