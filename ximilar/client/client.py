@@ -10,6 +10,7 @@ import concurrent.futures
 from tqdm import tqdm
 
 from ximilar.client.constants import *
+from ximilar.client.utils.decorators import retry_when
 
 CONFIG_ENDPOINT = "account/v2/config/"
 BASE64_HEADER_PATTERN = re.compile(r"^data:image/(\w+);base64,")
@@ -68,6 +69,7 @@ class RestClient(object):
         url = "/".join(map(lambda x: str(x).rstrip("/").lstrip("/"), args))
         return url
 
+    @retry_when(ConnectionError)
     def get(self, api_endpoint, data=None, params=None):
         """
         Call the http GET request with data.
@@ -85,6 +87,7 @@ class RestClient(object):
         )
         return result.json()
 
+    @retry_when(ConnectionError)
     def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post):
         """
         Call the http POST request with data.
@@ -97,7 +100,6 @@ class RestClient(object):
         :return: json response
         """
         self.invalidate()
-
         if data is not None and files is not None:
             raise Exception("Unable to send data along with files with python requests library!")
 
@@ -119,12 +121,14 @@ class RestClient(object):
         except ValueError as e:
             return None
 
+    @retry_when(ConnectionError)
     def put(self, api_endpoint, data=None, files=None, params=None):
         """
         Call the http PUT request with data
         """
         return self.post(api_endpoint, data=data, files=files, params=params, method=requests.put)
 
+    @retry_when(ConnectionError)
     def delete(self, api_endpoint, data=None, params=None):
         """
         Call the http DELETE request with data.

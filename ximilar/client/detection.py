@@ -1,6 +1,7 @@
 from ximilar.client import RecognitionClient
 from ximilar.client.recognition import Image, IMAGE_ENDPOINT
 from ximilar.client.constants import *
+from ximilar.client.recognition import Image, IMAGE_ENDPOINT
 
 OBJECT_ENDPOINT = "detection/v2/object/"
 LABEL_ENDPOINT = "detection/v2/label/"
@@ -139,25 +140,28 @@ class DetectionClient(RecognitionClient):
 
         return [DetectionLabel(self.token, self.endpoint, l_json) for l_json in labels], RESULT_OK
 
-    def create_task(self, name):
+    def create_task(self, name, description=None):
         """
         Create detection task with given name.
         :param name: name of the task
+        :param description: description of the label
         :return: Task object, status
         """
-        task_json = self.post(TASK_ENDPOINT, data={NAME: name})
+        task_json = self.post(TASK_ENDPOINT, data={NAME: name, DESCRIPTION: description})
         if ID not in task_json:
             msg = task_json[DETAIL] if DETAIL in task_json else "unexpected error"
             return None, {STATUS: msg}
         return DetectionTask(self.token, self.endpoint, task_json, self.max_image_size), RESULT_OK
 
-    def create_label(self, name):
+    def create_label(self, name, description=None, color="#FFFFFF"):
         """
         Create detection label with given name.
         :param name: name of the label
+        :param description: description of the label
+        :param color: color (hexadecimal color code) of the label
         :return: Label object, status
         """
-        label_json = self.post(LABEL_ENDPOINT, data={NAME: name})
+        label_json = self.post(LABEL_ENDPOINT, data={NAME: name, DESCRIPTION: description, COLOR: color})
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK
@@ -178,6 +182,54 @@ class DetectionClient(RecognitionClient):
             return None, {STATUS: "unexpected error"}
         return DetectionObject(self.token, self.endpoint, label_json), RESULT_OK
 
+    def upload_images(self, records):
+        """
+        Upload one or more files and add objects associated with them.
+        :param records: list of dictionaries with objects and one of '_base64', '_file', '_url'
+                        specify noresize: True to save image without (default False)
+                        [
+                            {
+                                '_file': '__FILE_PATH__',
+                                'objects': [
+                                    'detection_label': '__UUID__'
+                                    'data': [__xmin__, __ymin__, __xmax__, __ymax__],
+                                    'metadata': {__metadata__}
+                                ],
+                                'noresize': False,
+                             },
+                             ...
+                        ]
+        :return: image, status
+        """
+        images = []
+        worst_status = RESULT_OK
+        for record in records:
+            files, data = None, None
+            noresize = NORESIZE in record and record[NORESIZE]
+            noresize_on_server = noresize or self.max_image_size > 1024
+            metadata = record[META_DATA] if META_DATA in record and record[META_DATA] else {}
+            test_image = record[TEST_IMAGE] if TEST_IMAGE in record else False
+
+            data = self._create_image_data(record, noresize, noresize_on_server, test_image, metadata)
+
+            image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
+
+            if image_json is None:
+                worst_status = {STATUS: "image not uploaded " + str(record)}
+                continue
+            elif ID not in image_json:
+                worst_status = {STATUS: "image not uploaded " + str(record)}
+                continue
+
+            image = Image(self.token, self.endpoint, image_json)
+
+            if OBJECTS in record:
+                for object in record[OBJECTS]:
+                    self.create_object(object[DETECTION_LABEL], image.id, object[DATA], object[META_DATA])
+
+            images.append(image)
+        return images, worst_status
+
 
 class DetectionTask(DetectionClient):
     def __init__(self, token, endpoint, task_json, max_image_size):
@@ -185,6 +237,7 @@ class DetectionTask(DetectionClient):
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
+        self.description = task_json[DESCRIPTION] if DESCRIPTION in task_json else ""
         self.workspace = task_json[WORKSPACE] if WORKSPACE in task_json else DEFAULT_WORKSPACE
 
     def train(self):
@@ -274,8 +327,13 @@ class DetectionLabel(DetectionClient):
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
+        self.description = label_json[DESCRIPTION] if DESCRIPTION in label_json else ""
         self.workspace = label_json[WORKSPACE] if WORKSPACE in label_json else DEFAULT_WORKSPACE
         self.recognition_tasks = label_json[RECOGNITION_TASKS] if RECOGNITION_TASKS in label_json else None
+        self.color = label_json[COLOR]
+        self.output_name = (
+            label_json[OUTPUT_NAME] if OUTPUT_NAME in label_json and label_json[OUTPUT_NAME] else self.name
+        )
 
     def __str__(self):
         return self.name
@@ -403,6 +461,7 @@ class DetectionObject(DetectionClient):
         return {
             IMAGE: self.image,
             ID: self.id,
+            DETECTION_LABEL: self.detection_label,
             DATA: self.data,
             LABELS: self.recognition_labels,
             META_DATA: self.meta_data,
