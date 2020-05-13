@@ -1,21 +1,90 @@
 import os
-import sys
-import json
-from tqdm import tqdm
 from argparse import ArgumentParser
-import concurrent.futures
 
 from ximilar.client import RecognitionClient, DetectionClient
-from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE, OBJECTS, MULTI_LABEL, MULTI_CLASS, CATEGORY, TAG
-from ximilar.client.recognition import Image, Label
-from ximilar.client.utils.json_data import read_json_file_list, JSONWriter
+from ximilar.client.constants import (
+    DETECTION,
+    LABELS,
+    ID,
+    TASK_TYPE,
+    LABEL_TYPE,
+    DESCRIPTION,
+    DEFAULT_WORKSPACE,
+    OBJECTS,
+    MULTI_LABEL,
+    COLOR,
+    DETECTION_LABEL,
+    NAME,
+    TASK_NAME,
+    NORESIZE,
+)
+from ximilar.client.utils.json_data import read_json_file_list
 
 
-def get_label_id(labels, id, negative):
-    for label in labels:
-        if id == label.name:
-            return label.id
-    return negative.id
+def upload_recognition(task_json, args):
+    client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
+    client.max_image_size = 0
+
+    task, _ = client.create_task(
+        f"{task_json[0][TASK_NAME]} ({task_json[0][ID]})",
+        task_type=task_json[0][TASK_TYPE],
+        description=task_json[0][DESCRIPTION],
+    )
+    labels, negative = {}, None
+
+    if task.type == MULTI_LABEL:
+        negative, _ = task.get_negative_label()
+
+    labels_to_create = read_json_file_list(os.path.join(args.folder, "labels.json"))
+    for label_create in labels_to_create:
+        if label_create["negative"] is not None:
+            continue
+        else:
+            label, _ = client.create_label(
+                f"{label_create[NAME]} ({label_create[ID]})",
+                description=label_create[DESCRIPTION],
+                label_type=label_create[LABEL_TYPE],
+            )
+            labels[label_create[ID]] = label
+            task.add_label(label.id)
+
+    records = read_json_file_list(os.path.join(args.folder, "images.json"))
+
+    for i in range(len(records)):
+        records[i][NORESIZE] = True
+        records[i][LABELS] = [(labels[rlabel].id if rlabel in labels else negative.id) for rlabel in records[i][LABELS]]
+
+    client.parallel_records_processing(records, client.upload_images, max_workers=5, output=True)
+
+
+def upload_detection(task_json, args):
+    client = DetectionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
+    client.max_image_size = 0
+
+    task, _ = client.create_task(
+        f"{task_json[0][TASK_NAME]} ({task_json[0][ID]})", description=task_json[0][DESCRIPTION]
+    )
+
+    labels = {}
+    labels_to_create = read_json_file_list(os.path.join(args.folder, "labels.json"))
+    for label_create in labels_to_create:
+        label, _ = client.create_label(
+            f"{label_create[NAME]} ({label_create[ID]})",
+            description=label_create[DESCRIPTION],
+            color=label_create[COLOR],
+        )
+        labels[label_create[ID]] = label
+        task.add_label(label.id)
+
+    records = read_json_file_list(os.path.join(args.folder, "images.json"))
+
+    for i in range(len(records)):
+        records[i][NORESIZE] = True
+        for j in range(len(records[i][OBJECTS])):
+            old_id = records[i][OBJECTS][j][DETECTION_LABEL]
+            records[i][OBJECTS][j][DETECTION_LABEL] = labels[old_id].id
+
+    client.parallel_records_processing(records, client.upload_images, max_workers=5, output=True)
 
 
 if __name__ == "__main__":
@@ -27,28 +96,8 @@ if __name__ == "__main__":
     parser.add_argument("--task_id", help="if used, just images from this label are listed", default=None)
     args = parser.parse_args()
 
-    client = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
-    client.max_image_size = 0
-
-    tasks = read_json_file_list(os.path.join(args.folder, "task.json"))
-    task, _ = client.create_task(tasks[0]["id"], task_type=tasks[0]["type"])
-    labels, negative = [], None
-
-    if task.type == "multi_label":
-        negative, _ = task.get_negative_label()
-
-    labels_to_create = read_json_file_list(os.path.join(args.folder, "labels.json"))
-    for label_create in labels_to_create:
-        if label_create["negative"] is not None:
-            continue
-        else:
-            label, _ = client.create_label(label_create["id"], label_type=label_create["type"])
-            labels.append(label)
-            task.add_label(label.id)
-
-    records = read_json_file_list(os.path.join(args.folder, "images.json"))
-
-    for i in range(len(records)):
-        records[i]["labels"] = [get_label_id(labels, rlabel, negative) for rlabel in records[i]["labels"]]
-
-    client.parallel_records_processing(records, client.upload_images, max_workers=5, output=True)
+    task_json = read_json_file_list(os.path.join(args.folder, "task.json"))
+    if task_json[0][TASK_TYPE] == DETECTION:
+        upload_detection(task_json, args)
+    else:
+        upload_recognition(task_json, args)

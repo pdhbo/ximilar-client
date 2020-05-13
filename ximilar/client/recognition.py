@@ -282,36 +282,7 @@ class RecognitionClient(RestClient):
             metadata = record[META_DATA] if META_DATA in record and record[META_DATA] else {}
             test_image = record[TEST_IMAGE] if TEST_IMAGE in record else False
 
-            if IMG_DATA in record:
-                data = {
-                    "base64": self.cv2img_to_base64(record[IMG_DATA], record[COLOR_SPACE], resize=not noresize),
-                    NORESIZE: noresize_on_server,
-                    TEST_IMAGE: test_image,
-                    META_DATA: metadata,
-                }
-            elif FILE in record:
-                # We cannot send files to request along with json data (for workspace)
-                # That is why we load image from disk to base64 representation
-                data = {
-                    "base64": self.load_base64_file(record[FILE], resize=not noresize),
-                    NORESIZE: noresize_on_server,
-                    TEST_IMAGE: test_image,
-                    META_DATA: metadata,
-                }
-            elif BASE64 in record:
-                data = {
-                    "base64": record[BASE64].decode("utf-8"),
-                    NORESIZE: noresize_on_server,
-                    TEST_IMAGE: test_image,
-                    META_DATA: metadata,
-                }
-            elif URL in record:
-                data = {
-                    "base64": self.load_url_image(record[URL], resize=not noresize),
-                    NORESIZE: noresize_on_server,
-                    TEST_IMAGE: test_image,
-                    META_DATA: metadata,
-                }
+            data = self._create_image_data(record, noresize, noresize_on_server, test_image, metadata)
 
             image_json = self.post(IMAGE_ENDPOINT, files=files, data=data)
 
@@ -330,6 +301,43 @@ class RecognitionClient(RestClient):
 
             images.append(image)
         return images, worst_status
+
+    def _create_image_data(self, record, noresize, noresize_on_server, test_image, metadata):
+        if IMG_DATA in record:
+            return {
+                "base64": self.cv2img_to_base64(record[IMG_DATA], record[COLOR_SPACE], resize=not noresize),
+                NORESIZE: noresize_on_server,
+                TEST_IMAGE: test_image,
+                META_DATA: metadata,
+            }
+
+        if FILE in record:
+            # We cannot send files to request along with json data (for workspace)
+            # That is why we load image from disk to base64 representation
+            return {
+                "base64": self.load_base64_file(record[FILE], resize=not noresize),
+                NORESIZE: noresize_on_server,
+                TEST_IMAGE: test_image,
+                META_DATA: metadata,
+            }
+
+        if BASE64 in record:
+            return {
+                "base64": record[BASE64].decode("utf-8"),
+                NORESIZE: noresize_on_server,
+                TEST_IMAGE: test_image,
+                META_DATA: metadata,
+            }
+
+        if URL in record:
+            return {
+                "base64": self.load_url_image(record[URL], resize=not noresize),
+                NORESIZE: noresize_on_server,
+                TEST_IMAGE: test_image,
+                META_DATA: metadata,
+            }
+
+        raise Exception("No _file, _url, _base64, _img_data in record!")
 
     def construct_data(self, records=[], task_id=None, version=None, store_images=None):
         if len(records) == 0:
