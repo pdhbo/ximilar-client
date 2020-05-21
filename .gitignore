@@ -1,3 +1,4 @@
 *.pyc
 .tags*
 .idea
+ximilar_client.egg-info
