@@ -3,7 +3,7 @@ import json
 
 from ximilar.client import RestClient
 from ximilar.client.constants import *
-
+from ximilar.client.exceptions import XimilarClientInvalidDataException
 
 LABEL_ENDPOINT = "recognition/v2/label/"
 TASK_ENDPOINT = "recognition/v2/task/"
@@ -202,6 +202,39 @@ class RecognitionClient(RestClient):
             if not next_page:
                 break
             images, next_page, status = self.get_training_images(next_page)
+
+    def modify_images(self, images=None, labels=None, add_labels=None, remove_labels=None):
+        """
+        Modifies images in batch. Enter either list of images OR labels to be applied as a filter.
+        :param labels:
+        Filter images by these labels given as a list of IDs
+        :param images:
+        List of image IDs
+        :param add_labels:
+        List of label IDs to assign
+        :param remove_labels:
+        List of label IDs to remove
+        :return: int
+        Number of processed records
+        """
+        if images is None:
+            images = []
+        if labels is None:
+            labels = []
+        if remove_labels is None:
+            remove_labels = []
+        if add_labels is None:
+            add_labels = []
+
+        if not (labels or images):
+            raise XimilarClientInvalidDataException("Either images or labels must be specified")
+
+        return self.post(api_endpoint=IMAGE_ENDPOINT + "update", data={
+            "images": images,
+            "labels": labels,
+            "labels-add": add_labels,
+            "labels-remove": remove_labels,
+        })
 
     def get_labels_by_substring(self, name):
         """

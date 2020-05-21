@@ -10,21 +10,11 @@ import concurrent.futures
 from tqdm import tqdm
 
 from ximilar.client.constants import *
+from ximilar.client.exceptions import XimilarClientException
 from ximilar.client.utils.decorators import retry_when
 
 CONFIG_ENDPOINT = "account/v2/config/"
 BASE64_HEADER_PATTERN = re.compile(r"^data:image/(\w+);base64,")
-
-
-class XimilarClientException(Exception):
-    def __init__(self, code, msg=None):
-        Exception.__init__(self, msg)
-
-        self.code = code
-        self.msg = msg
-
-    def __str__(self):
-        return str(self.msg)
 
 
 class RestClient(object):
@@ -143,7 +133,7 @@ class RestClient(object):
             self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=self.request_timeout
         )
 
-        if result.status_code == HTTP_NO_COTENT_204:
+        if result.status_code == HTTP_NO_CONTENT_204:
             return result
 
         return result.json()

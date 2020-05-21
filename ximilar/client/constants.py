@@ -1,5 +1,5 @@
 # HTTP CODES
-HTTP_NO_COTENT_204 = 204
+HTTP_NO_CONTENT_204 = 204
 HTTP_UNAVAILABLE_503 = 503
 
 # General
@@ -54,9 +54,7 @@ NORESIZE = "noresize"
 LABELS = "labels"
 LABEL_NAMES = "label_names"
 DETAIL = "detail"
-STATUS = "status"
 VERSION = "version"
-NEXT = "NEXT"
 LABEL_ID = "label_id"
 TASK_ID = "task_id"
 IMG_PATH = "img_path"
