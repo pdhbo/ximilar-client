@@ -735,13 +735,13 @@ class Image(RecognitionClient):
         """
         return self.post(IMAGE_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
-    def download(self, destination=""):
+    def download(self, destination="", name=None):
         """
         Download image to the destination and store path to the _file of the object.
         :param destination: path on the disk
         :return: path of the file locally
         """
-        self._file = super().download_image(self.img_path, destination=destination)
+        self._file = super().download_image(self.img_path, destination=destination, name=name)
         return self._file
 
     def _ensure_meta_data(self):

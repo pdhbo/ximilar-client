@@ -407,14 +407,14 @@ class RestClient(object):
         return self.get(CONFIG_ENDPOINT + config_type + version)
 
     @staticmethod
-    def download_image(url, destination=""):
+    def download_image(url, destination="", name=None):
         """
         Download image from url to the destination
         :param url: url to the image
         :param destination: where the image will be stored
         :return: None
         """
-        f_name = url.split("/")[-1]
+        f_name = url.split("/")[-1] if name is None else name
         f_dest = os.path.join(destination, f_name)
         f_dest += ".jpg" if "." not in f_name else ""
 
