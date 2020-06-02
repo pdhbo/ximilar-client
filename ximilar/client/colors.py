@@ -3,8 +3,8 @@ import json
 from ximilar.client import RestClient
 from ximilar.client.constants import *
 
-DOMINANT_COLOR_GENERIC_ENDPOINT = "generic_photos/v2/dominantcolor"
-DOMINANT_COLOR_PRODUCT_ENDPOINT = "product_photos/v2/dominantcolor"
+DOMINANT_COLOR_GENERIC_ENDPOINT = "dom_colors/generic/v2/dominantcolor"
+DOMINANT_COLOR_PRODUCT_ENDPOINT = "dom_colors/product/v2/dominantcolor"
 
 
 class DominantColorClient(RestClient):
