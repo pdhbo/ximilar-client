@@ -4,6 +4,7 @@ from ximilar.client import RestClient
 from ximilar.client.constants import *
 
 FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/tags"
+META_FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/meta"
 GENERIC_TAGGING_ENDPOINT = "tagging/generic/v2/tags"
 
 
@@ -36,6 +37,9 @@ class FashionTaggingClient(TaggingClient):
 
     def tags(self, records, aggregate_labels=False):
         return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=aggregate_labels)
+
+    def meta_tags(self, records):
+        return super().tags(records, META_FASHION_TAGGING_ENDPOINT, aggregate_labels=False)
 
     def get_top_categories(self):
         result = requests.get(self.urljoin(self.endpoint, "tagging/fashion/v2/top_categories"))
