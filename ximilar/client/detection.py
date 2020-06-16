@@ -350,6 +350,17 @@ class DetectionLabel(DetectionClient):
             return None, status
         return [Image(self.token, self.endpoint, image) for image in images], RESULT_OK
 
+    def get_training_images(self, page_url=None, verification=None):
+        """
+        Get paginated result of images for specific label.
+
+        :param page_url: optional, select the specific page of images, default first page
+        :return: (list of images, next_page)
+        """
+        if page_url is None:
+            page_url = IMAGE_ENDPOINT + "?detection_labels=" + self.id
+
+        return super().get_training_images(page_url=page_url, verification=verification)
 
     def add_recognition_task(self, task_id):
         """
