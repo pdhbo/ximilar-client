@@ -25,14 +25,12 @@ class VisualSearchClient(SimilarityPhotosClient):
     def __init__(
         self,
         token,
-        collection=None,
         collection_id=None,
         endpoint=ENDPOINT + VISUAL_SEARCH_V2,
         resource_name=VISUAL_SEARCH,
     ):
         super(VisualSearchClient, self).__init__(
             token=token,
-            collection=collection,
             collection_id=collection_id,
             endpoint=endpoint,
             resource_name=resource_name,

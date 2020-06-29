@@ -297,7 +297,7 @@ Service for visual fashion search. For more information see docs.ximilar.com
 ```python
 from ximilar.client.visual import VisualSearchClient
 
-client = VisualSearchClient(token='__API_TOKEN__', collection='__COLLECTION_ID__')
+client = VisualSearchClient(token='__API_TOKEN__', collection_id='__COLLECTION_ID__')
 
 # inserting image requires _id and product_id
 client.insert([{"_id": "__IMAGE_ID__", "product_id": "__PRODUCT_ID__", "_url": "__URL_PATH_TO_IMAGE__"}])
@@ -339,13 +339,13 @@ print(result['records'][0]['_tags'])
 ## Ximilar Photo and Product similarity
 
 These two services provides visual search (similarity search) for generic (stock) photos or products (e-commerce, fashion, ...).
-When initializing client you need to specify both `token` and your `collection` that we created for you.
+When initializing client you need to specify both `token` and your `collection_id` that we created for you.
 
 ```python
 from ximilar.client.search import SimilarityPhotosClient, SimilarityProductsClient
 
-client = SimilarityPhotosClient(token='__API_TOKEN__', collection='__COLLECTION_ID__')
-client = SimilarityProductsClient(token='__API_TOKEN__', collection='__COLLECTION_ID__')
+client = SimilarityPhotosClient(token='__API_TOKEN__', collection_id='__COLLECTION_ID__')
+client = SimilarityProductsClient(token='__API_TOKEN__', collection_id='__COLLECTION_ID__')
 
 # get random 7 items from database and return also _url if is present in item
 result = client.random(count=7, fields_to_return=['_id', '_url'])
