@@ -605,18 +605,10 @@ class Label(RecognitionClient):
         :param page_url: optional, select the specific page of images, default first page
         :return: (list of images, next_page)
         """
-        url = (
-            page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
-            if page_url
-            else IMAGE_ENDPOINT + "?label=" + self.id
-        )
-        result = self.get(url)
+        if page_url is None:
+            page_url = IMAGE_ENDPOINT + "?label=" + self.id
 
-        return (
-            [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]],
-            result[NEXT],
-            RESULT_OK,
-        )
+        return super().get_training_images(page_url=page_url, verification=verification)
 
     def upload_images(self, records):
         """

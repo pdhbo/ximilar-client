@@ -334,6 +334,13 @@ generic_client = GenericTaggingClient(token="__API_TOKEN__")
 
 result = generic_client.tags([{"_url": "__URL_PATH_TO_IMAGE__"}])
 print(result['records'][0]['_tags'])
+
+result = fashion_client.tags([{"_url": "__URL_PATH_TO_IMAGE__"}])
+print(result['records'][0]['_tags'])
+
+result = fashion_client.meta_tags([{"_url": "__URL_PATH_TO_IMAGE__"}])
+print(result['records'][0]['_tags_meta_simple'])
+
 ```
 
 ## Ximilar Photo and Product similarity

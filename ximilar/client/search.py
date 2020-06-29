@@ -30,6 +30,7 @@ UPDATE = "update"
 RANDOM = "random"
 KNN_VISUAL = "visualKNN"
 PING = "ping"
+RANK_RECORDS = "visualRankRecords"
 
 
 class SimilarityPhotosClient(RestClient):
@@ -84,6 +85,20 @@ class SimilarityPhotosClient(RestClient):
         """
         data = self.construct_data(query_record, filter=filter, k=k, fields_to_return=fields_to_return)
         return self.post(self.PREDICT_ENDPOINT, data=data)
+
+    def search_and_rank(self, query_record, records, fields_to_return=[_ID]):
+        """
+        Ranks the records agains query
+        :param query_record: dictionary with field '_id' (from your collection) or '_url' or "_base64' data
+        :param k: how many similar items to return
+        :param fields_to_return: fields to return in every record
+        :param filter: how to filter picked items (mongodb syntax)
+        :return: json response
+        """
+        data = self.construct_data(query_record, fields_to_return=fields_to_return)
+        data[RECORDS] = self.preprocess_records(records)
+        del data[K_COUNT]
+        return self.post(RANK_RECORDS, data=data)
 
     def random(self, filter=None, count=10, fields_to_return=[_ID]):
         """
