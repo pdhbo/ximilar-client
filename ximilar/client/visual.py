@@ -5,7 +5,6 @@ from ximilar.client.constants import (
     ENDPOINT,
     VISUAL_SEARCH,
     RECORDS,
-    COLLECTION,
     FILTER,
 )
 from ximilar.client.search import SimilarityPhotosClient
@@ -23,17 +22,10 @@ PING = "ping"
 
 class VisualSearchClient(SimilarityPhotosClient):
     def __init__(
-        self,
-        token,
-        collection_id=None,
-        endpoint=ENDPOINT + VISUAL_SEARCH_V2,
-        resource_name=VISUAL_SEARCH,
+        self, token, collection_id=None, endpoint=ENDPOINT + VISUAL_SEARCH_V2, resource_name=VISUAL_SEARCH,
     ):
         super(VisualSearchClient, self).__init__(
-            token=token,
-            collection_id=collection_id,
-            endpoint=endpoint,
-            resource_name=resource_name,
+            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name,
         )
         self.PREDICT_ENDPOINT = SEARCH_PRODUCT
 
