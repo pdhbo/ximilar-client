@@ -32,7 +32,7 @@ class RestClient(object):
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": self.get_token_header(self.token),
-            "User-Agent": "Ximilar/Python-API-Client"
+            "User-Agent": "Ximilar Client/Python"
         }
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
