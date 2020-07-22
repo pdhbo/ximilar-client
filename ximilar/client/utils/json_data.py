@@ -6,11 +6,15 @@ import sys
 from os.path import splitext
 
 
-def read_json_array(file_name):
+def read_json_array(file_name, required_fields=None, skip=0):
     with open(file_name, "r", encoding="utf-8") as f:
         array = json.load(f)
-        for rec in array:
-            yield rec
+        for record in array:
+            if skip > 0:
+                skip -= 1
+                continue
+            if not required_fields or all(field in record for field in required_fields):
+                yield record
 
 
 def read_json_file_iterator(file_name, required_fields=None, skip=0):
@@ -48,9 +52,14 @@ def read_json_file_iterator(file_name, required_fields=None, skip=0):
     f.close()
 
 
-def read_json_file_list(file_name, required_fields=None, skip=0):
+def read_json_file_list(file_name, required_fields=None, skip=0, is_array=False):
     data = []
-    for record in read_json_file_iterator(file_name, required_fields=required_fields, skip=skip):
+    iterator = (
+        read_json_array(file_name, required_fields, skip)
+        if is_array
+        else read_json_file_iterator(file_name, required_fields, skip)
+    )
+    for record in iterator:
         data.append(record)
     return data
 
