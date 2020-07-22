@@ -4,7 +4,7 @@ import base64
 import cv2
 import os
 import re
-import numpy as np
+import numpy as npupda
 import concurrent.futures
 
 from tqdm import tqdm
@@ -29,7 +29,11 @@ class RestClient(object):
         self.cache = {}
         self.endpoint = endpoint
         self.max_image_size = max_image_size
-        self.headers = {"Content-Type": "application/json", "Authorization": self.get_token_header(self.token)}
+        self.headers = {
+            "Content-Type": "application/json",
+            "Authorization": self.get_token_header(self.token),
+            "User-Agent": "Ximilar/Python-API-Client"
+        }
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
 
