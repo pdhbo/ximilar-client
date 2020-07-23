@@ -50,7 +50,7 @@ def save(task, task_type, args):
         )
 
     # get recognition entities
-    labels, status = task.get_labels() if task_type == TaskType.RECOGNITION else task.get_all_labels()
+    labels, status = task.get_labels()
     labels_ids = [str(label.id) for label in labels]
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
@@ -85,6 +85,7 @@ def save(task, task_type, args):
                             futures[image.id] = {"future": future, LABELS: img_labels}
                         else:
                             objects, _ = task.get_objects_of_image(image.id)
+                            objects = list(filter(lambda obj: obj.detection_label["id"] in labels_ids, objects))
                             futures[image.id] = {"future": future, OBJECTS: objects}
 
                     pbar.update(1)
