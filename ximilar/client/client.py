@@ -6,6 +6,7 @@ import os
 import re
 import numpy as npupda
 import concurrent.futures
+import urllib.parse
 
 from tqdm import tqdm
 
@@ -32,7 +33,7 @@ class RestClient(object):
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": self.get_token_header(self.token),
-            "User-Agent": "Ximilar/Python-API-Client"
+            "User-Agent": "Ximilar Client/Python"
         }
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
@@ -133,8 +134,9 @@ class RestClient(object):
         """
         self.invalidate()
 
+        url = urllib.parse.urljoin(self.endpoint, api_endpoint)
         result = requests.delete(
-            self.endpoint + api_endpoint, params=params, headers=self.headers, data=data, timeout=self.request_timeout
+            url, params=params, headers=self.headers, data=data, timeout=self.request_timeout
         )
 
         if result.status_code == HTTP_NO_CONTENT_204:
