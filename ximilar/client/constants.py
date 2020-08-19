@@ -24,6 +24,7 @@ FASHION_TAGGING = "fashion-tagging"
 VISUAL_SEARCH = "visual-search"
 DOMINANT_COLORS_PRODUCT = "dominant-colors"
 DOMINANT_COLORS_GENERIC = "dominant-colors"
+HOME_DECOR_TAGGING = "homedecor-tagging"
 
 # Recognition/Vize related
 USER_ID = "user_id"

@@ -189,7 +189,7 @@ class RecognitionClient(RestClient):
             RESULT_OK,
         )
 
-    def training_images_iter(self, verification=None):
+    def training_images_iter(self, verification=None, batch_size=1):
         """
         Get iterator overall all of images from workspace.
         :param verification: optional, integer which says how many verifications should have the images
@@ -197,8 +197,11 @@ class RecognitionClient(RestClient):
         """
         images, next_page, status = self.get_training_images(verification=verification)
         while images:
-            for image in images:
-                yield image
+            for image in self.batch(images, batch_size):
+                if batch_size == 1:
+                    yield image[0]
+                else:
+                    yield image
             if not next_page:
                 break
             images, next_page, status = self.get_training_images(next_page)
@@ -689,6 +692,7 @@ class Image(RecognitionClient):
         )
         # file path after calling download_image on this object
         self._file = None
+        self._objects = []
 
     def __str__(self):
         return self.thumb_img_path

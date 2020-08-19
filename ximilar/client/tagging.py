@@ -6,6 +6,7 @@ from ximilar.client.constants import *
 FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/tags"
 META_FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/meta"
 GENERIC_TAGGING_ENDPOINT = "tagging/generic/v2/tags"
+HOME_DECOR_TAGGING_ENDPOINT = "tagging/homedecor/v2/tags"
 
 
 class TaggingClient(RestClient):
@@ -16,11 +17,22 @@ class TaggingClient(RestClient):
         data = {RECORDS: self.preprocess_records(records)}
         return data
 
-    def tags(self, records, endpoint, aggregate_labels=False):
+    def tags(self, records, endpoint, aggregate_labels=False, profile=None):
+        """
+        Call the tagging endpoint
+        :param records: [description]
+        :param endpoint: [description]
+        :param aggregate_labels: [description], defaults to False
+        :param profile: [description], defaults to None
+        :return: json result data from the API
+        """
         data = self.construct_data(records=records)
 
         if aggregate_labels:
             data["aggregate_labels"] = True
+
+        if profile:
+            data["profile"] = profile
 
         result = self.post(endpoint, data=data)
         self.check_json_status(result)
@@ -35,11 +47,11 @@ class FashionTaggingClient(TaggingClient):
     def change_predict_endpoint(self, new_endpoint):
         self.PREDICT_ENDPOINT = new_endpoint
 
-    def tags(self, records, aggregate_labels=False):
-        return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=aggregate_labels)
+    def tags(self, records, aggregate_labels=False, profile=None):
+        return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=aggregate_labels, profile=profile)
 
-    def meta_tags(self, records):
-        return super().tags(records, META_FASHION_TAGGING_ENDPOINT, aggregate_labels=False)
+    def meta_tags(self, records, profile=None):
+        return super().tags(records, META_FASHION_TAGGING_ENDPOINT, aggregate_labels=False, profile=profile)
 
     def get_top_categories(self):
         result = requests.get(self.urljoin(self.endpoint, "tagging/fashion/v2/top_categories"))
@@ -50,10 +62,22 @@ class FashionTaggingClient(TaggingClient):
         return result.json()["labels"]
 
 
+class HomeDecorTaggingClient(TaggingClient):
+    def __init__(self, token, endpoint=ENDPOINT, resource_name=HOME_DECOR_TAGGING):
+        super(HomeDecorTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
+        self.PREDICT_ENDPOINT = HOME_DECOR_TAGGING_ENDPOINT
+
+    def change_predict_endpoint(self, new_endpoint):
+        self.PREDICT_ENDPOINT = new_endpoint
+
+    def tags(self, records, aggregate_labels=False, profile=None):
+        return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=aggregate_labels, profile=profile)
+
+
 class GenericTaggingClient(TaggingClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name=GENERIC_TAGGING):
         super(GenericTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = GENERIC_TAGGING_ENDPOINT
 
-    def tags(self, records):
+    def tags(self, records,):
         return super().tags(records, self.PREDICT_ENDPOINT)
