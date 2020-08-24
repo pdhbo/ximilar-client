@@ -25,6 +25,7 @@ class DetectionClient(RecognitionClient):
             max_image_size=max_image_size,
             resource_name=resource_name,
         )
+        self.PREDICT_ENDPOINT = DETECT_ENDPOINT
 
     def get_object(self, object_id):
         """
@@ -229,6 +230,40 @@ class DetectionClient(RecognitionClient):
 
             images.append(image)
         return images, worst_status
+
+    def construct_data(self, records=[], task_id=None, version=None, store_images=None):
+        if len(records) == 0:
+            raise Exception("Please specify at least one record in detect method!")
+
+        if task_id is None:
+            raise Exception("Please specify task")
+
+        data = {RECORDS: self.preprocess_records(records), TASK_ID: task_id, VERSION: version}
+
+        if store_images:
+            data[STORE_IMAGES] = True
+
+        return data
+
+    def detect_on_task(self, records=[], task_id=None, version=None):
+        """
+        Takes the images and calls the ximilar client for detection these images on the task.
+
+        Usage:
+            client = DetectionClient('__YOUR_API_TOKEN__')
+            result = client.detect_on_task({'_url':'__SOME_IMG_URL__'}, task_id="__UUID__")
+
+        :param records: array of json/dicts [{'_url':'url-path'}, {'_file': ''}, {'_base64': 'base64encodeimg'}]
+        :param task_id: id of task 
+        :param version: optional(integer of specific version), default None/production_version
+        :return: json response
+        """
+        # version is default set to None, so ximilar will determine which one to take
+        data = self.construct_data(records=records, task_id=task_id, version=version)
+        result = self.post(self.PREDICT_ENDPOINT, data=data)
+
+        self.check_json_status(result)
+        return result
 
 
 class DetectionTask(DetectionClient):
