@@ -4,7 +4,7 @@ import base64
 import cv2
 import os
 import re
-import numpy as npupda
+import numpy as np
 import concurrent.futures
 import urllib.parse
 
