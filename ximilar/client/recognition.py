@@ -206,19 +206,17 @@ class RecognitionClient(RestClient):
                 break
             images, next_page, status = self.get_training_images(next_page)
 
-    def modify_images(self, images=None, labels=None, add_labels=None, remove_labels=None):
+    def modify_images(self, images=None, labels=None, add_labels=None, remove_labels=None, test=None, real=None):
         """
         Modifies images in batch. Enter either list of images OR labels to be applied as a filter.
-        :param labels:
-        Filter images by these labels given as a list of IDs
-        :param images:
-        List of image IDs
-        :param add_labels:
-        List of label IDs to assign
-        :param remove_labels:
-        List of label IDs to remove
-        :return: int
-        Number of processed records
+        :param images: [description], defaults to None
+        :param labels: [description], defaults to None
+        :param add_labels: [description], defaults to None
+        :param remove_labels: [description], defaults to None
+        :param test: [description], defaults to None
+        :param real: [description], defaults to None
+        :raises XimilarClientInvalidDataException: [description]
+        :return: [description]
         """
         if images is None:
             images = []
@@ -232,12 +230,26 @@ class RecognitionClient(RestClient):
         if not (labels or images):
             raise XimilarClientInvalidDataException("Either images or labels must be specified")
 
-        return self.post(api_endpoint=IMAGE_ENDPOINT + "update", data={
+        data = {
             "images": images,
             "labels": labels,
             "labels-add": add_labels,
             "labels-remove": remove_labels,
-        })
+        }
+
+        if test is not None:
+            if test:
+                data["mark-test"] = True
+            else:
+                data["unmark-test"] = True
+
+        if real is not None:
+            if real:
+                data["mark-real"] = True
+            else:
+                data["unmark-real"] = True
+
+        return self.post(api_endpoint=IMAGE_ENDPOINT + "update", data=data)
 
     def get_labels_by_substring(self, name):
         """
@@ -684,8 +696,8 @@ class Image(RecognitionClient):
         self.thumb_img_path = image_json[THUMB_IMG_PATH]
         self.verifyCount = image_json[VERIFY_COUNT] if VERIFY_COUNT in image_json else -1
         self.workspace = image_json[WORKSPACE] if WORKSPACE in image_json else DEFAULT_WORKSPACE
-        self.img_width = image_json[IMG_WIDTH]
-        self.img_height = image_json[IMG_HEIGHT]
+        self.img_width = image_json[IMG_WIDTH] if IMG_WIDTH in image_json else None
+        self.img_height = image_json[IMG_HEIGHT] if IMG_HEIGHT in image_json else None
         # if the meta data was downloaded from the server, this field is never None
         self.meta_data = (
             None if META_DATA not in image_json else (image_json[META_DATA] if image_json[META_DATA] else {})
@@ -693,6 +705,8 @@ class Image(RecognitionClient):
         # file path after calling download_image on this object
         self._file = None
         self._objects = []
+        self.test_image = image_json[TEST_IMAGE] if TEST_IMAGE in image_json else None
+        self.real_image = image_json[REAL_IMAGE] if REAL_IMAGE in image_json else None
 
     def __str__(self):
         return self.thumb_img_path
@@ -702,6 +716,14 @@ class Image(RecognitionClient):
         Remove image from system.
         """
         return self.remove_image(self.id)
+
+    def set_test(self, test):
+        self.modify_images([self.id], test=test)
+        self.test_image = test
+
+    def set_real(self, real):
+        self.modify_images([self.id], real=real)
+        self.real_image = real
 
     def get_labels(self):
         """

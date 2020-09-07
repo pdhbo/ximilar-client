@@ -25,11 +25,13 @@ VISUAL_SEARCH = "visual-search"
 DOMINANT_COLORS_PRODUCT = "dominant-colors"
 DOMINANT_COLORS_GENERIC = "dominant-colors"
 HOME_DECOR_TAGGING = "homedecor-tagging"
+CUSTOM_SIMILARITY = "custom-similarity"
 
 # Recognition/Vize related
 USER_ID = "user_id"
 USER = "user"
 IMAGE_ID = "image_id"
+TYPE_ID = "type_id"
 STATUS = "status"
 STATUS_OK = "OK"
 STATUS_ERROR = "ERROR"
@@ -81,6 +83,8 @@ TEST_IMAGE = "test_image"
 STORE_IMAGES = "store_images"
 OUTPUT_NAME = "output_name"
 COLOR = "color"
+TEST_IMAGE = "test_image"
+REAL_IMAGE = "real_image"
 
 # Flows
 TOP_NODE = "top_node"
