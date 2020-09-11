@@ -168,6 +168,12 @@ class RecognitionClient(RestClient):
 
         return None, {STATUS: "Task with this name not found!"}
 
+    def add_label_to_image(self, image_id, label_id):
+        """
+        Add label to the image.
+        """
+        return self.post(IMAGE_ENDPOINT + image_id + "/add-label/", data={LABEL_ID: label_id})
+
     def get_training_images(self, page_url=None, verification=None):
         """
         Get paginated result of images from workspace.
@@ -186,7 +192,7 @@ class RecognitionClient(RestClient):
         return (
             [Image(self.token, self.endpoint, image_json) for image_json in result[RESULTS]],
             result[NEXT],
-            RESULT_OK,
+            {"count": result["count"], STATUS: "ok"},
         )
 
     def training_images_iter(self, verification=None, batch_size=1):
@@ -524,7 +530,7 @@ class Task(RecognitionClient):
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(TASK_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
+        return self.add_label_to_image(self.id, label_id)
 
     def detach_label(self, label_id):
         """
