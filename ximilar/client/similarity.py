@@ -187,9 +187,3 @@ class SimilarityGroup(CustomSimilarityClient):
 
     def remove(self):
         self.remove_group(self.id)
-
-
-if __name__ == "__main__":
-    client = CustomSimilarityClient("")
-    t1, status = client.get_groups_by_type_name("TEST MICHAL 2")
-    print(t1)
