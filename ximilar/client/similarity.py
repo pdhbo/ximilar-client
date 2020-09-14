@@ -64,10 +64,20 @@ class CustomSimilarityClient(RestClient):
 
     def get_groups_by_name(self, name):
         result = self.get(GROUP_ENDPOINT + "?search=" + name)
+        if "results" not in result:
+            return result
         return [SimilarityGroup(self.token, self.endpoint, group_json) for group_json in result["results"]], RESULT_OK
 
     def get_groups_by_type(self, sim_type):
-        result = self.get(GROUP_ENDPOINT + "?search=" + name)
+        result = self.get(GROUP_ENDPOINT + "?type=" + sim_type)
+        if "results" not in result:
+            return result
+        return [SimilarityGroup(self.token, self.endpoint, group_json) for group_json in result["results"]], RESULT_OK
+
+    def get_groups_by_type_name(self, type_name):
+        result = self.get(GROUP_ENDPOINT + "?type__name=" + type_name)
+        if "results" not in result:
+            return result
         return [SimilarityGroup(self.token, self.endpoint, group_json) for group_json in result["results"]], RESULT_OK
 
     def predict(self, json_records, task_id):
@@ -177,3 +187,9 @@ class SimilarityGroup(CustomSimilarityClient):
 
     def remove(self):
         self.remove_group(self.id)
+
+
+if __name__ == "__main__":
+    client = CustomSimilarityClient("")
+    t1, status = client.get_groups_by_type_name("TEST MICHAL 2")
+    print(t1)
