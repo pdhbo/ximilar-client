@@ -268,7 +268,7 @@ class DetectionClient(RecognitionClient):
 
 class DetectionTask(DetectionClient):
     def __init__(self, token, endpoint, task_json, max_image_size):
-        super(DetectionTask, self).__init__(token, endpoint, max_image_size=max_image_size)
+        super(DetectionTask, self).__init__(token, endpoint, max_image_size=max_image_size, resource_name=None)
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
@@ -358,7 +358,7 @@ class DetectionLabel(DetectionClient):
     """
 
     def __init__(self, token, endpoint, label_json):
-        super(DetectionLabel, self).__init__(token, endpoint)
+        super(DetectionLabel, self).__init__(token, endpoint, resource_name=None)
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
@@ -426,7 +426,7 @@ class DetectionObject(DetectionClient):
     """
 
     def __init__(self, token, endpoint, object_json):
-        super(DetectionObject, self).__init__(token, endpoint)
+        super(DetectionObject, self).__init__(token, endpoint, resource_name=None)
 
         self.id = object_json[ID]
         self.image = object_json[IMAGE]

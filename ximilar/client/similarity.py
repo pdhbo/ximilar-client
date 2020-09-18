@@ -1,4 +1,3 @@
-from ximilar.client import RestClient
 from ximilar.client.constants import *
 from ximilar.client.recognition import  Image, RecognitionClient
 
@@ -7,51 +6,51 @@ TASK_ENDPOINT = "similarity/training/v2/task/"
 GROUP_ENDPOINT = "similarity/training/v2/group/"
 
 
-class CustomSimilarityClient(RestClient):
+class CustomSimilarityClient(RecognitionClient):
     """
     Ximilar API Client for Custom Similarity.
     """
-    def __init__(self, token, endpoint=ENDPOINT, resource_name=CUSTOM_SIMILARITY):
-        super(CustomSimilarityClient, self).__init__(token=token, endpoint=endpoint, max_image_size=512, resource_name=resource_name)
+    def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_SIMILARITY):
+        super(CustomSimilarityClient, self).__init__(token=token, endpoint=endpoint, workspace=workspace, max_image_size=512, resource_name=resource_name)
 
     def create_group(self, name, description, sim_type):
         data = {NAME: name, DESCRIPTION: description, "type": sim_type}
         group_json = self.post(GROUP_ENDPOINT, data=data)
         if ID not in group_json:
             return None, {STATUS: "unexpected error"}
-        return SimilarityGroup(self.token, self.endpoint, group_json), RESULT_OK
+        return SimilarityGroup(self.token, self.endpoint, self.workspace, group_json), RESULT_OK
 
     def create_task(self, name, description):
         data = {NAME: name, DESCRIPTION: description}
-        task_json = self.post(TASK_ENDPOINT, data=data)
+        task_json = self.post(TASK_ENDPOINT)
         if ID not in task_json:
             return None, {STATUS: "unexpected error"}
-        return SimilarityTask(self.token, self.endpoint, task_json), RESULT_OK
+        return SimilarityTask(self.token, self.endpoint, self.workspace, task_json), RESULT_OK
 
     def create_type(self, name, description):
         data = {NAME: name, DESCRIPTION: description}
-        type_json = self.post(TYPE_ENDPOINT, data=data)
+        type_json = self.post(TYPE_ENDPOINT)
         if ID not in type_json:
             return None, {STATUS: "unexpected error"}
-        return SimilarityType(self.token, self.endpoint, type_json), RESULT_OK
+        return SimilarityType(self.token, self.endpoint, self.workspace, type_json), RESULT_OK
 
     def get_task(self, task_id):
         task_json = self.get(TASK_ENDPOINT + task_id)
         if ID not in task_json:
             return None, {STATUS: "SimilarityTask with this id not found!"}
-        return SimilarityTask(self.token, self.endpoint, task_json), RESULT_OK
+        return SimilarityTask(self.token, self.endpoint, self.workspace, task_json), RESULT_OK
 
     def get_type(self, type_id):
         type_json = self.get(TYPE_ENDPOINT + type_id)
         if ID not in type_json:
             return None, {STATUS: "SimilarityType with this id not found!"}
-        return SimilarityType(self.token, self.endpoint, type_json), RESULT_OK
+        return SimilarityType(self.token, self.endpoint, self.workspace, type_json), RESULT_OK
 
     def get_group(self, group_id):
         group_json = self.get(GROUP_ENDPOINT + group_id)
         if ID not in group_json:
             return None, {STATUS: "SimilarityGroup with this id not found!"}
-        return SimilarityGroup(self.token, self.endpoint, group_json), RESULT_OK
+        return SimilarityGroup(self.token, self.endpoint, self.workspace, group_json), RESULT_OK
 
     def remove_group(self, group_id):
         return self.delete(GROUP_ENDPOINT + group_id)
@@ -62,31 +61,51 @@ class CustomSimilarityClient(RestClient):
     def remove_task(self, task_id):
         return self.delete(TASK_ENDPOINT + task_id)
 
-    def get_groups_by_name(self, name):
-        result = self.get(GROUP_ENDPOINT + "?search=" + name)
-        if "results" not in result:
-            return result
-        return [SimilarityGroup(self.token, self.endpoint, group_json) for group_json in result["results"]], RESULT_OK
+    def get_all_tasks(self):
+        tasks, status = self.get_all_paginated_items(TASK_ENDPOINT)
+        if not tasks and status[STATUS] == STATUS_ERROR:
+            return None, status
+        return [Task(self.token, self.endpoint, self.workspace, t_json) for t_json in tasks], RESULT_OK
 
-    def get_groups_by_type(self, sim_type):
-        result = self.get(GROUP_ENDPOINT + "?type=" + sim_type)
-        if "results" not in result:
-            return result
-        return [SimilarityGroup(self.token, self.endpoint, group_json) for group_json in result["results"]], RESULT_OK
+    def get_all_types(self):
+        types, status = self.get_all_paginated_items(TYPE_ENDPOINT)
+        if not types and status[STATUS] == STATUS_ERROR:
+            return None, status
+        return [SimilarityType(self.token, self.endpoint, self.workspace, t_json) for t_json in types], RESULT_OK
 
-    def get_groups_by_type_name(self, type_name):
-        result = self.get(GROUP_ENDPOINT + "?type__name=" + type_name)
-        if "results" not in result:
-            return result
-        return [SimilarityGroup(self.token, self.endpoint, group_json) for group_json in result["results"]], RESULT_OK
+    def get_groups(self, page_url=None, search=None):
+        url = (
+            page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
+            if page_url
+            else GROUP_ENDPOINT + "?page=1"
+        )
+
+        if page_url is None:
+            url += search if search is not None else ""
+
+        result = self.get(url)
+        return (
+            [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in result[RESULTS]],
+            result[NEXT],
+            {"count": result["count"], STATUS: "ok"},
+        )
+
+    def get_groups_by_name(self, name, page_url=None):
+        return self.get_groups(page_url, "&search="+name)
+
+    def get_groups_by_type(self, sim_type, page_url=None):
+        return self.get_groups(page_url, "&type="+sim_type)
+
+    def get_groups_by_type_name(self, type_name, page_url=None):
+        return self.get_groups(page_url, "&type__name="+type_name)
 
     def predict(self, json_records, task_id):
         pass
 
 
 class SimilarityTask(CustomSimilarityClient):
-    def __init__(self, token, endpoint, task_json):
-        super(SimilarityTask, self).__init__(token, endpoint)
+    def __init__(self, token, endpoint, workspace, task_json):
+        super(SimilarityTask, self).__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
 
         self.id = task_json["id"]
         self.name = task_json["name"]
@@ -111,8 +130,8 @@ class SimilarityTask(CustomSimilarityClient):
 
 
 class SimilarityType(CustomSimilarityClient):
-    def __init__(self, token, endpoint, type_json):
-        super(SimilarityType, self).__init__(token, endpoint)
+    def __init__(self, token, endpoint, workspace, type_json):
+        super(SimilarityType, self).__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
 
         self.id = type_json["id"]
         self.name = type_json["name"]
@@ -125,14 +144,14 @@ class SimilarityType(CustomSimilarityClient):
 
 
 class SimilarityGroup(CustomSimilarityClient):
-    def __init__(self, token, endpoint, group_json):
-        super(SimilarityGroup, self).__init__(token, endpoint)
+    def __init__(self, token, endpoint, workspace, group_json):
+        super(SimilarityGroup, self).__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
 
         self.id = group_json["id"]
         self.name = group_json["name"] if "name" in group_json else None
 
         if "groups" in group_json:
-            self.groups = [SimilarityGroup(token, endpoint, group) for group in group_json["groups"]]
+            self.groups = [SimilarityGroup(token, endpoint, workspace, group) for group in group_json["groups"]]
         else:
             self.groups = []
 
@@ -144,7 +163,7 @@ class SimilarityGroup(CustomSimilarityClient):
         if isinstance(group_json["type"], str):
             self.type = group_json["type"]
         elif isinstance(group_json["type"], dict):
-            self.type = SimilarityType(token, endpoint, group_json["type"])
+            self.type = SimilarityType(token, endpoint, workspace, group_json["type"])
 
         self.type = group_json["type"] if "type" in group_json else None
 

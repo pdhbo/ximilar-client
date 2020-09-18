@@ -9,6 +9,8 @@ if os.environ.get("CI_COMMIT_TAG"):
 else:
     version = "2.0"
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name="ximilar-client",
@@ -29,4 +31,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     namespace_packages=["ximilar"],
+    long_description=long_description,
+    long_description_content_type="text/markdown",
 )

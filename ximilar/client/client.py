@@ -38,6 +38,23 @@ class RestClient(object):
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
 
+    def add_workspace(self, data, url=None):
+        """
+        Add workspace uuid to the data.
+        :param data: dictionary/json data which will be send to endpoint
+        :return: modified json data with workspace
+        """
+        if self.workspace != DEFAULT_WORKSPACE:
+            if data is None:
+                data = {}
+
+            # if workspace is already in url then do not create the param
+            if url is not None and self.workspace not in url:
+                data[WORKSPACE] = self.workspace
+            elif url is None:
+                data[WORKSPACE] = self.workspace
+        return data
+
     def get_token_header(self, token):
         if len(token) < 70:
             return "Token " + token

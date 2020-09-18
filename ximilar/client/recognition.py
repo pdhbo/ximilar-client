@@ -56,23 +56,6 @@ class RecognitionClient(RestClient):
         """
         return super().delete(api_endpoint, data=data, params=self.add_workspace(params))
 
-    def add_workspace(self, data, url=None):
-        """
-        Add workspace uuid to the data.
-        :param data: dictionary/json data which will be send to endpoint
-        :return: modified json data with workspace
-        """
-        if self.workspace != DEFAULT_WORKSPACE:
-            if data is None:
-                data = {}
-
-            # if workspace is already in url then do not create the param
-            if url is not None and self.workspace not in url:
-                data[WORKSPACE] = self.workspace
-            elif url is None:
-                data[WORKSPACE] = self.workspace
-        return data
-
     def get_workspaces(self):
         """
         Get all workspaces accessed by user.
@@ -349,6 +332,9 @@ class RecognitionClient(RestClient):
 
             image = Image(self.token, self.endpoint, image_json)
 
+            if REAL_IMAGE in record:
+                image.set_real(record[REAL_IMAGE])
+
             if LABELS in record:
                 for label_id in record[LABELS]:
                     image.add_label(label_id)
@@ -436,7 +422,7 @@ class Task(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, task_json):
-        super(Task, self).__init__(token, endpoint)
+        super(Task, self).__init__(token, endpoint, resource_name=None)
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
@@ -558,7 +544,7 @@ class Model(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, model_json):
-        super(Model, self).__init__(token, endpoint)
+        super(Model, self).__init__(token, endpoint, resource_name=None)
 
         self.id = model_json[ID]
         self.task_id = model_json[TASK]
@@ -580,7 +566,7 @@ class Label(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, label_json):
-        super(Label, self).__init__(token, endpoint)
+        super(Label, self).__init__(token, endpoint, resource_name=None)
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
@@ -695,7 +681,7 @@ class Image(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, image_json):
-        super(Image, self).__init__(token, endpoint)
+        super(Image, self).__init__(token, endpoint, resource_name=None)
 
         self.id = image_json[ID]
         self.img_path = image_json[IMG_PATH]
