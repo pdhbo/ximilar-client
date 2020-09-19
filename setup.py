@@ -4,17 +4,12 @@ import os
 with open("requirements.txt") as f:
     install_requirements = f.read().splitlines()
 
-if os.environ.get("CI_COMMIT_TAG"):
-    version = os.environ["CI_COMMIT_TAG"]
-else:
-    version = "2.0"
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name="ximilar-client",
-    version=version,
+    version="1.10.17",
     description="The Ximilar App and Vize.ai Client.",
     url="https://gitlab.com/ximilar-public/ximilar-vize-api",
     author="Michal Lukac, David Novak and Ximilar.com Team",
