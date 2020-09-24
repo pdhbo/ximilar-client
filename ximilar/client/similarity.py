@@ -4,6 +4,7 @@ from ximilar.client.recognition import  Image, RecognitionClient
 TYPE_ENDPOINT = "similarity/training/v2/type/"
 TASK_ENDPOINT = "similarity/training/v2/task/"
 GROUP_ENDPOINT = "similarity/training/v2/group/"
+DESCRIPTOR_ENDPOINT = "similarity/training/v2/descriptor"
 
 
 class CustomSimilarityClient(RecognitionClient):
@@ -12,7 +13,7 @@ class CustomSimilarityClient(RecognitionClient):
     """
     def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_SIMILARITY):
         super(CustomSimilarityClient, self).__init__(token=token, endpoint=endpoint, workspace=workspace, max_image_size=512, resource_name=resource_name)
-        self.PREDICT_ENDPOINT = CLASSIFY_ENDPOINT
+        self.PREDICT_ENDPOINT = DESCRIPTOR_ENDPOINT
 
     def create_group(self, name, description, sim_type):
         data = {NAME: name, DESCRIPTION: description, "type": sim_type}
@@ -179,13 +180,14 @@ class SimilarityGroup(CustomSimilarityClient):
     def __str__(self):
         return self.name + ":" + self.id
 
-    def refresh(self):
-        group, _ = self.get_group(self.id)
+    def refresh(self, force):
+        if force:
+            group, _ = self.get_group(self.id)
 
-        self.name = group.name
-        self.groups = group.groups
-        self.images = group.images
-        self.type = group.type
+            self.name = group.name
+            self.groups = group.groups
+            self.images = group.images
+            self.type = group.type
 
     def get_images(self, images):
         return self.images
@@ -193,24 +195,24 @@ class SimilarityGroup(CustomSimilarityClient):
     def get_groups(self, groups):
         return self.groups
 
-    def add_images(self, images):
+    def add_images(self, images, refresh=False):
         result = self.post(GROUP_ENDPOINT + self.id + "/add-images/", data={"images": images})
-        self.refresh()
+        self.refresh(refresh)
         return result
 
-    def remove_images(self, images):
+    def remove_images(self, images, refresh=False):
         result = self.post(GROUP_ENDPOINT + self.id + "/remove-images/", data={"images": images})
-        self.refresh()
+        self.refresh(refresh)
         return result
 
-    def add_groups(self, groups):
+    def add_groups(self, groups, refresh=False):
         result = self.post(GROUP_ENDPOINT + self.id + "/add-groups/", data={"groups": groups})
-        self.refresh()
+        self.refresh(refresh)
         return result
 
-    def remove_groups(self, groups):
+    def remove_groups(self, groups, refresh=False):
         result = self.post(GROUP_ENDPOINT + self.id + "/remove-groups/", data={"groups": groups})
-        self.refresh()
+        self.refresh(refresh)
         return result
 
     def remove(self):
