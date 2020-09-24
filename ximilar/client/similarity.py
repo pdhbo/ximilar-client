@@ -12,6 +12,7 @@ class CustomSimilarityClient(RecognitionClient):
     """
     def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_SIMILARITY):
         super(CustomSimilarityClient, self).__init__(token=token, endpoint=endpoint, workspace=workspace, max_image_size=512, resource_name=resource_name)
+        self.PREDICT_ENDPOINT = CLASSIFY_ENDPOINT
 
     def create_group(self, name, description, sim_type):
         data = {NAME: name, DESCRIPTION: description, "type": sim_type}
@@ -99,8 +100,16 @@ class CustomSimilarityClient(RecognitionClient):
     def get_groups_by_type_name(self, type_name, page_url=None):
         return self.get_groups(page_url, "&type__name="+type_name)
 
-    def predict(self, json_records, task_id):
-        pass
+    def descriptor(self, records, task_id, version=None):
+        """
+        Takes the images and calls the ximilar client for extracting visual descriptors.
+        """
+        # version is default set to None, so ximilar will determine which one to take
+        data = self.construct_data(records=records, task_id=task_id, version=version)
+        result = self.post(self.PREDICT_ENDPOINT, data=data)
+
+        self.check_json_status(result)
+        return result
 
 
 class SimilarityTask(CustomSimilarityClient):
@@ -122,8 +131,8 @@ class SimilarityTask(CustomSimilarityClient):
     def train(self):
         pass
 
-    def predict(self, json_records):
-        pass
+    def descriptor(self, json_records):
+        return self.descriptor(json_records, self.id)
 
     def remove(self):
         self.remove_task(self.id)
