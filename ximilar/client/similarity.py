@@ -1,4 +1,5 @@
 from ximilar.client.constants import *
+from ximilar.client import RestClient
 from ximilar.client.recognition import  Image, RecognitionClient
 
 TYPE_ENDPOINT = "similarity/training/v2/type/"
@@ -217,3 +218,27 @@ class SimilarityGroup(CustomSimilarityClient):
 
     def remove(self):
         self.remove_group(self.id)
+
+
+class SimilarityRunLogClient(RestClient):
+    BASE_ENDPOINT = "/similarity/v2/run-log/"
+
+    def __init__(
+        self,
+        token,
+        endpoint=ENDPOINT,
+    ):
+        self.workspace = None 
+        super(SimilarityRunLogClient, self).__init__(token=token, endpoint=endpoint, resource_name=None)
+
+    def create_log(self, collection, data):
+        return self.post(self.BASE_ENDPOINT, {"collection": collection, "data": data})
+
+    def get_log(self, log_id):
+        return self.get(self.BASE_ENDPOINT + log_id)
+
+    def delete_log(self, log_id):
+        return self.delete(self.BASE_ENDPOINT + log_id)
+
+    def update_log(self, log_id, data):
+        return self.put(self.BASE_ENDPOINT + log_id,  {"data": data})
