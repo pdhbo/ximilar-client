@@ -76,7 +76,7 @@ class CustomSimilarityClient(RecognitionClient):
             return None, status
         return [SimilarityType(self.token, self.endpoint, self.workspace, t_json) for t_json in types], RESULT_OK
 
-    def get_groups(self, page_url=None, search=None):
+    def get_groups(self, page_url=None, search=None, test=None):
         url = (
             page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
             if page_url
@@ -86,21 +86,36 @@ class CustomSimilarityClient(RecognitionClient):
         if page_url is None:
             url += search if search is not None else ""
 
-        result = self.get(url)
+        test_field =  ""
+        if test is not None:
+            if test:
+                test_field = "&test=True"
+            else:
+                test_field = "&test=False"
+
+        result = self.get(url + test_field)
         return (
             [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in result[RESULTS]],
             result[NEXT],
             {"count": result["count"], STATUS: "ok"},
         )
 
-    def get_groups_by_name(self, name, page_url=None):
-        return self.get_groups(page_url, "&search="+name)
+    def get_groups_by_name(self, name, page_url=None, test=None):
+        test_field =  "?search="+name
+        if test is not None:
+            if test:
+                test_field += "&test=True"
+            else:
+                test_field += "&test=False"
 
-    def get_groups_by_type(self, sim_type, page_url=None):
-        return self.get_groups(page_url, "&type="+sim_type)
+        groups, status = self.get_all_paginated_items(GROUP_ENDPOINT + test_field)
+        return [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in groups], RESULT_OK
 
-    def get_groups_by_type_name(self, type_name, page_url=None):
-        return self.get_groups(page_url, "&type__name="+type_name)
+    def get_groups_by_type(self, sim_type, page_url=None, test=None):
+        return self.get_groups(page_url, "&type="+sim_type, test=test)
+
+    def get_groups_by_type_name(self, type_name, page_url=None, test=None):
+        return self.get_groups(page_url, "&type__name="+type_name, test=test)
 
     def descriptor(self, records, task_id, version=None):
         """
@@ -171,6 +186,7 @@ class SimilarityGroup(CustomSimilarityClient):
         else:
             self.images = []
 
+        self.test_group = group_json["test_group"] if "test_group" in group_json else None
         if isinstance(group_json["type"], str):
             self.type = group_json["type"]
         elif isinstance(group_json["type"], dict):
@@ -189,11 +205,12 @@ class SimilarityGroup(CustomSimilarityClient):
             self.groups = group.groups
             self.images = group.images
             self.type = group.type
+            self.test_group = group.test_group
 
-    def get_images(self, images):
+    def get_images(self):
         return self.images
 
-    def get_groups(self, groups):
+    def get_groups(self):
         return self.groups
 
     def add_images(self, images, refresh=False):
