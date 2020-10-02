@@ -216,6 +216,12 @@ class SimilarityGroup(CustomSimilarityClient):
         self.refresh(refresh)
         return result
 
+    def set_test(self, test, refresh=False):
+        field = "mark-test" if test else "unmark-test"
+        result = self.post(GROUP_ENDPOINT + "update", data={"groups": [self.id], field: True})
+        self.refresh(refresh)
+        return result
+
     def remove(self):
         self.remove_group(self.id)
 
