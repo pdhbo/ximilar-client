@@ -100,15 +100,15 @@ class CustomSimilarityClient(RecognitionClient):
             {"count": result["count"], STATUS: "ok"},
         )
 
-    def get_groups_by_name(self, name, page_url=None, test=None):
-        test_field =  "?search="+name
+    def get_all_groups_by_name(self, name, page_url=None, test=None):
+        search_field =  "?search="+name
         if test is not None:
             if test:
-                test_field += "&test=True"
+                search_field += "&test=True"
             else:
-                test_field += "&test=False"
+                search_field += "&test=False"
 
-        groups, status = self.get_all_paginated_items(GROUP_ENDPOINT + test_field)
+        groups, status = self.get_all_paginated_items(GROUP_ENDPOINT + search_field)
         return [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in groups], RESULT_OK
 
     def get_groups_by_type(self, sim_type, page_url=None, test=None):
