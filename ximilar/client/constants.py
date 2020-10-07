@@ -83,7 +83,7 @@ TEST_IMAGE = "test_image"
 STORE_IMAGES = "store_images"
 OUTPUT_NAME = "output_name"
 COLOR = "color"
-REAL_IMAGE = "real_image"
+REAL_IMAGE = "real"
 
 # Flows
 TOP_NODE = "top_node"
