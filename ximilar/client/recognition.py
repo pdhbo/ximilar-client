@@ -516,7 +516,7 @@ class Task(RecognitionClient):
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.add_label_to_image(self.id, label_id)
+        return self.post(TASK_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
 
     def detach_label(self, label_id):
         """
