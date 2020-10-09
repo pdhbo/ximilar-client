@@ -745,6 +745,9 @@ class Image(RecognitionClient):
         """
         return self.post(IMAGE_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
+    def remove_label(self, label_id):
+        return self.detach_label(label_id)
+
     def download(self, destination="", name=None):
         """
         Download image to the destination and store path to the _file of the object.
