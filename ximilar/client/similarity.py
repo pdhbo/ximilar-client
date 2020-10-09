@@ -25,14 +25,14 @@ class CustomSimilarityClient(RecognitionClient):
 
     def create_task(self, name, description):
         data = {NAME: name, DESCRIPTION: description}
-        task_json = self.post(TASK_ENDPOINT)
+        task_json = self.post(TASK_ENDPOINT, data=data)
         if ID not in task_json:
             return None, {STATUS: "unexpected error"}
         return SimilarityTask(self.token, self.endpoint, self.workspace, task_json), RESULT_OK
 
     def create_type(self, name, description):
         data = {NAME: name, DESCRIPTION: description}
-        type_json = self.post(TYPE_ENDPOINT)
+        type_json = self.post(TYPE_ENDPOINT, data=data)
         if ID not in type_json:
             return None, {STATUS: "unexpected error"}
         return SimilarityType(self.token, self.endpoint, self.workspace, type_json), RESULT_OK
