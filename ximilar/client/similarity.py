@@ -68,7 +68,7 @@ class CustomSimilarityClient(RecognitionClient):
         tasks, status = self.get_all_paginated_items(TASK_ENDPOINT)
         if not tasks and status[STATUS] == STATUS_ERROR:
             return None, status
-        return [Task(self.token, self.endpoint, self.workspace, t_json) for t_json in tasks], RESULT_OK
+        return [SimilarityTask(self.token, self.endpoint, self.workspace, t_json) for t_json in tasks], RESULT_OK
 
     def get_all_types(self):
         types, status = self.get_all_paginated_items(TYPE_ENDPOINT)
