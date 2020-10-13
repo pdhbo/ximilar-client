@@ -76,6 +76,7 @@ def process_workspace(
         page_url = f"{IMAGE_ENDPOINT}?test=true&page_size={page_size}"
         total_images = recognition_client.get_training_images(page_url=page_url)[2]["count"]
 
+        line_number = 2
         with tqdm(total=total_images) as pbar:
             while page_url:
                 # get one page with test images
@@ -94,7 +95,6 @@ def process_workspace(
                 labels_records = [item for sublist in labels_response for item in sublist[RECORDS]]
 
                 # process one result (Image) at a time and write one line to CSV
-                line_number = 2
                 for labels_record in labels_records:
                     img = training_images[labels_record["_url"]]
                     try:
