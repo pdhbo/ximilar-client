@@ -67,7 +67,7 @@ def process_workspace(
         header_probability = "prob"
         header_found = ""
         header_labels = ["top category 1", "top category 2", "category 1", "category 2", *(["label"] * max_labels)]
-        header = ["image id", "image"]
+        header = ["image", "image id", "image URL"]
         for header_label in header_labels:
             header.extend([header_label, header_probability, header_found])
         csv_writer.writerow(header)
@@ -94,10 +94,11 @@ def process_workspace(
                 labels_records = [item for sublist in labels_response for item in sublist[RECORDS]]
 
                 # process one result (Image) at a time and write one line to CSV
+                line_number = 2
                 for labels_record in labels_records:
                     img = training_images[labels_record["_url"]]
                     try:
-                        row = [img.id, img.img_path]
+                        row = [f"=IMAGE(C{line_number})", img.id, img.img_path]
 
                         labels_true = img.get_labels()[0]
                         labels_pred = labels_record["_tags"]
@@ -120,6 +121,7 @@ def process_workspace(
 
                         row.extend([""] * (len(header) - len(row)))
                         csv_writer.writerow(row)
+                        line_number += 1
                     except Exception:
                         print(f"Error for image id {img.id}")
                         traceback.print_exc()
@@ -130,10 +132,10 @@ def process_workspace(
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Evaluate fashion tagging for all testing images in given workspace")
-    parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
+    parser.add_argument("--api_prefix", help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
-    parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
-    parser.add_argument("--output_file", help="path to the json output file", default="tagging_output.csv")
+    parser.add_argument("--workspace_id", help="ID of workspace to take test images from", default=DEFAULT_WORKSPACE)
+    parser.add_argument("--output_file", help="json output file [tagging_output.csv]", default="tagging_output.csv")
     args = parser.parse_args()
 
     fashion_tagging = FashionTaggingClient(token=args.auth_token)
