@@ -219,12 +219,7 @@ class RecognitionClient(RestClient):
         if not (labels or images):
             raise XimilarClientInvalidDataException("Either images or labels must be specified")
 
-        data = {
-            "images": images,
-            "labels": labels,
-            "labels-add": add_labels,
-            "labels-remove": remove_labels,
-        }
+        data = {"images": images, "labels": labels, "labels-add": add_labels, "labels-remove": remove_labels}
 
         if test is not None:
             if test:

@@ -35,7 +35,7 @@ RANK_RECORDS = "visualRankRecords"
 
 class SimilarityPhotosClient(RestClient):
     def __init__(
-        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS, resource_name=PHOTO_SIMILARITY,
+        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS, resource_name=PHOTO_SIMILARITY
     ):
         super(SimilarityPhotosClient, self).__init__(
             token=token, endpoint=endpoint, max_image_size=512, resource_name=resource_name
@@ -154,10 +154,10 @@ class SimilarityPhotosClient(RestClient):
 
 class SimilarityProductsClient(SimilarityPhotosClient):
     def __init__(
-        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY,
+        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY
     ):
         super(SimilarityProductsClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name,
+            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
         )
 
 
@@ -170,7 +170,7 @@ class SimilarityProductsTagsClient(SimilarityPhotosClient):
         resource_name=PRODUCT_SIMILARITY_TAGS,
     ):
         super(SimilarityProductsTagsClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name,
+            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
         )
 
     def insert(self, records, custom_flow=None):

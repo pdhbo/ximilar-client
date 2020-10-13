@@ -87,5 +87,5 @@ class GenericTaggingClient(TaggingClient):
         super(GenericTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = GENERIC_TAGGING_ENDPOINT
 
-    def tags(self, records,):
+    def tags(self, records):
         return super().tags(records, self.PREDICT_ENDPOINT)
