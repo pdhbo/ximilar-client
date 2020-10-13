@@ -252,9 +252,7 @@ class SimilarityGroup(CustomSimilarityClient):
 class SimilarityRunLogClient(RestClient):
     BASE_ENDPOINT = "/similarity/v2/run-log/"
 
-    def __init__(
-        self, token, endpoint=ENDPOINT,
-    ):
+    def __init__(self, token, endpoint=ENDPOINT):
         self.workspace = None
         super(SimilarityRunLogClient, self).__init__(token=token, endpoint=endpoint, resource_name=None)
 

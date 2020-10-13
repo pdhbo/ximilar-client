@@ -24,9 +24,7 @@ if __name__ == "__main__":
             token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
         )
     elif args.type == "visual":
-        client = VisualSearchClient(
-            token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
-        )
+        client = VisualSearchClient(token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id)
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 
