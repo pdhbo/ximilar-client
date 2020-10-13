@@ -1,6 +1,6 @@
 from ximilar.client.constants import *
 from ximilar.client import RestClient
-from ximilar.client.recognition import  Image, RecognitionClient
+from ximilar.client.recognition import Image, RecognitionClient
 
 TYPE_ENDPOINT = "similarity/training/v2/type/"
 TASK_ENDPOINT = "similarity/training/v2/task/"
@@ -12,8 +12,11 @@ class CustomSimilarityClient(RecognitionClient):
     """
     Ximilar API Client for Custom Similarity.
     """
+
     def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_SIMILARITY):
-        super(CustomSimilarityClient, self).__init__(token=token, endpoint=endpoint, workspace=workspace, max_image_size=512, resource_name=resource_name)
+        super(CustomSimilarityClient, self).__init__(
+            token=token, endpoint=endpoint, workspace=workspace, max_image_size=512, resource_name=resource_name
+        )
         self.PREDICT_ENDPOINT = DESCRIPTOR_ENDPOINT
 
     def create_group(self, name, description, sim_type):
@@ -23,14 +26,14 @@ class CustomSimilarityClient(RecognitionClient):
             return None, {STATUS: "unexpected error"}
         return SimilarityGroup(self.token, self.endpoint, self.workspace, group_json), RESULT_OK
 
-    def create_task(self, name, description):
+    def create_task(self, name, description=""):
         data = {NAME: name, DESCRIPTION: description}
         task_json = self.post(TASK_ENDPOINT, data=data)
         if ID not in task_json:
             return None, {STATUS: "unexpected error"}
         return SimilarityTask(self.token, self.endpoint, self.workspace, task_json), RESULT_OK
 
-    def create_type(self, name, description):
+    def create_type(self, name, description=""):
         data = {NAME: name, DESCRIPTION: description}
         type_json = self.post(TYPE_ENDPOINT, data=data)
         if ID not in type_json:
@@ -76,46 +79,49 @@ class CustomSimilarityClient(RecognitionClient):
             return None, status
         return [SimilarityType(self.token, self.endpoint, self.workspace, t_json) for t_json in types], RESULT_OK
 
-    def get_groups(self, page_url=None, search=None, test=None):
+    def get_groups_url(self, page_url=None, search=None, test=None):
         url = (
             page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
             if page_url
             else GROUP_ENDPOINT + "?page=1"
         )
-
         if page_url is None:
-            url += search if search is not None else ""
-
-        test_field =  ""
+            url += "&" + search if search is not None else ""
         if test is not None:
-            if test:
-                test_field = "&test=True"
-            else:
-                test_field = "&test=False"
+            url += f"&test={'True' if test else 'False'}"
 
-        result = self.get(url + test_field)
+        return url
+
+    def get_groups(self, page_url=None, search=None, test=None):
+        url = self.get_groups_url(page_url, search, test)
+
+        result = self.get(url)
         return (
             [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in result[RESULTS]],
             result[NEXT],
             {"count": result["count"], STATUS: "ok"},
         )
 
-    def get_all_groups_by_name(self, name, page_url=None, test=None):
-        search_field =  "?search="+name
-        if test is not None:
-            if test:
-                search_field += "&test=True"
-            else:
-                search_field += "&test=False"
+    def get_all_groups(self, page_url=None, search=None, test=None):
+        url = self.get_groups_url(page_url, search, test)
 
-        groups, status = self.get_all_paginated_items(GROUP_ENDPOINT + search_field)
-        return [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in groups], RESULT_OK
+        groups, status = self.get_all_paginated_items(url)
+        return (
+            [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in groups],
+            RESULT_OK,
+        )
+
+    def get_all_groups_by_name(self, name, page_url=None, test=None):
+        return self.get_all_groups(page_url, "search=" + name, test)
+
+    def get_all_groups_by_type(self, sim_type, page_url=None, test=None):
+        return self.get_all_groups(page_url, "type=" + sim_type, test)
 
     def get_groups_by_type(self, sim_type, page_url=None, test=None):
-        return self.get_groups(page_url, "&type="+sim_type, test=test)
+        return self.get_groups(page_url, "type=" + sim_type, test=test)
 
     def get_groups_by_type_name(self, type_name, page_url=None, test=None):
-        return self.get_groups(page_url, "&type__name="+type_name, test=test)
+        return self.get_groups(page_url, "type__name=" + type_name, test=test)
 
     def descriptor(self, records, task_id, version=None):
         """
@@ -176,15 +182,13 @@ class SimilarityGroup(CustomSimilarityClient):
         self.id = group_json["id"]
         self.name = group_json["name"] if "name" in group_json else None
 
+        self.groups = None
         if "groups" in group_json:
             self.groups = [SimilarityGroup(token, endpoint, workspace, group) for group in group_json["groups"]]
-        else:
-            self.groups = []
 
+        self.images = None
         if "images" in group_json:
             self.images = [Image(token, endpoint, image) for image in group_json["images"]]
-        else:
-            self.images = []
 
         self.test_group = group_json["test_group"] if "test_group" in group_json else None
         if isinstance(group_json["type"], str):
@@ -198,7 +202,7 @@ class SimilarityGroup(CustomSimilarityClient):
         return self.name + ":" + self.id
 
     def refresh(self, force):
-        if force:
+        if force or self.images is None or self.groups is None:
             group, _ = self.get_group(self.id)
 
             self.name = group.name
@@ -208,9 +212,11 @@ class SimilarityGroup(CustomSimilarityClient):
             self.test_group = group.test_group
 
     def get_images(self):
+        self.refresh(False)
         return self.images
 
     def get_groups(self):
+        self.refresh(False)
         return self.groups
 
     def add_images(self, images, refresh=False):
@@ -247,11 +253,9 @@ class SimilarityRunLogClient(RestClient):
     BASE_ENDPOINT = "/similarity/v2/run-log/"
 
     def __init__(
-        self,
-        token,
-        endpoint=ENDPOINT,
+        self, token, endpoint=ENDPOINT,
     ):
-        self.workspace = None 
+        self.workspace = None
         super(SimilarityRunLogClient, self).__init__(token=token, endpoint=endpoint, resource_name=None)
 
     def create_log(self, collection, data):
@@ -264,4 +268,4 @@ class SimilarityRunLogClient(RestClient):
         return self.delete(self.BASE_ENDPOINT + log_id)
 
     def update_log(self, log_id, data):
-        return self.put(self.BASE_ENDPOINT + log_id,  {"data": data})
+        return self.put(self.BASE_ENDPOINT + log_id, {"data": data})
