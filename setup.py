@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="ximilar-client",
-    version="1.10.26",
+    version="1.10.27",
     description="The Ximilar App and Vize.ai Client.",
     url="https://gitlab.com/ximilar-public/ximilar-vize-api",
     author="Michal Lukac, David Novak and Ximilar.com Team",
