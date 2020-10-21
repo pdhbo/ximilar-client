@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 
 from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient
+from ximilar.client.search import SimilarityFashionClient
 from ximilar.client.utils.json_data import read_json_file_list
 
 
@@ -33,8 +34,8 @@ if __name__ == "__main__":
         client = SimilarityPhotosClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     elif args.type == "product":
         client = SimilarityProductsClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
-    elif args.type == "visual":
-        client = SimilarityProductsClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
+    elif args.type == "fashion":
+        client = SimilarityFashionClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 
