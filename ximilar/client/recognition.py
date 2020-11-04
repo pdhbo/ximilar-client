@@ -757,7 +757,9 @@ class Image(RecognitionClient):
         If the meta_data were not downloaded yet, do so
         """
         if not self.meta_data:
-            self.meta_data = self.get(IMAGE_ENDPOINT + self.id)[META_DATA]
+            image_data = self.get(IMAGE_ENDPOINT + self.id)
+            if META_DATA in image_data:
+                self.meta_data = image_data[META_DATA]
         if not self.meta_data:
             self.meta_data = {}
 
