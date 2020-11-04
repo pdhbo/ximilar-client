@@ -117,6 +117,7 @@ class RestClient(object):
 
         if data is not None:
             data = json.dumps(data)
+
         result = method(
             self.urljoin(self.endpoint, api_endpoint),
             params=params,

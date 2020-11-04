@@ -37,7 +37,7 @@ class TaggingClient(RestClient):
             data["profile"] = profile
 
         result = self.post(endpoint, data=data)
-        self.check_json_status(result)
+        # todo: self.check_json_status(result)
         return result
 
 
