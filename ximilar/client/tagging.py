@@ -12,14 +12,24 @@ DETECT_FASHION_ENDPOINT = "tagging/fashion/v2/detect"
 
 
 class TaggingClient(RestClient):
-    def construct_data(self, records=[]):
+    def construct_data(self, records, aggregate_labels, profile, **kwargs):
         if len(records) == 0:
             raise Exception("Please specify at least on record when using tags method.")
 
         data = {RECORDS: self.preprocess_records(records)}
+
+        if aggregate_labels:
+            data["aggregate_labels"] = True
+
+        if profile:
+            data["profile"] = profile
+
+        if kwargs:
+            data.update(kwargs)
+
         return data
 
-    def tags(self, records, endpoint, aggregate_labels=False, profile=None):
+    def tags(self, records, endpoint, aggregate_labels=False, profile=None, **kwargs):
         """
         Call the tagging endpoint
         :param records: [description]
@@ -28,14 +38,7 @@ class TaggingClient(RestClient):
         :param profile: [description], defaults to None
         :return: json result data from the API
         """
-        data = self.construct_data(records=records)
-
-        if aggregate_labels:
-            data["aggregate_labels"] = True
-
-        if profile:
-            data["profile"] = profile
-
+        data = self.construct_data(records, aggregate_labels=aggregate_labels, profile=profile, **kwargs)
         result = self.post(endpoint, data=data)
         # todo: self.check_json_status(result)
         return result
@@ -52,14 +55,14 @@ class FashionTaggingClient(TaggingClient):
     def tags(self, records, aggregate_labels=False, profile=None):
         return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=aggregate_labels, profile=profile)
 
-    def meta_tags(self, records, profile=None):
-        return super().tags(records, META_FASHION_TAGGING_ENDPOINT, aggregate_labels=False, profile=profile)
+    def meta_tags(self, records, profile=None, **kwargs):
+        return super().tags(records, META_FASHION_TAGGING_ENDPOINT, profile=profile, **kwargs)
 
-    def detect(self, records, profile=None):
-        return super().tags(records, DETECT_FASHION_ENDPOINT, aggregate_labels=False, profile=profile)
+    def detect(self, records, profile=None, **kwargs):
+        return super().tags(records, DETECT_FASHION_ENDPOINT, profile=profile, **kwargs)
 
-    def detect_tags(self, records, profile=None):
-        return super().tags(records, DETECT_FASHION_TAGGING_ENDPOINT, aggregate_labels=False, profile=profile)
+    def detect_tags(self, records, profile=None, **kwargs):
+        return super().tags(records, DETECT_FASHION_TAGGING_ENDPOINT, profile=profile, **kwargs)
 
     def get_top_categories(self):
         result = requests.get(self.urljoin(self.endpoint, "tagging/fashion/v2/top_categories"))

@@ -19,13 +19,16 @@ class VisualSearchClient(SimilarityPhotosClient):
         )
         self.PREDICT_ENDPOINT = SEARCH_PRODUCT
 
-    def construct_data(self, records=[], filter=None, k=5, fields_to_return=[_ID], custom_flow=None):
+    def construct_data(self, records=[], filter=None, k=5, fields_to_return=[_ID], custom_flow=None, **kwargs):
         if len(records) == 0:
             raise Exception("Please specify at least on record when using search method.")
 
         data = {RECORDS: self.preprocess_records(records), K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
         if filter:
             data[FILTER] = filter
+
+        if kwargs:
+            data.update(kwargs)
 
         data = self.fill_data(data, custom_flow)
         return data
@@ -36,6 +39,10 @@ class VisualSearchClient(SimilarityPhotosClient):
         """
         result = self.get(TOP_CATEGORIES)
         return result
+
+    def descriptor(self, records, profile=None, custom_flow=None, **kwargs):
+        data = self.construct_data(records=records, custom_flow=custom_flow, **kwargs)
+        return self.post("descriptor", data=data)
 
     def search(self, records, filter=None, k=5, fields_to_return=[_ID], custom_flow=None):
         """

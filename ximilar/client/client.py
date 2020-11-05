@@ -100,7 +100,7 @@ class RestClient(object):
         return result.json()
 
     @retry_when(ConnectionError)
-    def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post):
+    def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post, headers=None):
         """
         Call the http POST request with data.
 
@@ -121,7 +121,7 @@ class RestClient(object):
         result = method(
             self.urljoin(self.endpoint, api_endpoint),
             params=params,
-            headers=self.headers,
+            headers=self.headers if headers is None else headers,
             data=data,
             files=files,
             timeout=self.request_timeout,
