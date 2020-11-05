@@ -23,6 +23,8 @@ if __name__ == "__main__":
     parser.add_argument("--file_path", help="path to JSON file with image records", required=True)
     parser.add_argument("--type", help="product, generic or fashion similarity service", default="generic")
     parser.add_argument("--is_array", help="is the data JSON array or list of JSON records", default=False, type=bool)
+    parser.add_argument("--batch_size", help="batch size for insert operation", default=10, type=int)
+    parser.add_argument("--threads", help="# of threads to insert with", default=3, type=int)
 
     args = parser.parse_args()
 
@@ -43,4 +45,4 @@ if __name__ == "__main__":
     if args.clean_fields:
         index_images = clean_fields(index_images, args.clean_fields)
 
-    client.parallel_records_processing(index_images, client.insert, batch_size=10, output=True)
+    client.parallel_records_processing(index_images, client.insert, args.threads, args.batch_size, output=True)
