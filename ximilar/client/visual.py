@@ -40,7 +40,7 @@ class VisualSearchClient(SimilarityPhotosClient):
         result = self.get(TOP_CATEGORIES)
         return result
 
-    def descriptor(self, records, profile=None, custom_flow=None, **kwargs):
+    def descriptor(self, records, custom_flow=None, **kwargs):
         data = self.construct_data(records=records, custom_flow=custom_flow, **kwargs)
         return self.post("descriptor", data=data)
 
