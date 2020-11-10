@@ -1,4 +1,4 @@
-# Ximilar API Python Client 1.10.17
+# Ximilar API Python Client
 
 ![](logo.png)
 
@@ -183,6 +183,18 @@ image.add_meta_data({"__KEY_1__": "value", "__KEY_2__": {"THIS CAB BE":"COMPLEX"
 image.clear_meta_data()
 ```
 
+Every image can be marked with **test** flag (for evaluation on independent test dataset only):
+
+```python
+image.set_test(True)
+```
+
+Every image can be marked as real (default) or product. Product image should be images where is dominant one object on nice solid background. We can do more augmentations on these images.
+
+```python
+image.set_real(False) # will mark image as product
+```
+
 ## Ximilar Flows
 
 The client is able to get flow of the json or process images/records by the flow.
@@ -202,8 +214,6 @@ flow.proces(records)
 
 
 ## Ximilar Object Detection
-
-This service is in BETA version.
 
 Ximilar Object Detection is service which will help you find exact location (Bounding Box/Object with four coordinates xmin, ymin, xmax, ymax).
 In similar way as Ximilar Recognition, here we also have Tasks, Labels and Images. However one more entity called Object is present in Ximilar Object Detection.
@@ -389,6 +399,58 @@ result = client.remove([{'_id': '__ITEM_ID__'}])
 
 # update item in index with all additional fields and meta-info
 result = client.update([{'_id': '__ITEM_ID__', 'some-additional-field': '__VALUE__'}])
+```
+
+## Custom Similarity
+
+This service let you train your custom image similarity model.
+
+Creating entities is similar to recognition or detection service.
+
+```python
+from ximilar.client.similarity import CustomSimilarityClient
+client = CustomSimilarityClient("__API__TOKEN__")
+tasks, _ = client.get_all_tasks()
+
+task, _ = client.create_task("__NAME__",  "__DESCRIPTION__")
+type1, _ = client.create_type("__NAME__", "__DESCRIPTION__")
+group, _ = client.create_group("__NAME__", "__DESCRIPTION__", type1.id)
+```
+
+Add/Remove types to/from task:
+
+```python
+task.add_type(type1.id)
+task.remove_type(type1.id)
+```
+
+Add/Remove images to/from group:
+
+```python
+group.add_images(["__IMAGE_ID_1__"])
+group.remove_images(["__IMAGE_ID_1__"])
+group.refresh()
+```
+
+Add/Remove groups to/from group:
+
+```python
+group.add_groups(["__GROUP_ID_1__"])
+group.remove_groups(["__GROUP_ID_1__"])
+group.refresh()
+```
+
+Set unset group as test (test flag is for evaluation dataset):
+
+```python
+group.set_test(True) # or False if unsetting from eval dataset
+group.refresh()
+```
+
+Searching groups with name:
+
+```python
+client.get_all_groups_by_name("__NAME__")
 ```
 
 # Tools

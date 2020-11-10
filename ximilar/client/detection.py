@@ -380,7 +380,7 @@ class DetectionLabel(DetectionClient):
         return self.remove_label(self.id)
 
     def get_images(self):
-        images, status = self.get_all_paginated_items(IMAGE_ENDPOINT+"?detection_labels="+self.id)
+        images, status = self.get_all_paginated_items(IMAGE_ENDPOINT + "?detection_labels=" + self.id)
         if not images and status[STATUS] == STATUS_ERROR:
             return None, status
         return [Image(self.token, self.endpoint, image) for image in images], RESULT_OK

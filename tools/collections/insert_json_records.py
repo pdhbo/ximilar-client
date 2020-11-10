@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 
 from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient
+from ximilar.client.search import SimilarityFashionClient
 from ximilar.client.utils.json_data import read_json_file_list
 
 
@@ -14,14 +15,16 @@ def clean_fields(index_images, fields):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Train all non trained tasks of workspace")
+    parser = ArgumentParser(description="Insert all records in a given file into a similarity search collection")
     parser.add_argument("--api_prefix", help="API prefix", default="")
     parser.add_argument("--clean_fields", help="list of field (separated by comma) to remove from records", default="")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
-    parser.add_argument("--collection_id", help="ID of collection to upload the images into", required=True)
-    parser.add_argument("--path", help="path to the json file", required=True)
-    parser.add_argument("--type", help="product or generic or visual", default="generic")
-    parser.add_argument("--is_array", help="true just in case the data is JSON array", default=False, type=bool)
+    parser.add_argument("--collection_id", help="ID of collection to upload the image records into", required=True)
+    parser.add_argument("--file_path", help="path to JSON file with image records", required=True)
+    parser.add_argument("--type", help="product, generic or fashion similarity service", default="generic")
+    parser.add_argument("--is_array", help="is the data JSON array or list of JSON records", default=False, type=bool)
+    parser.add_argument("--batch_size", help="batch size for insert operation", default=10, type=int)
+    parser.add_argument("--threads", help="# of threads to insert with", default=3, type=int)
 
     args = parser.parse_args()
 
@@ -33,13 +36,13 @@ if __name__ == "__main__":
         client = SimilarityPhotosClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     elif args.type == "product":
         client = SimilarityProductsClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
-    elif args.type == "visual":
-        client = SimilarityProductsClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
+    elif args.type == "fashion":
+        client = SimilarityFashionClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 
-    index_images = read_json_file_list(args.path, is_array=args.is_array)
+    index_images = read_json_file_list(args.file_path, is_array=args.is_array)
     if args.clean_fields:
         index_images = clean_fields(index_images, args.clean_fields)
 
-    client.parallel_records_processing(index_images, client.insert, batch_size=10, output=True)
+    client.parallel_records_processing(index_images, client.insert, args.threads, args.batch_size, output=True)

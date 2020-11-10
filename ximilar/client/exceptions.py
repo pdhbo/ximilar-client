@@ -1,5 +1,3 @@
-
-
 class XimilarClientException(Exception):
     def __init__(self, code, msg=None):
         Exception.__init__(self, msg)

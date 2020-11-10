@@ -219,12 +219,7 @@ class RecognitionClient(RestClient):
         if not (labels or images):
             raise XimilarClientInvalidDataException("Either images or labels must be specified")
 
-        data = {
-            "images": images,
-            "labels": labels,
-            "labels-add": add_labels,
-            "labels-remove": remove_labels,
-        }
+        data = {"images": images, "labels": labels, "labels-add": add_labels, "labels-remove": remove_labels}
 
         if test is not None:
             if test:
@@ -516,7 +511,7 @@ class Task(RecognitionClient):
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.add_label_to_image(self.id, label_id)
+        return self.post(TASK_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
 
     def detach_label(self, label_id):
         """
@@ -748,6 +743,9 @@ class Image(RecognitionClient):
         """
         return self.post(IMAGE_ENDPOINT + self.id + "/remove-label/", data={LABEL_ID: label_id})
 
+    def remove_label(self, label_id):
+        return self.detach_label(label_id)
+
     def download(self, destination="", name=None):
         """
         Download image to the destination and store path to the _file of the object.
@@ -762,7 +760,9 @@ class Image(RecognitionClient):
         If the meta_data were not downloaded yet, do so
         """
         if not self.meta_data:
-            self.meta_data = self.get(IMAGE_ENDPOINT + self.id)[META_DATA]
+            image_data = self.get(IMAGE_ENDPOINT + self.id)
+            if META_DATA in image_data:
+                self.meta_data = image_data[META_DATA]
         if not self.meta_data:
             self.meta_data = {}
 

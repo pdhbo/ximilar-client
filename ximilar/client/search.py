@@ -12,12 +12,12 @@ from ximilar.client.constants import (
     COLLECTION_ID,
     PHOTO_SIMILARITY,
     PRODUCT_SIMILARITY,
-    PRODUCT_SIMILARITY_TAGS,
+    FASHION_SIMILARITY,
 )
 
 SIMILARITY_PHOTOS = "similarity/photos/v2/"
 SIMILARITY_PRODUCTS = "similarity/products/v2/"
-SIMILARITY_PRODUCTS_TAGS = "similarity/products_tags/v2/"
+SIMILARITY_FASHION = "similarity/fashion/v2/"
 SMART_SEARCH = "smart/v2/product/"
 
 SEARCH_OBJ_ENDPOINT = "search_by_object"
@@ -35,7 +35,7 @@ RANK_RECORDS = "visualRankRecords"
 
 class SimilarityPhotosClient(RestClient):
     def __init__(
-        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS, resource_name=PHOTO_SIMILARITY,
+        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS, resource_name=PHOTO_SIMILARITY
     ):
         super(SimilarityPhotosClient, self).__init__(
             token=token, endpoint=endpoint, max_image_size=512, resource_name=resource_name
@@ -154,23 +154,19 @@ class SimilarityPhotosClient(RestClient):
 
 class SimilarityProductsClient(SimilarityPhotosClient):
     def __init__(
-        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY,
+        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY
     ):
         super(SimilarityProductsClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name,
+            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
         )
 
 
-class SimilarityProductsTagsClient(SimilarityPhotosClient):
+class SimilarityFashionClient(SimilarityPhotosClient):
     def __init__(
-        self,
-        token,
-        collection_id=None,
-        endpoint=ENDPOINT + SIMILARITY_PRODUCTS_TAGS,
-        resource_name=PRODUCT_SIMILARITY_TAGS,
+        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_FASHION, resource_name=FASHION_SIMILARITY,
     ):
-        super(SimilarityProductsTagsClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name,
+        super(SimilarityFashionClient, self).__init__(
+            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
         )
 
     def insert(self, records, custom_flow=None):

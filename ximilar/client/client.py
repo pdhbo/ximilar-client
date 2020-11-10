@@ -33,7 +33,7 @@ class RestClient(object):
         self.headers = {
             "Content-Type": "application/json",
             "Authorization": self.get_token_header(self.token),
-            "User-Agent": "Ximilar Client/Python"
+            "User-Agent": "Ximilar Client/Python",
         }
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
@@ -100,7 +100,7 @@ class RestClient(object):
         return result.json()
 
     @retry_when(ConnectionError)
-    def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post):
+    def post(self, api_endpoint, data=None, files=None, params=None, method=requests.post, headers=None):
         """
         Call the http POST request with data.
 
@@ -117,10 +117,11 @@ class RestClient(object):
 
         if data is not None:
             data = json.dumps(data)
+
         result = method(
             self.urljoin(self.endpoint, api_endpoint),
             params=params,
-            headers=self.headers,
+            headers=self.headers if headers is None else headers,
             data=data,
             files=files,
             timeout=self.request_timeout,
@@ -152,9 +153,7 @@ class RestClient(object):
         self.invalidate()
 
         url = urllib.parse.urljoin(self.endpoint, api_endpoint)
-        result = requests.delete(
-            url, params=params, headers=self.headers, data=data, timeout=self.request_timeout
-        )
+        result = requests.delete(url, params=params, headers=self.headers, data=data, timeout=self.request_timeout)
 
         if result.status_code == HTTP_NO_CONTENT_204:
             return result

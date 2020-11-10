@@ -3,6 +3,7 @@ from ximilar.client.constants import *
 
 FLOW_ENDPOINT = "/flows/v2/flow/"
 
+
 class FlowsClient(RestClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name="flows", max_image_size=512):
         super(FlowsClient, self).__init__(
