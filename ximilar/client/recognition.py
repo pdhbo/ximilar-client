@@ -605,7 +605,7 @@ class Label(RecognitionClient):
     # TODO: get object count
     # TODO: get objects of given label
 
-    def get_training_images(self, page_url=None, verification=None):
+    def get_training_images(self, page_url=None, verification=None, not_label=False):
         """
         Get paginated result of images for specific label.
 
@@ -613,7 +613,10 @@ class Label(RecognitionClient):
         :return: (list of images, next_page)
         """
         if page_url is None:
-            page_url = IMAGE_ENDPOINT + "?label=" + self.id
+            if not_label:
+                page_url = IMAGE_ENDPOINT + "?not_labels="+self.id
+            else:
+                page_url = IMAGE_ENDPOINT + "?label=" + self.id
 
         return super().get_training_images(page_url=page_url, verification=verification)
 
