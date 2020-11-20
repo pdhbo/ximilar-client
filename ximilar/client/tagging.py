@@ -12,7 +12,7 @@ DETECT_FASHION_ENDPOINT = "tagging/fashion/v2/detect"
 
 
 class TaggingClient(RestClient):
-    def construct_data(self, records, aggregate_labels, profile, **kwargs):
+    def construct_data(self, records, aggregate_labels=None, profile=None, **kwargs):
         if len(records) == 0:
             raise Exception("Please specify at least on record when using tags method.")
 

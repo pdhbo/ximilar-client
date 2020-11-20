@@ -43,7 +43,7 @@ class SimilarityPhotosClient(RestClient):
         self.headers[COLLECTION_ID] = collection_id
         self.PREDICT_ENDPOINT = KNN_VISUAL
 
-    def construct_data(self, query_record=None, filter=None, k=5, fields_to_return=[_ID]):
+    def construct_data(self, query_record=None, filter=None, k=5, fields_to_return=[_ID], **kwargs):
         if query_record is None:
             raise Exception("Please specify record when using search method.")
 
@@ -54,6 +54,10 @@ class SimilarityPhotosClient(RestClient):
         }
         if filter:
             data[FILTER] = filter
+
+        if kwargs:
+            data.update(kwargs)
+
         return data
 
     def allRecords(self, size=1000, page=1, fields_to_return=[_ID]):
