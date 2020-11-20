@@ -29,6 +29,7 @@ GET = "get"
 UPDATE = "update"
 RANDOM = "random"
 KNN_VISUAL = "visualKNN"
+KNN_VISUAL_TAGS = "visualTagsKNN"
 PING = "ping"
 RANK_RECORDS = "visualRankRecords"
 
@@ -172,6 +173,7 @@ class SimilarityFashionClient(SimilarityPhotosClient):
         super(SimilarityFashionClient, self).__init__(
             token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
         )
+        self.PREDICT_ENDPOINT = KNN_VISUAL_TAGS
 
     def insert(self, records, custom_flow=None):
         """
