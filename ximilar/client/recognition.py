@@ -609,7 +609,7 @@ class Label(RecognitionClient):
         """
         if page_url is None:
             if not_label:
-                page_url = IMAGE_ENDPOINT + "?not_labels="+self.id
+                page_url = IMAGE_ENDPOINT + "?not_labels=" + self.id
             else:
                 page_url = IMAGE_ENDPOINT + "?label=" + self.id
 

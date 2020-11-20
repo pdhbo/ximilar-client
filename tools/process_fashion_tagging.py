@@ -9,6 +9,7 @@ from ximilar.client import FashionTaggingClient
 from ximilar.client import RecognitionClient
 from ximilar.client.constants import DEFAULT_WORKSPACE, RECORDS
 from ximilar.client.recognition import IMAGE_ENDPOINT, Label
+import sys
 
 
 def find_label(labels_true: List[Label], label_id: str) -> bool:
@@ -49,7 +50,10 @@ def categories_result(labels_true: List[Label], predicted: List, row: List[str],
 
 
 def process_workspace(
-    recognition_client: RecognitionClient, fashion_tagging_client: FashionTaggingClient, output_file: str
+    recognition_client: RecognitionClient,
+    fashion_tagging_client: FashionTaggingClient,
+    labels: List[Label],
+    output_file: str,
 ) -> None:
     """
     Finds all testing images in given workspace, tags them and compare the result to labels assigned to given image.
@@ -57,6 +61,7 @@ def process_workspace(
 
     :param recognition_client:
     :param fashion_tagging_client:
+    :param labels:
     :param output_file:
     """
     max_labels = 30
@@ -74,6 +79,10 @@ def process_workspace(
 
         page_size = 50
         page_url = f"{IMAGE_ENDPOINT}?test=true&page_size={page_size}"
+        if labels:
+            ids = ",".join([label.id for label in labels])
+            page_url += f"&labels={ids}&union=true"
+
         total_images = recognition_client.get_training_images(page_url=page_url)[2]["count"]
 
         line_number = 2
@@ -136,8 +145,16 @@ if __name__ == "__main__":
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--workspace_id", help="ID of workspace to take test images from", default=DEFAULT_WORKSPACE)
     parser.add_argument("--output_file", help="json output file [tagging_output.csv]", default="tagging_output.csv")
+    parser.add_argument("--label_name", help="Evaluate only images with given label name.")
     args = parser.parse_args()
 
     fashion_tagging = FashionTaggingClient(token=args.auth_token)
     recognition = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
-    process_workspace(recognition, fashion_tagging, args.output_file)
+
+    labels = None
+    if args.label_name:
+        labels, _ = recognition.get_labels_by_substring(args.label_name)
+        if not labels:
+            sys.exit(f"No labels with with name {args.label_name}")
+
+    process_workspace(recognition, fashion_tagging, labels, args.output_file)

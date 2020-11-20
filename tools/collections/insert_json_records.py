@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--is_array", help="is the data JSON array or list of JSON records", default=False, type=bool)
     parser.add_argument("--batch_size", help="batch size for insert operation", default=10, type=int)
     parser.add_argument("--threads", help="# of threads to insert with", default=3, type=int)
+    parser.add_argument("--skip", help="# of records from the file to be skipped", default=0, type=int)
 
     args = parser.parse_args()
 
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 
-    index_images = read_json_file_list(args.file_path, is_array=args.is_array)
+    index_images = read_json_file_list(args.file_path, is_array=args.is_array, skip=args.skip)
     if args.clean_fields:
         index_images = clean_fields(index_images, args.clean_fields)
 
