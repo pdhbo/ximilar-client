@@ -40,9 +40,7 @@ class SimilarityPhotosClient(RestClient):
     def __init__(
         self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PHOTOS, resource_name=PHOTO_SIMILARITY
     ):
-        super(SimilarityPhotosClient, self).__init__(
-            token=token, endpoint=endpoint, max_image_size=512, resource_name=resource_name
-        )
+        super().__init__(token=token, endpoint=endpoint, max_image_size=512, resource_name=resource_name)
         self.headers[COLLECTION_ID] = collection_id
         self.PREDICT_ENDPOINT = KNN_VISUAL
 
@@ -164,34 +162,26 @@ class SimilarityProductsClient(SimilarityPhotosClient):
     def __init__(
         self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_PRODUCTS, resource_name=PRODUCT_SIMILARITY
     ):
-        super(SimilarityProductsClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
-        )
+        super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
 
 
 class SimilarityCustomClient(SimilarityPhotosClient):
     def __init__(
         self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_CUSTOM, resource_name=CUSTOM_SIMILARITY
     ):
-        super(SimilarityCustomClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
-        )
+        super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
 
 
 class ImageMatchingSearchClient(SimilarityPhotosClient):
     def __init__(self, token, collection_id=None, endpoint=ENDPOINT + IMAGE_MATCHING_API, resource_name=IMAGE_MATCHING):
-        super(ImageMatchingSearchClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
-        )
+        super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
 
 
 class SimilarityFashionClient(SimilarityPhotosClient):
     def __init__(
         self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_FASHION, resource_name=FASHION_SIMILARITY,
     ):
-        super(SimilarityFashionClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
-        )
+        super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = KNN_VISUAL_TAGS
 
     def insert(self, records, custom_flow=None):
