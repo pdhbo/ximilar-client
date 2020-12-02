@@ -1,7 +1,11 @@
 from argparse import ArgumentParser
 
-from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient
-from ximilar.client.search import SimilarityFashionClient
+from ximilar.client import (
+    SimilarityPhotosClient,
+    SimilarityProductsClient,
+    SimilarityCustomClient,
+    SimilarityFashionClient,
+)
 from ximilar.client.utils.json_data import read_json_file_list
 
 
@@ -21,7 +25,7 @@ if __name__ == "__main__":
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--collection_id", help="ID of collection to upload the image records into", required=True)
     parser.add_argument("--file_path", help="path to JSON file with image records", required=True)
-    parser.add_argument("--type", help="product, generic or fashion similarity service", default="generic")
+    parser.add_argument("--type", help="product, generic, fashion similarity or custom service", default="generic")
     parser.add_argument("--is_array", help="is the data JSON array or list of JSON records", default=False, type=bool)
     parser.add_argument("--batch_size", help="batch size for insert operation", default=10, type=int)
     parser.add_argument("--threads", help="# of threads to insert with", default=3, type=int)
@@ -39,6 +43,8 @@ if __name__ == "__main__":
         client = SimilarityProductsClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     elif args.type == "fashion":
         client = SimilarityFashionClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
+    elif args.type == "custom":
+        client = SimilarityCustomClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 
