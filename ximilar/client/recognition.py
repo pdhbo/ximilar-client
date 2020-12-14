@@ -284,14 +284,14 @@ class RecognitionClient(RestClient):
             return None, {STATUS: msg}
         return Task(self.token, self.endpoint, task_json), RESULT_OK
 
-    def create_label(self, name, description=None, label_type=CATEGORY):
+    def create_label(self, name, description=None, output_name=None, label_type=CATEGORY):
         """
         Create label with given name.
         :param name: name of the label
         :param label_type: type of label to create (category or tag)
         :return: Label object, status
         """
-        data = {NAME: name, LABEL_TYPE: label_type, DESCRIPTION: description}
+        data = {NAME: name, LABEL_TYPE: label_type, DESCRIPTION: description, OUTPUT_NAME: output_name}
         label_json = self.post(LABEL_ENDPOINT, data=data)
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
