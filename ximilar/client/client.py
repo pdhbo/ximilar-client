@@ -350,14 +350,15 @@ class RestClient(object):
         except Exception as e:
             raise Exception("Unable to read base64:" + str(e))
 
-    def load_url_image(self, path, resize=True):
+    def load_url_image(self, path, resize=True, timeout=30):
         """
         Load url file to base64 WITHOUT resizing (it is used in upload image for recognition).
         :param path: url path
         :param resize: if we want to resize image
+        :param timeout: request timeout in seconds
         :return: base64 encoded string
         """
-        r = requests.get(str(path), headers={"Accept": "*/*", "User-Agent": "request"})
+        r = requests.get(str(path), headers={"Accept": "*/*", "User-Agent": "request"}, timeout=timeout)
         img_bin = r.content
         image = np.asarray(bytearray(img_bin), dtype="uint8")
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
