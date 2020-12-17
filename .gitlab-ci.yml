@@ -8,7 +8,7 @@ black:
   stage: test
   image: kiwicom/black:19.10b0
   script:
-    - black --check --line-length 120 .
+    - black --check .
   allow_failure: true
 
 deploy_production:
