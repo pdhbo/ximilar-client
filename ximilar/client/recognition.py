@@ -178,13 +178,14 @@ class RecognitionClient(RestClient):
             {"count": result["count"], STATUS: "ok"},
         )
 
-    def training_images_iter(self, verification=None, batch_size=1):
+    def training_images_iter(self, page_url=None, verification=None, batch_size=1):
         """
         Get iterator overall all of images from workspace.
+        :param page_url: optional, can add new parameters or select different than first page
         :param verification: optional, integer which says how many verifications should have the images
         :return: iterator
         """
-        images, next_page, status = self.get_training_images(verification=verification)
+        images, next_page, status = self.get_training_images(page_url=page_url, verification=verification)
         while images:
             for image in self.batch(images, batch_size):
                 if batch_size == 1:
@@ -397,7 +398,7 @@ class RecognitionClient(RestClient):
             result = client.classify_on_task({'_url':'__SOME_IMG_URL__'}, task_id="__UUID__")
 
         :param records: array of json/dicts [{'_url':'url-path'}, {'_file': ''}, {'_base64': 'base64encodeimg'}]
-        :param task_id: id of task 
+        :param task_id: id of task
         :param version: optional(integer of specific version), default None/production_version
         :param store_images: if true then store the images on the backend (available in higher plans)
         :return: json response
@@ -643,7 +644,7 @@ class Label(RecognitionClient):
         """
         Add task to this label.
         ! this is only for ANNOTATE (parent => child mapping behaviour)
-        
+
         :param task_id: identification of label
         :return: json/dict result
         """
