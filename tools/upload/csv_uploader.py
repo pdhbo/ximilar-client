@@ -34,7 +34,7 @@ class Processor:
                 if len(image_line) == 0:
                     continue
 
-                labels_for_image = self._label_ids(image_line[1:]) if labels else []
+                labels_for_image = self._label_ids(image_line[1:])
                 labels = [*labels_for_each, *labels_for_image]
 
                 record = {URL: image_line[0], TEST_IMAGE: self.test_image, NORESIZE: self.no_resize}
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("--resize", type=int, default=1024, help="size of uploaded images, default: 1024")
     parser.add_argument("--print_details", help="if true, info about each image is printed out", action="store_true")
     parser.add_argument("--label", help="list of labels which will be added to all images", nargs="+")
-    parser.add_argument("--create_labels", help="create labels from the fields, if don't exist", action="store_true")
+    parser.add_argument("--create_labels", help="create labels, if they don't exist", action="store_true")
     parser.add_argument("--dryrun", help="if true, just print info", action="store_true")
     args = parser.parse_args()
 
