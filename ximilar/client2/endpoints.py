@@ -2,7 +2,7 @@
 This is an internal module, providing abstractions over HTTP endpoints.
 Those simplify working with HTTP nodes and hides details about their implementation.
 """
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Protocol, TypeVar
 import json
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
@@ -80,6 +80,28 @@ class EndpointError(Exception):
         return EndpointError(f"Error returned from HTTP layer: {code}", code=code, body=body)
 
 
+Cls = TypeVar("Cls", bound="AppEndpoint")
+
+
+class AppEndpoint(Protocol):
+    """Protocol for endpoint classes able to work with Ximilar servers"""
+
+    def sub(self, subpoint: str, /) -> Cls:
+        """Creates a REST client working with a fixed part of an URL"""
+
+    def get(self, suffix: str, /, *, args: Optional[Dict[str, Any]] = None):
+        """Calls GET method passing args as request parameters"""
+
+    def post(self, suffix: str, /, *, args: Any = None):
+        """Calls POST method passing args as JSON in request body"""
+
+    def put(self, suffix: str, /, *, args: Any = None):
+        """Calls PUT method passing args as JSON in request body"""
+
+    def delete(self, suffix: str, /, *, args: Optional[Dict[str, Any]] = None):
+        """Calls DELETE method passing args as request parameters"""
+
+
 class XimilarEndpoint:
     """
     Wrapper for HttpEndpoint, which knows how to talk to Ximilar services.
@@ -149,3 +171,42 @@ class XimilarEndpoint:
             raise EndpointError.content_type(result["content-type"])
 
         return json.loads(result["content"])
+
+
+class WorkspaceEndpoint:
+    """
+    Wrapper for the XimilarEndpoint. It provides exactly the same interface, so
+    it can be used interchangeably with the original one. WorkspaceEndpint adds
+    a "workspace" argument to each call. You can even wrap another
+    WorkspaceEndpoint with WorkspaceEndpint. The outermost one has precedence.
+    """
+
+    def __init__(self, workspace_id: str, /, *, endpoint: AppEndpoint):
+        self.name = workspace_id
+        self.endpoint = endpoint
+
+    def sub(self, subpoint, /):
+        """Creates a WorkspaceEndpoint working with a fixed part of an URL"""
+        return WorkspaceEndpoint(self.name, endpoint=self.endpoint.sub(subpoint))
+
+    def get(self, suffix: str, /, *, args: Optional[Dict[str, Any]] = None):
+        """Calls GET method passing args as request parameters"""
+        return self._call(self.endpoint.get, suffix, args)
+
+    def post(self, suffix: str, /, *, args=None):
+        """Calls POST method passing args as JSON in request body"""
+        return self._call(self.endpoint.post, suffix, args)
+
+    def put(self, suffix: str, /, *, args=None):
+        """Calls PUT method passing args as JSON in request body"""
+        return self._call(self.endpoint.put, suffix, args)
+
+    def delete(self, suffix: str, /, *, args: Optional[Dict[str, Any]] = None):
+        """Calls DELETE method passing args as request parameters"""
+        return self._call(self.endpoint.delete, suffix, args)
+
+    def _call(self, method, suffix, args):
+        real_args = {"workspace": self.name}
+        if args is not None:
+            real_args.update(args)
+        return method(suffix, args=real_args)

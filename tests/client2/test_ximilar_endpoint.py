@@ -1,25 +1,15 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
-from dataclasses import dataclass
 from unittest.mock import ANY
 import json
 import pytest
 
 from ximilar.client2.endpoints import XimilarEndpoint, EndpointError
+from .helpers import EndpointWrapper
 
 
 @pytest.fixture(name="http_endpoint")
 def http_endpoint_fixture(mocker):
-    @dataclass
-    class _wrapper:
-        def __init__(self):
-            self.init = mocker.patch("ximilar.client2.endpoints.HttpEndpoint", autospec=True)
-            self.sub = self.init.return_value.sub
-            self.get = self.init.return_value.get
-            self.post = self.init.return_value.post
-            self.put = self.init.return_value.put
-            self.delete = self.init.return_value.delete
-
-    return _wrapper()
+    return EndpointWrapper(mocker.patch("ximilar.client2.endpoints.HttpEndpoint", autospec=True))
 
 
 @pytest.fixture(name="json_endpoint")
