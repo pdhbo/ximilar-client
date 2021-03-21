@@ -157,7 +157,7 @@ class RecognitionClient(RestClient):
         """
         return self.post(IMAGE_ENDPOINT + image_id + "/add-label/", data={LABEL_ID: label_id})
 
-    def get_training_images(self, page_url=None, verification=None):
+    def get_training_images(self, page_url=None, verification=None, test=False):
         """
         Get paginated result of images from workspace.
         :param page_url: optional, select the specific page of images, default first page
@@ -170,6 +170,9 @@ class RecognitionClient(RestClient):
             else IMAGE_ENDPOINT + "?page=1"
         )
         url += "&verified=" + str(verification) if verification is not None else ""
+
+        if test:
+            url += "&test=true"
 
         result = self.get(url)
         return (
@@ -600,7 +603,7 @@ class Label(RecognitionClient):
     # TODO: get object count
     # TODO: get objects of given label
 
-    def get_training_images(self, page_url=None, verification=None, not_label=False):
+    def get_training_images(self, page_url=None, verification=None, not_label=False, test=False):
         """
         Get paginated result of images for specific label.
 
@@ -613,7 +616,7 @@ class Label(RecognitionClient):
             else:
                 page_url = IMAGE_ENDPOINT + "?label=" + self.id
 
-        return super().get_training_images(page_url=page_url, verification=verification)
+        return super().get_training_images(page_url=page_url, verification=verification, test=test)
 
     def upload_images(self, records):
         """
