@@ -174,7 +174,7 @@ class RestClient(object):
         # as the self.endpoint can be different size
         result = requests.post(
             ENDPOINT + "authorization/v2/authorize",
-            data=json.dumps({"service": resource_name}),
+            data=json.dumps({"service": resource_name, "call_type": "authenticate"}),
             headers=self.headers,
             timeout=10,
         )
