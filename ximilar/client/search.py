@@ -19,7 +19,6 @@ SIMILARITY_PHOTOS = "similarity/photos/v2/"
 SIMILARITY_PRODUCTS = "similarity/products/v2/"
 SIMILARITY_FASHION = "similarity/fashion/v2/"
 SIMILARITY_CUSTOM = "similarity/custom/v2/"
-SMART_SEARCH = "smart/v2/product/"
 
 SEARCH_OBJ_ENDPOINT = "search_by_object"
 SEARCH = "search"
