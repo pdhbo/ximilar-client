@@ -51,13 +51,14 @@ class Flow(FlowsClient):
     def __init__(self, token, endpoint, flow_json, max_image_size=512):
         super(Flow, self).__init__(token, endpoint=endpoint, max_image_size=max_image_size, resource_name="")
 
+
         self.id = flow_json[ID]
         self.name = flow_json[NAME]
         self.description = flow_json[DESCRIPTION]
         self.workspace = flow_json[WORKSPACE]
         self.top_node = flow_json[TOP_NODE]
         self.valid = flow_json[VALID]
-        self.image_size = 512
+        self.image_size = int(flow_json["image_size"]) if "image_size" in flow_json else 512
 
     def to_json(self):
         """
