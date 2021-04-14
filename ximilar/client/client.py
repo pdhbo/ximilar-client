@@ -38,6 +38,9 @@ class RestClient(object):
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
 
+    def update_token(self, token):
+        self.headers["Authorization"] = self.get_token_header(token)
+
     def add_workspace(self, data, url=None):
         """
         Add workspace uuid to the data.
