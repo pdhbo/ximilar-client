@@ -115,13 +115,14 @@ class SimilarityPhotosClient(RestClient):
 
         return self.post(RANDOM, data=data)
 
-    def update(self, records):
+    def update(self, records, fields_to_return=["*"]):
         """
         Update records with meta-information, this will not update the descriptor(please do delete and insert instead).
         :param records: list of dictionaries with field '_id', '_url' or '_base64' with your meta-info
+        :param fields_to_return: fields to return in every record
         :return: json response
         """
-        data = {RECORDS: records}
+        data = {RECORDS: records, FIELDS_TO_RETURN: fields_to_return}
         return self.post(UPDATE, data=data)
 
     def remove(self, records):
