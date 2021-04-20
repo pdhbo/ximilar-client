@@ -26,6 +26,7 @@ DOMINANT_COLORS_PRODUCT = "dominant-colors"
 DOMINANT_COLORS_GENERIC = "dominant-colors"
 HOME_DECOR_TAGGING = "homedecor-tagging"
 CUSTOM_SIMILARITY = "custom-similarity"
+IMAGE_MATCHING = "image-matching"
 
 # Recognition/Vize related
 USER_ID = "user_id"

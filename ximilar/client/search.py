@@ -13,12 +13,14 @@ from ximilar.client.constants import (
     PRODUCT_SIMILARITY,
     FASHION_SIMILARITY,
     CUSTOM_SIMILARITY,
+    IMAGE_MATCHING,
 )
 
 SIMILARITY_PHOTOS = "similarity/photos/v2/"
 SIMILARITY_PRODUCTS = "similarity/products/v2/"
 SIMILARITY_FASHION = "similarity/fashion/v2/"
 SIMILARITY_CUSTOM = "similarity/custom/v2/"
+IMAGE_MATCHING_API = "image_matching/v2/"
 
 SEARCH_OBJ_ENDPOINT = "search_by_object"
 SEARCH = "search"
@@ -172,6 +174,13 @@ class SimilarityCustomClient(SimilarityPhotosClient):
         self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_CUSTOM, resource_name=CUSTOM_SIMILARITY
     ):
         super(SimilarityCustomClient, self).__init__(
+            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
+        )
+
+
+class ImageMatchingSearchClient(SimilarityPhotosClient):
+    def __init__(self, token, collection_id=None, endpoint=ENDPOINT + IMAGE_MATCHING_API, resource_name=IMAGE_MATCHING):
+        super(ImageMatchingSearchClient, self).__init__(
             token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
         )
 
