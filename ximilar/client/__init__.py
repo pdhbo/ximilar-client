@@ -7,3 +7,4 @@ from .search import SimilarityPhotosClient, SimilarityProductsClient, Similarity
 from .flows import FlowsClient
 from .exceptions import XimilarClientException
 from .removebg import RemoveBGClient
+from .similarity import CustomSimilarityClient
