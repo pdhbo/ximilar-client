@@ -38,6 +38,9 @@ class RestClient(object):
         self.check_resource(resource_name)
         self.request_timeout = request_timeout
 
+    def update_token(self, token):
+        self.headers["Authorization"] = self.get_token_header(token)
+
     def add_workspace(self, data, url=None):
         """
         Add workspace uuid to the data.
@@ -174,7 +177,7 @@ class RestClient(object):
         # as the self.endpoint can be different size
         result = requests.post(
             ENDPOINT + "authorization/v2/authorize",
-            data=json.dumps({"service": resource_name}),
+            data=json.dumps({"service": resource_name, "call_type": "authenticate"}),
             headers=self.headers,
             timeout=10,
         )
@@ -482,7 +485,6 @@ class RestClient(object):
                     self.update_status(status, result)
                     results.append(result)
                     pbar.update(future["size"])
-            print(status)
         else:
             results = [future["future"].result() for future in futures]
         return results

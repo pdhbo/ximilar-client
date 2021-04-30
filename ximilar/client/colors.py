@@ -8,6 +8,13 @@ DOMINANT_COLOR_PRODUCT_ENDPOINT = "dom_colors/product/v2/dominantcolor"
 
 
 class DominantColorClient(RestClient):
+    def construct_data(self, records=[]):
+        if len(records) == 0:
+            raise Exception("Please specify at least one record in detect method!")
+
+        data = {RECORDS: self.preprocess_records(records)}
+        return data
+
     def dominantcolor(self, records, endpoint):
         records = self.preprocess_records(records)
         return self.post(endpoint, data={RECORDS: records})
@@ -16,6 +23,7 @@ class DominantColorClient(RestClient):
 class DominantColorGenericClient(DominantColorClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name=DOMINANT_COLORS_PRODUCT):
         super(DominantColorGenericClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
+        self.PREDICT_ENDPOINT = DOMINANT_COLOR_GENERIC_ENDPOINT
 
     def dominantcolor(self, records):
         return super().dominantcolor(records, DOMINANT_COLOR_GENERIC_ENDPOINT)
@@ -24,6 +32,7 @@ class DominantColorGenericClient(DominantColorClient):
 class DominantColorProductClient(DominantColorClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name=DOMINANT_COLORS_GENERIC):
         super(DominantColorProductClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
+        self.PREDICT_ENDPOINT = DOMINANT_COLOR_PRODUCT_ENDPOINT
 
     def dominantcolor(self, records):
         return super().dominantcolor(records, DOMINANT_COLOR_PRODUCT_ENDPOINT)
