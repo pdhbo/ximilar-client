@@ -19,7 +19,7 @@ deploy_production:
   script:
     - apk update
     - apk add gcc musl-dev libffi-dev libressl-dev
-    - pip install cryptography==3.3.1
+    - pip install cryptography==3.3.1 # workaround, remove when twine can be installed with the default (new) one
     - pip install twine
     - python setup.py sdist bdist_wheel
     - twine upload dist/*
