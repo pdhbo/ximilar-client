@@ -1,10 +1,6 @@
-import os
 from argparse import ArgumentParser
 
-from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient, VisualSearchClient,    SimilarityCustomClient
-from ximilar.client.constants import DEFAULT_WORKSPACE
-from ximilar.client.recognition import Image
-
+from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient, VisualSearchClient, SimilarityCustomClient
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Train all non trained tasks of workspace")

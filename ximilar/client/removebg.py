@@ -1,5 +1,3 @@
-import json
-
 from ximilar.client import RestClient
 from ximilar.client.constants import *
 
@@ -21,4 +19,3 @@ class RemoveBGClient(RestClient):
     def removebg(self, records):
         records = self.preprocess_records(records)
         return self.post(self.PREDICT_ENDPOINT, data={RECORDS: records})
-
