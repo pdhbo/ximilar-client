@@ -615,7 +615,7 @@ class Label(RecognitionClient):
             if not_label:
                 page_url = IMAGE_ENDPOINT + "?not_labels=" + self.id
             else:
-                page_url = IMAGE_ENDPOINT + "?label=" + self.id
+                page_url = IMAGE_ENDPOINT + "?labels=" + self.id
 
         return super().get_training_images(page_url=page_url, verification=verification, test=test)
 
