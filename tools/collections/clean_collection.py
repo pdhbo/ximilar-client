@@ -1,10 +1,6 @@
-import os
 from argparse import ArgumentParser
 
-from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient, VisualSearchClient
-from ximilar.client.constants import DEFAULT_WORKSPACE
-from ximilar.client.recognition import Image
-
+from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient, VisualSearchClient, SimilarityCustomClient
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Train all non trained tasks of workspace")
@@ -25,6 +21,8 @@ if __name__ == "__main__":
         )
     elif args.type == "visual":
         client = VisualSearchClient(token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id)
+    elif args.type == "custom":
+        client = SimilarityCustomClient(token=args.auth_token, collection_id=args.collection_id)
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 

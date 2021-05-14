@@ -79,7 +79,7 @@ class CustomSimilarityClient(RecognitionClient):
             return None, status
         return [SimilarityType(self.token, self.endpoint, self.workspace, t_json) for t_json in types], RESULT_OK
 
-    def get_groups_url(self, page_url=None, search=None, test=None):
+    def get_groups_url(self, page_url=None, search=None, test=None, image=None, group=None):
         url = (
             page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
             if page_url
@@ -89,11 +89,14 @@ class CustomSimilarityClient(RecognitionClient):
             url += "&" + search if search is not None else ""
         if test is not None:
             url += f"&test={'True' if test else 'False'}"
-
+        if image is not None:
+            url += "&image=" + str(image)
+        if group is not None:
+            url += "&group=" + str(group)
         return url
 
-    def get_groups(self, page_url=None, search=None, test=None):
-        url = self.get_groups_url(page_url, search, test)
+    def get_groups(self, page_url=None, search=None, test=None, image=None, group=None):
+        url = self.get_groups_url(page_url, search, test, image, group)
 
         result = self.get(url)
         return (
@@ -111,7 +114,10 @@ class CustomSimilarityClient(RecognitionClient):
             RESULT_OK,
         )
 
-    def get_all_groups_by_name(self, name, page_url=None, test=None):
+    def get_all_groups_by_name(self, name, sim_type=None, page_url=None, test=None):
+        query = "search=" + name
+        if sim_type:
+            query = query + "&type=" + sim_type
         return self.get_all_groups(page_url, "search=" + name, test)
 
     def get_all_groups_by_type(self, sim_type, page_url=None, test=None):

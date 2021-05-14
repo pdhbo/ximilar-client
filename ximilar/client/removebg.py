@@ -1,5 +1,3 @@
-import json
-
 from ximilar.client import RestClient
 from ximilar.client.constants import *
 

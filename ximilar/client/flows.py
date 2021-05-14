@@ -51,7 +51,6 @@ class Flow(FlowsClient):
     def __init__(self, token, endpoint, flow_json, max_image_size=512):
         super(Flow, self).__init__(token, endpoint=endpoint, max_image_size=max_image_size, resource_name="")
 
-
         self.id = flow_json[ID]
         self.name = flow_json[NAME]
         self.description = flow_json[DESCRIPTION]
