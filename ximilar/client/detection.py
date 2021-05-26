@@ -254,7 +254,7 @@ class DetectionClient(RecognitionClient):
             result = client.detect_on_task({'_url':'__SOME_IMG_URL__'}, task_id="__UUID__")
 
         :param records: array of json/dicts [{'_url':'url-path'}, {'_file': ''}, {'_base64': 'base64encodeimg'}]
-        :param task_id: id of task 
+        :param task_id: id of task
         :param version: optional(integer of specific version), default None/production_version
         :return: json response
         """
@@ -385,7 +385,7 @@ class DetectionLabel(DetectionClient):
             return None, status
         return [Image(self.token, self.endpoint, image) for image in images], RESULT_OK
 
-    def get_training_images(self, page_url=None, verification=None):
+    def get_training_images(self, page_url=None, verification=None, test=False):
         """
         Get paginated result of images for specific label.
 
@@ -394,6 +394,9 @@ class DetectionLabel(DetectionClient):
         """
         if page_url is None:
             page_url = IMAGE_ENDPOINT + "?detection_labels=" + self.id
+
+        if test:
+            page_url += "&test=true"
 
         return super().get_training_images(page_url=page_url, verification=verification)
 
