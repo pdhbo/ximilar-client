@@ -181,14 +181,14 @@ class RecognitionClient(RestClient):
             {"count": result["count"], STATUS: "ok"},
         )
 
-    def training_images_iter(self, page_url=None, verification=None, batch_size=1):
+    def training_images_iter(self, page_url=None, verification=None, batch_size=1, test=False):
         """
         Get iterator overall all of images from workspace.
         :param page_url: optional, can add new parameters or select different than first page
         :param verification: optional, integer which says how many verifications should have the images
         :return: iterator
         """
-        images, next_page, status = self.get_training_images(page_url=page_url, verification=verification)
+        images, next_page, status = self.get_training_images(page_url=page_url, verification=verification, test=test)
         while images:
             for image in self.batch(images, batch_size):
                 if batch_size == 1:
@@ -615,7 +615,7 @@ class Label(RecognitionClient):
             if not_label:
                 page_url = IMAGE_ENDPOINT + "?not_labels=" + self.id
             else:
-                page_url = IMAGE_ENDPOINT + "?label=" + self.id
+                page_url = IMAGE_ENDPOINT + "?labels=" + self.id
 
         return super().get_training_images(page_url=page_url, verification=verification, test=test)
 

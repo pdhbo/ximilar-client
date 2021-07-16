@@ -5,6 +5,7 @@ from ximilar.client import (
     SimilarityProductsClient,
     SimilarityCustomClient,
     SimilarityFashionClient,
+    ImageMatchingSearchClient,
 )
 from ximilar.client.utils.json_data import read_json_file_list
 
@@ -45,6 +46,8 @@ if __name__ == "__main__":
         client = SimilarityFashionClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     elif args.type == "custom":
         client = SimilarityCustomClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
+    elif args.type == "matching":
+        client = ImageMatchingSearchClient(token=args.auth_token, collection_id=args.collection_id, **kwargs)
     else:
         raise Exception("Please specify one of the similarity type (generic, product, visual)")
 

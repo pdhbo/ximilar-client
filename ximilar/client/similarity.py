@@ -13,9 +13,15 @@ class CustomSimilarityClient(RecognitionClient):
     Ximilar API Client for Custom Similarity.
     """
 
-    def __init__(self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, resource_name=CUSTOM_SIMILARITY):
+    def __init__(
+        self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, max_image_size=512, resource_name=CUSTOM_SIMILARITY
+    ):
         super(CustomSimilarityClient, self).__init__(
-            token=token, endpoint=endpoint, workspace=workspace, max_image_size=512, resource_name=resource_name
+            token=token,
+            endpoint=endpoint,
+            workspace=workspace,
+            max_image_size=max_image_size,
+            resource_name=resource_name,
         )
         self.PREDICT_ENDPOINT = DESCRIPTOR_ENDPOINT
 
@@ -115,7 +121,7 @@ class CustomSimilarityClient(RecognitionClient):
         )
 
     def get_all_groups_by_name(self, name, sim_type=None, page_url=None, test=None):
-        query =  "search=" + name
+        query = "search=" + name
         if sim_type:
             query = query + "&type=" + sim_type
         return self.get_all_groups(page_url, "search=" + name, test)
