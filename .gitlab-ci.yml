@@ -20,6 +20,20 @@ mypy:
     - python3 -m pip install types-setuptools types-requests
     - mypy --ignore-missing-import .
 
+pytest:
+  stage: test
+  image: jjanzic/docker-python3-opencv:latest
+  script:
+    - pip install -r requirements.txt
+    - pip install pytest-cov
+    - pytest --cov=ximilar/ --junitxml=report.xml
+    - coverage xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
+      cobertura: coverage.xml
+
 package:
   stage: pack
   script:

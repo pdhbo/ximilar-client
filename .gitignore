@@ -2,3 +2,5 @@
 .tags*
 .idea
 ximilar_client.egg-info
+.coverage
+coverage.xml

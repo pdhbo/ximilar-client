@@ -1,4 +1,7 @@
 requests
 opencv-contrib-python-headless
 pytest
+pytest-mock
 tqdm
+pre-commit
+black
