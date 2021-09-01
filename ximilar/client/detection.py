@@ -435,7 +435,8 @@ class DetectionObject(DetectionClient):
         self.image = object_json[IMAGE]
         self.detection_label = object_json[DETECTION_LABEL]
         self.data = object_json[DATA]
-        self.recognition_labels = object_json[RECOGNITION_LABELS]
+        self.recognition_labels = object_json[RECOGNITION_LABELS] if RECOGNITION_LABELS in object_json else None
+
         # if the meta data was downloaded from the server, this field is never None
         self.meta_data = (
             None if META_DATA not in object_json else (object_json[META_DATA] if object_json[META_DATA] else {})

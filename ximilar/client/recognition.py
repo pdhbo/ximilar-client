@@ -10,7 +10,6 @@ TASK_ENDPOINT = "recognition/v2/task/"
 MODEL_ENDPOINT = "recognition/v2/model/"
 IMAGE_ENDPOINT = "recognition/v2/training-image/"
 CLASSIFY_ENDPOINT = "recognition/v2/classify/"
-WORKSPACE_ENDPOINT = "account/v2/workspace/"
 
 
 class RecognitionClient(RestClient):
@@ -55,17 +54,6 @@ class RecognitionClient(RestClient):
         Calling delete request to the API.
         """
         return super().delete(api_endpoint, data=data, params=self.add_workspace(params))
-
-    def get_workspaces(self):
-        """
-        Get all workspaces accessed by user.
-        """
-        workspaces = self.get(WORKSPACE_ENDPOINT)
-
-        if not workspaces and status[STATUS] == STATUS_ERROR:
-            return None, status
-
-        return [Workspace(self.token, self.endpoint, w_json) for w_json in workspaces], RESULT_OK
 
     def get_task(self, task_id):
         """
@@ -288,7 +276,7 @@ class RecognitionClient(RestClient):
             return None, {STATUS: msg}
         return Task(self.token, self.endpoint, task_json), RESULT_OK
 
-    def create_label(self, name, description=None, output_name=None, label_type=CATEGORY):
+    def create_label(self, name, description=None, output_name=None, label_type=CATEGORY, **kwargs):
         """
         Create label with given name.
         :param name: name of the label
@@ -296,6 +284,8 @@ class RecognitionClient(RestClient):
         :return: Label object, status
         """
         data = {NAME: name, LABEL_TYPE: label_type, DESCRIPTION: description, OUTPUT_NAME: output_name}
+        data.update(kwargs)
+
         label_json = self.post(LABEL_ENDPOINT, data=data)
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
@@ -342,6 +332,10 @@ class RecognitionClient(RestClient):
             if LABELS in record:
                 for label_id in record[LABELS]:
                     image.add_label(label_id)
+
+            if VALUES in record:
+                for label_id in record[VALUES].keys():
+                    image.add_label(label_id, record[VALUES][label_id])
 
             images.append(image)
         return images, worst_status
@@ -514,13 +508,14 @@ class Task(RecognitionClient):
         self.check_json_status(result)
         return result
 
-    def add_label(self, label_id):
+    def add_label(self, label_id, value=None):
         """
         Add label to this task.
         :param label_id: identification of label
         :return: json/dict result
         """
-        return self.post(TASK_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
+        data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
+        return self.post(TASK_ENDPOINT + self.id + "/add-label/", data=data)
 
     def detach_label(self, label_id):
         """
@@ -736,13 +731,21 @@ class Image(RecognitionClient):
 
         return labels, RESULT_OK
 
-    def add_label(self, label_id):
+    def add_label(self, label_id, value=None):
         """
         Add label to the image.
         :param label_id: id of label
         :return: result
         """
-        return self.post(IMAGE_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
+        data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
+        return self.post(IMAGE_ENDPOINT + self.id + "/add-label/", data=data)
+
+    def update_label(self, label_id, value=None):
+        """
+        Update value of the label on image.
+        """
+        data = {LABEL_ID: label_id, "value": value}
+        return self.post(IMAGE_ENDPOINT + self.id + "/update-label/", data=data)
 
     def detach_label(self, label_id):
         """
