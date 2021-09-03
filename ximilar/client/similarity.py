@@ -126,6 +126,13 @@ class CustomSimilarityClient(RecognitionClient):
             query = query + "&type=" + sim_type
         return self.get_all_groups(page_url, "search=" + name, test)
 
+    def get_group_by_name(self, name, sim_type=None, page_url=None, test=None):
+        groups, _ = self.get_all_groups_by_name(name, sim_type=sim_type, page_url=page_url, test=test)
+        for group in groups:
+            if group.name == name:
+                return group, RESULT_OK
+        return None, None
+
     def get_all_groups_by_type(self, sim_type, page_url=None, test=None):
         return self.get_all_groups(page_url, "type=" + sim_type, test)
 
