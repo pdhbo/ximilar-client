@@ -238,6 +238,20 @@ class RecognitionClient(RestClient):
         else:
             return None, {STATUS: "No labels found"}
 
+    def get_label_by_name(self, name):
+        """
+        Get label with specified name which also belongs to this task.
+        """
+        labels, result = self.get_labels_by_substring(name)
+        if result[STATUS] == STATUS_OK:
+            for label in labels:
+                if label.name == name:
+                    return label, RESULT_OK
+        else:
+            return None, result
+
+        return None, {STATUS: "Label with this name not found!"}
+
     def remove_model(self, model_id):
         """
         Remove recognition model by id/uuid.
