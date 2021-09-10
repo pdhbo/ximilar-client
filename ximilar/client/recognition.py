@@ -687,6 +687,8 @@ class Label(RecognitionClient):
             NAME: self.name,
             NEGATIVE_FOR_TASK: self.negative_for_task,
             DESCRIPTION: self.description,
+            OUTPUT_NAME: self.output_name,
+            TYPE: self.type
         }
 
 

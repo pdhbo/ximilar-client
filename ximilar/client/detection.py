@@ -86,6 +86,7 @@ class DetectionClient(RecognitionClient):
     def remove_model(self, object_id):
         pass
 
+
     def get_objects(self, page_url=None):
         """
         Get paginated result of all Detection Objects in your workspace.
@@ -129,6 +130,25 @@ class DetectionClient(RecognitionClient):
 
         return [DetectionTask(self.token, self.endpoint, t_json, self.max_image_size) for t_json in tasks], RESULT_OK
 
+    def get_tasks_by_name(self, name):
+        """
+        Get all tasks with the name.
+        """
+        tasks, result = self.get_all_tasks()
+
+        tasks_to_return = []
+        if result[STATUS] == STATUS_OK:
+            for task in tasks:
+                if task.name == name:
+                    tasks_to_return.append(task)
+        else:
+            return None, result
+
+        if len(tasks_to_return) > 0:
+            return tasks_to_return, result
+
+        return None, {STATUS: "Task with this name not found!"}
+
     def get_all_labels(self, suffix=""):
         """
         Get all Detection Labels of the user(user is specified by client key).
@@ -140,6 +160,20 @@ class DetectionClient(RecognitionClient):
             return None, status
 
         return [DetectionLabel(self.token, self.endpoint, l_json) for l_json in labels], RESULT_OK
+
+    def get_label_by_name(self, name):
+        """
+        Get label with specified name which also belongs to this task.
+        """
+        labels, result = self.get_all_labels()
+        if result[STATUS] == STATUS_OK:
+            for label in labels:
+                if label.name == name:
+                    return label, RESULT_OK
+        else:
+            return None, result
+
+        return None, {STATUS: "Label with this name not found!"}
 
     def create_task(self, name, description=None):
         """
@@ -154,7 +188,7 @@ class DetectionClient(RecognitionClient):
             return None, {STATUS: msg}
         return DetectionTask(self.token, self.endpoint, task_json, self.max_image_size), RESULT_OK
 
-    def create_label(self, name, description=None, color="#FFFFFF"):
+    def create_label(self, name, description=None, color="#FFFFFF", output_name=None):
         """
         Create detection label with given name.
         :param name: name of the label
@@ -162,7 +196,7 @@ class DetectionClient(RecognitionClient):
         :param color: color (hexadecimal color code) of the label
         :return: Label object, status
         """
-        label_json = self.post(LABEL_ENDPOINT, data={NAME: name, DESCRIPTION: description, COLOR: color})
+        label_json = self.post(LABEL_ENDPOINT, data={NAME: name, DESCRIPTION: description, COLOR: color, OUTPUT_NAME: output_name})
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK
@@ -417,7 +451,7 @@ class DetectionLabel(DetectionClient):
         return self.post(LABEL_ENDPOINT + self.id + "/remove-task/", data={TASK_ID: task_id})
 
     def to_json(self):
-        return {LABEL_ID: self.id, NAME: self.name, RECOGNITION_TASKS: self.recognition_tasks}
+        return {LABEL_ID: self.id, NAME: self.name, OUTPUT_NAME: self.output_name, COLOR: self.color}
 
 
 class DetectionObject(DetectionClient):
