@@ -86,7 +86,6 @@ class DetectionClient(RecognitionClient):
     def remove_model(self, object_id):
         pass
 
-
     def get_objects(self, page_url=None):
         """
         Get paginated result of all Detection Objects in your workspace.
@@ -196,7 +195,9 @@ class DetectionClient(RecognitionClient):
         :param color: color (hexadecimal color code) of the label
         :return: Label object, status
         """
-        label_json = self.post(LABEL_ENDPOINT, data={NAME: name, DESCRIPTION: description, COLOR: color, OUTPUT_NAME: output_name})
+        label_json = self.post(
+            LABEL_ENDPOINT, data={NAME: name, DESCRIPTION: description, COLOR: color, OUTPUT_NAME: output_name}
+        )
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK

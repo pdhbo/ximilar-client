@@ -332,7 +332,8 @@ class RecognitionClient(RestClient):
                 continue
             elif "detail" in image_json and "already exists" in image_json["detail"]:
                 import re
-                result = re.search(r'.*image.ID..(.*?)\'.*', image_json["detail"]).group(1)
+
+                result = re.search(r".*image.ID..(.*?)\'.*", image_json["detail"]).group(1)
                 image, _ = self.get_image(result)
             elif ID not in image_json:
                 worst_status = {STATUS: "image not uploaded " + str(record)}
@@ -688,7 +689,7 @@ class Label(RecognitionClient):
             NEGATIVE_FOR_TASK: self.negative_for_task,
             DESCRIPTION: self.description,
             OUTPUT_NAME: self.output_name,
-            TYPE: self.type
+            TYPE: self.type,
         }
 
 

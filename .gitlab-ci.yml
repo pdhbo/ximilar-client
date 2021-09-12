@@ -10,7 +10,6 @@ black:
   image: kiwicom/black:19.10b0
   script:
     - black --check .
-  allow_failure: true
 
 package:
   stage: pack

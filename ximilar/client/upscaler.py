@@ -26,5 +26,5 @@ class UpscaleClient(RestClient):
         :return: json result data from the API
         """
         data = self.construct_data(records, **kwargs)
-        result = self.post(f'/upscaler/{scale}x/upscale', data=data)
+        result = self.post(f"/upscaler/{scale}x/upscale", data=data)
         return result
