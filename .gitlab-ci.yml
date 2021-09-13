@@ -11,6 +11,15 @@ black:
   script:
     - black --check .
 
+mypy:
+  stage: test
+  script:
+    - apk update
+    - apk add gcc musl-dev python3-dev
+    - pip install mypy --quiet
+    - python3 -m pip install types-setuptools types-requests
+    - mypy --ignore-missing-import .
+
 package:
   stage: pack
   script:

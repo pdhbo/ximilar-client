@@ -3,7 +3,7 @@ import traceback
 import csv
 from argparse import ArgumentParser
 from tqdm import tqdm
-from typing import List
+from typing import List, Optional
 
 from ximilar.client import FashionTaggingClient
 from ximilar.client import RecognitionClient
@@ -52,7 +52,7 @@ def categories_result(labels_true: List[Label], predicted: List, row: List[str],
 def process_workspace(
     recognition_client: RecognitionClient,
     fashion_tagging_client: FashionTaggingClient,
-    labels: List[Label],
+    labels: Optional[List[Label]],
     output_file: str,
 ) -> None:
     """
@@ -117,11 +117,11 @@ def process_workspace(
                         categories_result(labels_true, labels_pred.get("Category", []), row)
 
                         # number of other labels can vary
-                        for key, labels in labels_pred.items():
+                        for key, image_labels in labels_pred.items():
                             if key in ["Top Category", "Category"]:
                                 continue
-                            labels.sort(reverse=True, key=lambda c: c["prob"])
-                            for label in labels:
+                            image_labels.sort(reverse=True, key=lambda c: c["prob"])
+                            for label in image_labels:
                                 if "id" in label:
                                     found = find_label(labels_true, label["id"])
                                     row.extend([f"{key}: {label['name']}", label["prob"], found_symbol(found)])

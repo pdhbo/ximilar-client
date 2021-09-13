@@ -20,7 +20,7 @@ if __name__ == "__main__":
     client_r = RecognitionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
     client_d = DetectionClient(token=args.auth_token, endpoint=args.api_prefix, workspace=args.workspace_id)
 
-    rec_json, det_json, img_json, obj_json = [], [], [], []
+    rec_json, det_json, img_json = [], [], []
 
     # create store directories
     os.makedirs(args.folder, exist_ok=True)
@@ -61,8 +61,8 @@ if __name__ == "__main__":
         image_iter = client_r.training_images_iter()
 
     # save images with bounding boxes/objects
+    image: Image
     for image in image_iter:
-        image: Image
         print("processing image: " + str(image.id))
         if args.download_images:
             image.download(destination=args.folder + "/image/")
