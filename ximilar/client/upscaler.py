@@ -3,8 +3,6 @@ import requests
 from ximilar.client import RestClient
 from ximilar.client.constants import *
 
-FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/tags"
-META_FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/meta"
 RECORDS = "records"
 
 
@@ -20,7 +18,7 @@ class UpscaleClient(RestClient):
 
         return data
 
-    def upscale(self, records, endpoint, **kwargs):
+    def upscale(self, records, scale, **kwargs):
         """
         Call the upscaling endpoint
         :param records: [description]
@@ -28,5 +26,5 @@ class UpscaleClient(RestClient):
         :return: json result data from the API
         """
         data = self.construct_data(records, **kwargs)
-        result = self.post(endpoint, data=data)
+        result = self.post(f'/upscaler/{scale}x/upscale', data=data)
         return result
