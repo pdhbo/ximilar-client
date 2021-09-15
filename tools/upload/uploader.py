@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--extensions",
         help="list of file extensions to consider (ignore case)",
-        type=list,
+        type=lambda x: x.split(","),
         default=[".jpg", ".jpeg", ".png", ".tiff", ".tif", ".bmp", ".gif"],
     )
     parser.add_argument("--labels_by_dir", help="label is created for each directory and assigned", action="store_true")
