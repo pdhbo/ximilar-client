@@ -1,6 +1,11 @@
 from argparse import ArgumentParser
 
-from ximilar.client import SimilarityPhotosClient, SimilarityProductsClient, VisualSearchClient, SimilarityCustomClient
+from ximilar.client import (
+    SimilarityPhotosClient,
+    SimilarityProductsClient,
+    SimilarityFashionClient,
+    SimilarityCustomClient,
+)
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Train all non trained tasks of workspace")
@@ -20,7 +25,9 @@ if __name__ == "__main__":
             token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
         )
     elif args.type == "visual":
-        client = VisualSearchClient(token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id)
+        client = SimilarityFashionClient(
+            token=args.auth_token, endpoint=args.api_prefix, collection_id=args.collection_id
+        )
     elif args.type == "custom":
         client = SimilarityCustomClient(token=args.auth_token, collection_id=args.collection_id)
     else:

@@ -13,9 +13,7 @@ PING = "ping"
 
 class FashionSearchClient(SimilarityPhotosClient):
     def __init__(self, token, collection_id=None, endpoint=ENDPOINT + VISUAL_SEARCH_V2, resource_name=VISUAL_SEARCH):
-        super(VisualSearchClient, self).__init__(
-            token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name
-        )
+        super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = SEARCH_PRODUCT
 
     def construct_data(self, records=[], filter=None, k=5, fields_to_return=[_ID], custom_flow=None, **kwargs):
