@@ -43,5 +43,5 @@ deploy:
     - apk update
     - apk add gcc musl-dev python3-dev libffi-dev openssl-dev cargo
     - pip install twine
-    - echo twine upload dist/*
+    - twine upload dist/*
 
