@@ -1,2 +1,10 @@
 [tool.black]
 line-length = 120
+
+[tool.pylint.'FORMAT']
+max-line-length = 120
+
+[tool.pylint.TYPECHECK]
+ignored-classes = [
+    "socket",
+]
