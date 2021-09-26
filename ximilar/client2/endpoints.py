@@ -6,7 +6,7 @@ from typing import Optional, Dict, Any, Protocol, TypeVar
 import json
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-from requests import Session
+from requests import Session, Request
 
 HttpHeaders = Optional[Dict[str, str]]
 
@@ -17,6 +17,8 @@ class HttpEndpoint:
     URL and provides means to call GET, POST, PUT or DELETE methods of HTTP
     protocol.
     """
+
+    debug_mode = False
 
     def __init__(self, url: str, /, *, timeout: int = 90):
         self._url = url
@@ -43,11 +45,21 @@ class HttpEndpoint:
         return self._call(Session.delete, suffix, params=params, headers=headers)
 
     def _call(self, http_method, suffix, /, **rest):
+        if self.debug_mode:
+            self._dump_request(http_method, suffix, **rest)
+
         adapter = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=5))
         session = Session()
         session.mount("http://", adapter)
         session.mount("https://", adapter)
         return self._format_result(http_method(session, self._url + suffix, timeout=self._timeout, **rest))
+
+    def _dump_request(self, http_method, suffix, /, **rest):
+        req = Request(http_method.__name__.upper(), self._url + suffix, **rest)
+        prepared = req.prepare()
+        start_marker = "-----------START-----------"
+        headers = "\n".join(f"{k}: {v}" for k, v in prepared.headers.items())
+        print(f"{start_marker}\n{prepared.method} {prepared.url}\n{headers}\n\n{prepared.body}")
 
     @staticmethod
     def _format_result(result):
