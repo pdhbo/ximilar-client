@@ -5,6 +5,7 @@ for working with Ximilar services.
 from typing import Optional
 from ximilar.client2.endpoints import AppEndpoint, EndpointError, XimilarEndpoint, HttpEndpoint, WorkspaceEndpoint
 from ximilar.client2 import api
+from ximilar.client2.image import NewImage
 
 
 class ClientApp:
@@ -55,6 +56,10 @@ class ClientApp:
             if error.code == 401:
                 return False
             raise error
+
+    def new_image(self):
+        """Configure a new image to be uploaded"""
+        return NewImage(self._endpoint)
 
     def _refresh_workspaces(self):
         if self._workspaces is None:
