@@ -61,6 +61,10 @@ class ClientApp:
         """Configure a new image to be uploaded"""
         return NewImage(self._endpoint)
 
+    def recognition(self):
+        """Access recognition application"""
+        return RecognitionClient(self._endpoint)
+
     def _refresh_workspaces(self):
         if self._workspaces is None:
             data = self._list_workspaces()
@@ -72,3 +76,14 @@ class ClientApp:
 
     def _authorize(self, args):
         return self._endpoint.post(api.AUTHORIZE, args=args)
+
+
+class RecognitionClient:
+    def __init__(self, endpoint):
+        self._endpoint = endpoint
+
+    def new_tag(self, name: str, description: str = None, output_name: str = None):
+        return self._new_label({"name": name, "type": "tag", "description": description, "output_name": output_name})
+
+    def _new_label(self, args):
+        return self._endpoint.post("recognition/v2/label/", args=args)
