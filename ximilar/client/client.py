@@ -235,7 +235,7 @@ class RestClient(object):
         return items, RESULT_OK
 
     def add_header(self, header):
-        """ Add header to the every request """
+        """Add header to the every request"""
         self.headers.update(header)
 
     def check_json_status(self, result):

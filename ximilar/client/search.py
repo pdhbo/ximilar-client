@@ -44,7 +44,9 @@ class SimilarityPhotosClient(RestClient):
         self.headers[COLLECTION_ID] = collection_id
         self.PREDICT_ENDPOINT = KNN_VISUAL
 
-    def construct_data(self, query_record=None, filter=None, k=5, fields_to_return=[_ID], custom_flow=None, records=[], **kwargs):
+    def construct_data(
+        self, query_record=None, filter=None, k=5, fields_to_return=[_ID], custom_flow=None, records=[], **kwargs
+    ):
         if query_record is None and len(records) == 0:
             raise Exception("Please specify record when using search method.")
 
@@ -198,7 +200,11 @@ class ImageMatchingSearchClient(SimilarityPhotosClient):
 
 class SimilarityFashionClient(SimilarityPhotosClient):
     def __init__(
-        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_FASHION, resource_name=FASHION_SIMILARITY,
+        self,
+        token,
+        collection_id=None,
+        endpoint=ENDPOINT + SIMILARITY_FASHION,
+        resource_name=FASHION_SIMILARITY,
     ):
         super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = KNN_VISUAL_TAGS
