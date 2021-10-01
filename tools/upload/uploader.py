@@ -26,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--extensions",
         help="list of file extensions to consider (ignore case)",
-        type=list,
+        type=lambda x: x.split(","),
         default=[".jpg", ".jpeg", ".png", ".tiff", ".tif", ".bmp", ".gif"],
     )
     parser.add_argument("--labels_by_dir", help="label is created for each directory and assigned", action="store_true")
@@ -60,10 +60,10 @@ if __name__ == "__main__":
                 else:
                     labels[subdir], _ = client.create_label(subdir, "automatically created label for dir: " + subdir)
 
-        files = filter(lambda x: os.path.splitext(x)[1].lower() in args.extensions, files)
+        filtered_files = filter(lambda x: os.path.splitext(x)[1].lower() in args.extensions, files)
         records = [
             {FILE: os.path.join(root, filename), NORESIZE: args.no_resize, TEST_IMAGE: args.test_image}
-            for filename in files
+            for filename in filtered_files
         ]
         if args.labels_by_dir:
             # find the label matching the directory name

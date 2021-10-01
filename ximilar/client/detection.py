@@ -18,7 +18,7 @@ class DetectionClient(RecognitionClient):
         max_image_size=1024,
         resource_name=CUSTOM_OBJECT_DETECTION,
     ):
-        super(DetectionClient, self).__init__(
+        super().__init__(
             token=token,
             endpoint=endpoint,
             workspace=workspace,
@@ -85,7 +85,6 @@ class DetectionClient(RecognitionClient):
 
     def remove_model(self, object_id):
         pass
-
 
     def get_objects(self, page_url=None):
         """
@@ -196,7 +195,9 @@ class DetectionClient(RecognitionClient):
         :param color: color (hexadecimal color code) of the label
         :return: Label object, status
         """
-        label_json = self.post(LABEL_ENDPOINT, data={NAME: name, DESCRIPTION: description, COLOR: color, OUTPUT_NAME: output_name})
+        label_json = self.post(
+            LABEL_ENDPOINT, data={NAME: name, DESCRIPTION: description, COLOR: color, OUTPUT_NAME: output_name}
+        )
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return DetectionLabel(self.token, self.endpoint, label_json), RESULT_OK
@@ -302,7 +303,7 @@ class DetectionClient(RecognitionClient):
 
 class DetectionTask(DetectionClient):
     def __init__(self, token, endpoint, task_json, max_image_size):
-        super(DetectionTask, self).__init__(token, endpoint, max_image_size=max_image_size, resource_name=None)
+        super().__init__(token, endpoint, max_image_size=max_image_size, resource_name=None)
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
@@ -392,7 +393,7 @@ class DetectionLabel(DetectionClient):
     """
 
     def __init__(self, token, endpoint, label_json):
-        super(DetectionLabel, self).__init__(token, endpoint, resource_name=None)
+        super().__init__(token, endpoint, resource_name=None)
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
@@ -463,7 +464,7 @@ class DetectionObject(DetectionClient):
     """
 
     def __init__(self, token, endpoint, object_json):
-        super(DetectionObject, self).__init__(token, endpoint, resource_name=None)
+        super().__init__(token, endpoint, resource_name=None)
 
         self.id = object_json[ID]
         self.image = object_json[IMAGE]

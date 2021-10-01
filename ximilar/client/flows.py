@@ -6,9 +6,7 @@ FLOW_ENDPOINT = "/flows/v2/flow/"
 
 class FlowsClient(RestClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name="flows", max_image_size=512):
-        super(FlowsClient, self).__init__(
-            token=token, endpoint=endpoint, max_image_size=max_image_size, resource_name=resource_name
-        )
+        super().__init__(token=token, endpoint=endpoint, max_image_size=max_image_size, resource_name=resource_name)
 
         self.PREDICT_ENDPOINT = "/flows/v2/process"
 
@@ -49,7 +47,7 @@ class Flow(FlowsClient):
     """
 
     def __init__(self, token, endpoint, flow_json, max_image_size=512):
-        super(Flow, self).__init__(token, endpoint=endpoint, max_image_size=max_image_size, resource_name="")
+        super().__init__(token, endpoint=endpoint, max_image_size=max_image_size, resource_name="")
 
         self.id = flow_json[ID]
         self.name = flow_json[NAME]

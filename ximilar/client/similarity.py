@@ -16,7 +16,7 @@ class CustomSimilarityClient(RecognitionClient):
     def __init__(
         self, token, endpoint=ENDPOINT, workspace=DEFAULT_WORKSPACE, max_image_size=512, resource_name=CUSTOM_SIMILARITY
     ):
-        super(CustomSimilarityClient, self).__init__(
+        super().__init__(
             token=token,
             endpoint=endpoint,
             workspace=workspace,
@@ -156,7 +156,7 @@ class CustomSimilarityClient(RecognitionClient):
 
 class SimilarityTask(CustomSimilarityClient):
     def __init__(self, token, endpoint, workspace, task_json):
-        super(SimilarityTask, self).__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
+        super().__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
 
         self.id = task_json["id"]
         self.name = task_json["name"]
@@ -182,7 +182,7 @@ class SimilarityTask(CustomSimilarityClient):
 
 class SimilarityType(CustomSimilarityClient):
     def __init__(self, token, endpoint, workspace, type_json):
-        super(SimilarityType, self).__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
+        super().__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
 
         self.id = type_json["id"]
         self.name = type_json["name"]
@@ -196,7 +196,7 @@ class SimilarityType(CustomSimilarityClient):
 
 class SimilarityGroup(CustomSimilarityClient):
     def __init__(self, token, endpoint, workspace, group_json):
-        super(SimilarityGroup, self).__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
+        super().__init__(token, endpoint=endpoint, workspace=workspace, resource_name=None)
 
         self.id = group_json["id"]
         self.name = group_json["name"] if "name" in group_json else None
@@ -273,7 +273,7 @@ class SimilarityRunLogClient(RestClient):
 
     def __init__(self, token, endpoint=ENDPOINT):
         self.workspace = None
-        super(SimilarityRunLogClient, self).__init__(token=token, endpoint=endpoint, resource_name=None)
+        super().__init__(token=token, endpoint=endpoint, resource_name=None)
 
     def create_log(self, collection, data):
         return self.post(self.BASE_ENDPOINT, {"collection": collection, "data": data})

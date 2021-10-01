@@ -2,6 +2,7 @@ image: python:3.6-alpine
 
 stages:
   - test
+  - pack
   - deploy
 
 black:
@@ -9,19 +10,38 @@ black:
   image: kiwicom/black:19.10b0
   script:
     - black --check .
-  allow_failure: true
 
-deploy_production:
+mypy:
+  stage: test
+  script:
+    - apk update
+    - apk add gcc musl-dev python3-dev
+    - pip install mypy --quiet
+    - python3 -m pip install types-setuptools types-requests
+    - mypy --ignore-missing-import .
+
+package:
+  stage: pack
+  script:
+    - apk update
+    - apk add git
+    - python setup.py sdist bdist_wheel
+  artifacts:
+    when: on_success
+    paths:
+      - dist/
+    expire_in: 1 week
+
+deploy:
   stage: deploy
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v_/'
   variables:
     TWINE_USERNAME: $PRODUCTION_USERNAME
     TWINE_PASSWORD: $PRODUCTION_PASSWORD
   script:
     - apk update
-    - apk add gcc musl-dev libffi-dev libressl-dev
-    - pip install cryptography==3.3.1 # workaround, remove when twine can be installed with the default (new) one
+    - apk add gcc musl-dev python3-dev libffi-dev openssl-dev cargo
     - pip install twine
-    - python setup.py sdist bdist_wheel
     - twine upload dist/*
-  only:
-    - master
+

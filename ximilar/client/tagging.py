@@ -46,7 +46,7 @@ class TaggingClient(RestClient):
 
 class FashionTaggingClient(TaggingClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name=FASHION_TAGGING):
-        super(FashionTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
+        super().__init__(token=token, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = FASHION_TAGGING_ENDPOINT
 
     def change_predict_endpoint(self, new_endpoint):
@@ -75,7 +75,7 @@ class FashionTaggingClient(TaggingClient):
 
 class HomeDecorTaggingClient(TaggingClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name=HOME_DECOR_TAGGING):
-        super(HomeDecorTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
+        super().__init__(token=token, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = HOME_DECOR_TAGGING_ENDPOINT
 
     def change_predict_endpoint(self, new_endpoint):
@@ -87,7 +87,7 @@ class HomeDecorTaggingClient(TaggingClient):
 
 class GenericTaggingClient(TaggingClient):
     def __init__(self, token, endpoint=ENDPOINT, resource_name=GENERIC_TAGGING):
-        super(GenericTaggingClient, self).__init__(token=token, endpoint=endpoint, resource_name=resource_name)
+        super().__init__(token=token, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = GENERIC_TAGGING_ENDPOINT
 
     def tags(self, records):

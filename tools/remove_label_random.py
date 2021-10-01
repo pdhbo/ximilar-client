@@ -24,9 +24,9 @@ if __name__ == "__main__":
     im_counter = 0
     removed_counter = 0
     image_to_remove = []
+    image: Image
     for image in image_iter:
         im_counter += 1
-        image: Image
         if random.uniform(0.0, 1.0) < args.remove_probability:
             print("removing label from image: " + str(image.id))
             removed_counter += 1

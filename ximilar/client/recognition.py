@@ -26,9 +26,7 @@ class RecognitionClient(RestClient):
         resource_name=CUSTOM_IMAGE_RECOGNITION,
     ):
         self.workspace = workspace  # this must be set before calling supers
-        super(RecognitionClient, self).__init__(
-            token=token, endpoint=endpoint, max_image_size=max_image_size, resource_name=resource_name
-        )
+        super().__init__(token=token, endpoint=endpoint, max_image_size=max_image_size, resource_name=resource_name)
         self.PREDICT_ENDPOINT = CLASSIFY_ENDPOINT
 
     def get(self, api_endpoint, data=None, params=None):
@@ -332,7 +330,8 @@ class RecognitionClient(RestClient):
                 continue
             elif "detail" in image_json and "already exists" in image_json["detail"]:
                 import re
-                result = re.search(r'.*image.ID..(.*?)\'.*', image_json["detail"]).group(1)
+
+                result = re.search(r".*image.ID..(.*?)\'.*", image_json["detail"]).group(1)
                 image, _ = self.get_image(result)
             elif ID not in image_json:
                 worst_status = {STATUS: "image not uploaded " + str(record)}
@@ -434,7 +433,7 @@ class Task(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, task_json):
-        super(Task, self).__init__(token, endpoint, resource_name=None)
+        super().__init__(token, endpoint, resource_name=None)
 
         self.id = task_json[ID]
         self.name = task_json[NAME]
@@ -557,7 +556,7 @@ class Model(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, model_json):
-        super(Model, self).__init__(token, endpoint, resource_name=None)
+        super().__init__(token, endpoint, resource_name=None)
 
         self.id = model_json[ID]
         self.task_id = model_json[TASK]
@@ -579,7 +578,7 @@ class Label(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, label_json):
-        super(Label, self).__init__(token, endpoint, resource_name=None)
+        super().__init__(token, endpoint, resource_name=None)
 
         self.id = label_json[ID]
         self.name = label_json[NAME]
@@ -644,7 +643,7 @@ class Label(RecognitionClient):
                 records[i][LABELS].append(self.id)
             else:
                 records[i][LABELS] = [self.id]
-        return super(Label, self).upload_images(records)
+        return super().upload_images(records)
 
     def detach_image(self, image_id):
         """
@@ -688,7 +687,7 @@ class Label(RecognitionClient):
             NEGATIVE_FOR_TASK: self.negative_for_task,
             DESCRIPTION: self.description,
             OUTPUT_NAME: self.output_name,
-            TYPE: self.type
+            TYPE: self.type,
         }
 
 
@@ -699,7 +698,7 @@ class Image(RecognitionClient):
     """
 
     def __init__(self, token, endpoint, image_json):
-        super(Image, self).__init__(token, endpoint, resource_name=None)
+        super().__init__(token, endpoint, resource_name=None)
 
         self.id = image_json[ID]
         self.img_path = image_json[IMG_PATH]

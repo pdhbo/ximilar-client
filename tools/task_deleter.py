@@ -32,8 +32,8 @@ if __name__ == "__main__":
         image_iter = label.training_images_iter()
 
         # save images with bounding boxes/objects
+        image: Image
         for image in image_iter:
-            image: Image
             futures.append(executor.submit(image.remove))
         label.remove()
 

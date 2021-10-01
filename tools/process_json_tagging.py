@@ -1,5 +1,6 @@
 import json
 from argparse import ArgumentParser
+from typing import Union
 
 from ximilar.client import FashionTaggingClient, GenericTaggingClient
 from ximilar.client.constants import DEFAULT_WORKSPACE, NORESIZE, LABELS, TEST_IMAGE, META_DATA
@@ -23,6 +24,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", help="size of batch in which to process the data", default=10, type=int)
     args = parser.parse_args()
 
+    client: Union[FashionTaggingClient, GenericTaggingClient]
     if args.type.lower() == "fashion":
         client = FashionTaggingClient(token=args.auth_token)
     else:

@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 import os
+import re
+import subprocess
 
 with open("requirements.txt") as f:
     install_requirements = f.read().splitlines()
@@ -7,9 +9,31 @@ with open("requirements.txt") as f:
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+version_re = re.compile(r"^v_(\d+\.\d+\.\d+)")
+
+
+def get_version():
+    tag = os.environ.get("CI_COMMIT_TAG")
+    if tag != None:
+        m = version_re.match(tag)
+        if m != None:
+            return m.group(1)
+    try:
+        result = subprocess.run(["git", "describe", "--match", "v_*", "--abbrev=0", "HEAD"], stdout=subprocess.PIPE)
+        tag = result.stdout.decode("utf-8").rstrip()
+        result = subprocess.run(["git", "rev-parse", "--short=6", "HEAD"], stdout=subprocess.PIPE)
+        commitid = result.stdout.decode("utf-8").rstrip()
+        m = version_re.match(tag)
+        if m != None:
+            return m.group(1) + "." + commitid
+    except FileNotFoundError:
+        pass
+    return "1.0.0"
+
+
 setup(
     name="ximilar-client",
-    version="1.21.07",
+    version=get_version(),
     description="The Ximilar App and Vize.ai Client.",
     url="https://gitlab.com/ximilar-public/ximilar-vize-api",
     author="Michal Lukac, David Novak and Ximilar.com Team",
