@@ -46,22 +46,41 @@ class SimilarityPhotosClient(RestClient):
         self.headers[COLLECTION_ID] = collection_id
         self.PREDICT_ENDPOINT = KNN_VISUAL
 
-    def construct_data(self, query_record=None, filter=None, k=5, fields_to_return=[_ID], **kwargs):
-        if query_record is None:
+    def construct_data(self, query_record=None, filter=None, k=5, fields_to_return=[_ID], custom_flow=None, records=[], **kwargs):
+        if query_record is None and len(records) == 0:
             raise Exception("Please specify record when using search method.")
 
-        data = {
-            QUERY_RECORD: self.preprocess_records([query_record])[0],
-            K_COUNT: k,
-            FIELDS_TO_RETURN: fields_to_return,
-        }
+        data = None
+        if len(records):
+            data = {RECORDS: self.preprocess_records(records), K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
+        else:
+            data = {
+                QUERY_RECORD: self.preprocess_records([query_record])[0],
+                K_COUNT: k,
+                FIELDS_TO_RETURN: fields_to_return,
+            }
+
         if filter:
             data[FILTER] = filter
 
         if kwargs:
             data.update(kwargs)
 
+        data = self.fill_data(data, custom_flow)
         return data
+
+    def fill_data(self, data, custom_flow):
+        if custom_flow is not None:
+            data["custom_flow"] = custom_flow
+
+        return data
+
+    def get_all_ids(self):
+        """
+        Returns an array with records with "_id" fields.
+        :return: an array with records with "_id" fields.
+        """
+        return self.post(ALL_IDS, data={"something": "value"})
 
     def allRecords(self, size=1000, page=1, fields_to_return=[_ID]):
         if size > 0:
@@ -205,8 +224,6 @@ class SimilarityFashionClient(SimilarityPhotosClient):
         data = {RECORDS: self.fill_data(records, custom_flow)}
         return self.post(INSERT, data=data)
 
-    def fill_data(self, records, custom_flow):
-        if custom_flow is not None:
-            for r in records:
-                r["custom_flow"] = custom_flow
-        return records
+    def descriptor(self, records, custom_flow=None, **kwargs):
+        data = self.construct_data(records=records, custom_flow=custom_flow, **kwargs)
+        return self.post("descriptor", data=data)
