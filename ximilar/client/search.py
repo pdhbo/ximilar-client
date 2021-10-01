@@ -75,13 +75,6 @@ class SimilarityPhotosClient(RestClient):
 
         return data
 
-    def get_all_ids(self):
-        """
-        Returns an array with records with "_id" fields.
-        :return: an array with records with "_id" fields.
-        """
-        return self.post(ALL_IDS, data={"something": "value"})
-
     def allRecords(self, size=1000, page=1, fields_to_return=[_ID]):
         if size > 0:
             result = self.post("allRecords?size=%s&page=%s" % (size, page), data={FIELDS_TO_RETURN: fields_to_return})
