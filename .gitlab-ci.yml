@@ -9,7 +9,7 @@ black:
   stage: test
   image: kiwicom/black:19.10b0
   script:
-    - black --check . -l 120
+    - black --check . 
 
 mypy:
   stage: test
