@@ -193,11 +193,7 @@ class ImageMatchingSearchClient(SimilarityPhotosClient):
 
 class SimilarityFashionClient(SimilarityPhotosClient):
     def __init__(
-        self,
-        token,
-        collection_id=None,
-        endpoint=ENDPOINT + SIMILARITY_FASHION,
-        resource_name=FASHION_SIMILARITY,
+        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_FASHION, resource_name=FASHION_SIMILARITY,
     ):
         super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = KNN_VISUAL_TAGS
