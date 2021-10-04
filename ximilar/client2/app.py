@@ -6,6 +6,7 @@ from typing import Optional
 from ximilar.client2.endpoints import AppEndpoint, EndpointError, XimilarEndpoint, HttpEndpoint, WorkspaceEndpoint
 from ximilar.client2 import api
 from ximilar.client2.image import NewImage
+from ximilar.client2.recognition import RecognitionClient
 
 
 class ClientApp:
@@ -76,14 +77,3 @@ class ClientApp:
 
     def _authorize(self, args):
         return self._endpoint.post(api.AUTHORIZE, args=args)
-
-
-class RecognitionClient:
-    def __init__(self, endpoint):
-        self._endpoint = endpoint
-
-    def new_tag(self, name: str, description: str = None, output_name: str = None):
-        return self._new_label({"name": name, "type": "tag", "description": description, "output_name": output_name})
-
-    def _new_label(self, args):
-        return self._endpoint.post("recognition/v2/label/", args=args)
