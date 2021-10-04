@@ -392,7 +392,7 @@ class RestClient(object):
 
             if FILE in records[i] and BASE64 not in records[i] and IMG_DATA not in records[i]:
                 records[i][BASE64] = self.load_base64_file(records[i][FILE], resize=not noresize)
-            elif BASE64 in records[i] and (noresize or self.max_image_size == 0):
+            elif (BASE64 in records[i] or URL in records[i]) and (noresize or self.max_image_size == 0):
                 # if we have base64 and we do not want to resize it at all
                 pass
             elif BASE64 in records[i]:
