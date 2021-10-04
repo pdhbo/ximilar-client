@@ -9,6 +9,7 @@ GENERIC_TAGGING_ENDPOINT = "tagging/generic/v2/tags"
 HOME_DECOR_TAGGING_ENDPOINT = "tagging/homedecor/v2/tags"
 DETECT_FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/detect_tags"
 DETECT_FASHION_ENDPOINT = "tagging/fashion/v2/detect"
+DETECT_FASHION_TAGGING_ALL_ENDPOINT = "tagging/fashion/v2/detect_tags_all"
 
 
 class TaggingClient(RestClient):
@@ -63,6 +64,9 @@ class FashionTaggingClient(TaggingClient):
 
     def detect_tags(self, records, profile=None, **kwargs):
         return super().tags(records, DETECT_FASHION_TAGGING_ENDPOINT, profile=profile, **kwargs)
+
+    def detect_tags_all(self, records, profile=None, **kwargs):
+        return super().tags(records, DETECT_FASHION_TAGGING_ALL_ENDPOINT, profile=profile, **kwargs)
 
     def get_top_categories(self):
         result = requests.get(self.urljoin(self.endpoint, "tagging/fashion/v2/top_categories"))
