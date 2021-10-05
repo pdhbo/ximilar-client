@@ -74,8 +74,8 @@ class HttpEndpoint:
     @staticmethod
     def _dump_reply(result):
         start_marker = "-----------REPLY-----------"
-        status = f"CODE: {result.status_code}"
-        content_type = f"Content-Type: {result.headers['content-type']}"
+        status = f"CODE: '{result.status_code}'"
+        content_type = f"Content-Type: '{result.headers.get('content-type')}'"
         print(f"{start_marker}\n{status}\n{content_type}\n{result.text}\n\n")
 
 
