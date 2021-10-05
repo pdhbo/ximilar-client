@@ -59,11 +59,20 @@ class HttpEndpoint:
         prepared = req.prepare()
         start_marker = "-----------START-----------"
         headers = "\n".join(f"{k}: {v}" for k, v in prepared.headers.items())
-        print(f"{start_marker}\n{prepared.method} {prepared.url}\n{headers}\n\n{prepared.body}")
+        print(f"{start_marker}\n{prepared.method} {prepared.url}\n{headers}\n\n{prepared.body}\n\n")
 
     @staticmethod
     def _format_result(result):
+        if HttpEndpoint.debug_mode:
+            HttpEndpoint._dump_reply(result)
         return {"status": result.status_code, "content-type": result.headers["content-type"], "content": result.text}
+
+    @staticmethod
+    def _dump_reply(result):
+        start_marker = "-----------REPLY-----------"
+        status = f"CODE: {result.status_code}"
+        content_type = f"Content-Type: {result.headers['content-type']}"
+        print(f"{start_marker}\n{status}\n{content_type}\n{result.text}\n\n")
 
 
 class EndpointError(Exception):
