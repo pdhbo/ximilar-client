@@ -78,6 +78,18 @@ class Label:
         """Returns unknown shit"""
         return self._data["negative_for_task"]
 
+    def wipe(self):
+        """
+        Delete label and all images associated with this label.
+        """
+        self._endpoint.delete(f"recognition/v2/label/{self._id}/wipe")
+
+    def delete(self):
+        """
+        Delete label.
+        """
+        self._endpoint.delete(f"recognition/v2/label/{self._id}")
+
     @staticmethod
     def _extract_from(data):
         return {
