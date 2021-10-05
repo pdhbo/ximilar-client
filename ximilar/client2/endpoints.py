@@ -65,7 +65,11 @@ class HttpEndpoint:
     def _format_result(result):
         if HttpEndpoint.debug_mode:
             HttpEndpoint._dump_reply(result)
-        return {"status": result.status_code, "content-type": result.headers["content-type"], "content": result.text}
+        return {
+            "status": result.status_code,
+            "content-type": result.headers.get("content-type"),
+            "content": result.text,
+        }
 
     @staticmethod
     def _dump_reply(result):
