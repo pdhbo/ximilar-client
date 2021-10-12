@@ -2,6 +2,7 @@
 This module provide classes that wraps access to Ximilar Recognition application
 """
 from typing import Any, Dict
+from ximilar.client2.endpoints import AppEndpoint
 
 
 class Label:
@@ -86,6 +87,63 @@ class Label:
         raise AttributeError(self, item)
 
 
+class FilteredLister:
+    """Wrapper for listing Ximilar objects applying filtering rules"""
+
+    def __init__(self, lister, convertor, args: Dict[str, Any] = None):
+        self._lister = lister
+        self._convertor = convertor
+        self._args = {} if args is None else args
+
+    def filter_by(self, key: str, value: Any):
+        """update the filter"""
+        args = self._args.copy()
+        args[key] = value
+        return FilteredLister(lister=self._lister, convertor=self._convertor, args=args)
+
+    def items(self):
+        """iterate over items"""
+        page = 1
+        result = self._request_items({"page": page, "page_size": 10})
+        while result["results"]:
+            for data in result["results"]:
+                yield self._convertor(data)
+            if not result["next"]:
+                break
+            page += 1
+            result = self._request_items({"page": page, "page_size": 10})
+
+    def _request_items(self, args):
+        real_args = self._args.copy()
+        real_args.update(args)
+        return self._lister(real_args)
+
+
+class Labels:
+    """Filter builder for labels"""
+
+    def __init__(self, endpoint: AppEndpoint):
+        self._endpoint = endpoint
+        self._lister = FilteredLister(lister=self._list_labels, convertor=self._label_from_json)
+
+    def tags_only(self):
+        """Return only tags"""
+        return self._lister.filter_by("type", "tag")
+
+    def categories_only(self):
+        """Return only categories"""
+        return self._lister.filter_by("type", "category")
+
+    def __iter__(self):
+        yield from self._lister.items()
+
+    def _list_labels(self, args):
+        return self._endpoint.get("recognition/v2/label/", args=args)
+
+    def _label_from_json(self, data):
+        return Label(self._endpoint, json=data)
+
+
 class RecognitionClient:
     """
     The umbrella wrapper class for everything related to Recognition application
@@ -115,6 +173,12 @@ class RecognitionClient:
         Returns a structure with all the label properties
         """
         return Label(self._endpoint, label_id=label_id)
+
+    def labels(self):
+        """
+        Iterates over existing labels
+        """
+        return Labels(self._endpoint)
 
     def _new_label(self, args):
         return self._endpoint.post("recognition/v2/label/", args=args)
