@@ -7,7 +7,7 @@ from .helpers import EndpointWrapper
 
 @pytest.fixture(name="ximilar_endpoint")
 def ximilar_endpoint_fixture(mocker):
-    return EndpointWrapper(mocker.patch("ximilar.client2.endpoints.XimilarEndpoint", autospec=True))
+    return EndpointWrapper(mocker.patch("ximilar.client2.endpoint.default.Default", autospec=True))
 
 
 server_response = [
@@ -18,7 +18,7 @@ server_response = [
 
 def test_workspaces_returns_map(ximilar_endpoint):
     ximilar_endpoint.get.return_value = server_response
-    app = ClientApp(endpoint=ximilar_endpoint)
+    app = ClientApp(ximilar=ximilar_endpoint)
 
     result = app.workspaces()
 
@@ -28,7 +28,7 @@ def test_workspaces_returns_map(ximilar_endpoint):
 
 def test_workspaces_double_call_returns_cache(ximilar_endpoint):
     ximilar_endpoint.get.return_value = server_response
-    app = ClientApp(endpoint=ximilar_endpoint)
+    app = ClientApp(ximilar=ximilar_endpoint)
 
     app.workspaces()
     app.workspaces()
@@ -38,7 +38,7 @@ def test_workspaces_double_call_returns_cache(ximilar_endpoint):
 
 def test_workspaces_passes_error_through(ximilar_endpoint):
     ximilar_endpoint.get.side_effect = Exception("some error")
-    app = ClientApp(endpoint=ximilar_endpoint)
+    app = ClientApp(ximilar=ximilar_endpoint)
 
     with pytest.raises(Exception) as error_info:
         app.workspaces()
@@ -47,7 +47,7 @@ def test_workspaces_passes_error_through(ximilar_endpoint):
 
 def test_workspace_by_id_returns_app_with_workspace_endpoint(ximilar_endpoint):
     ximilar_endpoint.get.return_value = server_response
-    app = ClientApp(endpoint=ximilar_endpoint)
+    app = ClientApp(ximilar=ximilar_endpoint)
 
     result = app.workspace_by_id("id1")
 
@@ -59,7 +59,7 @@ def test_workspace_by_id_returns_app_with_workspace_endpoint(ximilar_endpoint):
 
 def test_workspace_by_name_returns_app_with_workspace_endpoint(ximilar_endpoint):
     ximilar_endpoint.get.return_value = server_response
-    app = ClientApp(endpoint=ximilar_endpoint)
+    app = ClientApp(ximilar=ximilar_endpoint)
 
     result = app.workspace_by_name("name2")
 
@@ -72,7 +72,7 @@ def test_workspace_by_name_returns_app_with_workspace_endpoint(ximilar_endpoint)
 
 def test_workspace_by_name_name_does_not_exist_throws_error(ximilar_endpoint):
     ximilar_endpoint.get.return_value = server_response
-    app = ClientApp(endpoint=ximilar_endpoint)
+    app = ClientApp(ximilar=ximilar_endpoint)
 
     with pytest.raises(Exception) as error_info:
         app.workspace_by_name("name3")

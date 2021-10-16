@@ -1,7 +1,7 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
 import pytest
 
-from ximilar.client2.endpoints import HttpEndpoint
+from ximilar.client2 import endpoint
 from .minserver import MinHTTPServer
 
 
@@ -21,9 +21,9 @@ def server_fixture():
 
 @pytest.mark.parametrize("method", ["get", "post", "put", "delete"])
 def test_returns_content_and_status(server, method):
-    endpoint = HttpEndpoint(server.url())
+    http = endpoint.Http(server.url())
 
-    result = getattr(endpoint, method)("resource")
+    result = getattr(http, method)("resource")
 
     assert f"{method.upper()} /resource HTTP" in server.request
     assert "status" in result
@@ -36,9 +36,9 @@ def test_returns_content_and_status(server, method):
 
 @pytest.mark.parametrize("method", ["get", "post", "put", "delete"])
 def test_sends_headers(server, method):
-    endpoint = HttpEndpoint(server.url())
+    http = endpoint.Http(server.url())
 
-    getattr(endpoint, method)("resource", headers={"Header1": "value1", "Header2": "value2"})
+    getattr(http, method)("resource", headers={"Header1": "value1", "Header2": "value2"})
 
     assert "\r\nHeader1: value1\r\n" in server.request
     assert "\r\nHeader2: value2\r\n" in server.request
@@ -46,16 +46,16 @@ def test_sends_headers(server, method):
 
 @pytest.mark.parametrize("method", ["post", "put"])
 def test_sends_data(server, method):
-    endpoint = HttpEndpoint(server.url())
+    http = endpoint.Http(server.url())
 
-    getattr(endpoint, method)("resource", data="request body")
+    getattr(http, method)("resource", data="request body")
 
     assert server.request_body == "request body"
 
 
 def test_sub_makes_prefix(server):
-    endpoint = HttpEndpoint(server.url())
-    subpoint = endpoint.sub("group/")
+    http = endpoint.Http(server.url())
+    subpoint = http.sub("group/")
 
     subpoint.get("resource")
 

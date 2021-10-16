@@ -2,7 +2,7 @@
 This module provide classes that wraps access to Ximilar Recognition application
 """
 from typing import Any, Dict
-from ximilar.client2.endpoints import AppEndpoint
+from ximilar.client2 import endpoint
 
 
 class Label:
@@ -10,8 +10,8 @@ class Label:
     Wrapper for Ximial Recognition application's label object
     """
 
-    def __init__(self, endpoint, label_id: str = None, json: Dict[str, Any] = None):
-        self._endpoint = endpoint
+    def __init__(self, ximilar, label_id: str = None, json: Dict[str, Any] = None):
+        self._ximilar = ximilar
         if json is not None:
             self._id = json["id"]
             self._data = self._extract_from(json)
@@ -58,13 +58,13 @@ class Label:
         """
         Delete label and all images associated with this label.
         """
-        self._endpoint.delete(f"recognition/v2/label/{self._id}/wipe")
+        self._ximilar.delete(f"recognition/v2/label/{self._id}/wipe")
 
     def delete(self) -> None:
         """
         Delete label.
         """
-        self._endpoint.delete(f"recognition/v2/label/{self._id}")
+        self._ximilar.delete(f"recognition/v2/label/{self._id}")
 
     @staticmethod
     def _extract_from(data) -> Dict[str, Any]:
@@ -81,7 +81,7 @@ class Label:
 
     def __getattr__(self, item):
         if item == "_data":
-            reply = self._endpoint.get(f"recognition/v2/label/{self._id}/")
+            reply = self._ximilar.get(f"recognition/v2/label/{self._id}/")
             self._data = self._extract_from(reply)
             return self._data
         raise AttributeError(self, item)
@@ -122,8 +122,8 @@ class FilteredLister:
 class Labels:
     """Filter builder for labels"""
 
-    def __init__(self, endpoint: AppEndpoint):
-        self._endpoint = endpoint
+    def __init__(self, ximilar: endpoint.Ximilar):
+        self._ximilar = ximilar
         self._lister = FilteredLister(lister=self._list_labels, convertor=self._label_from_json)
 
     def tags_only(self):
@@ -138,10 +138,10 @@ class Labels:
         yield from self._lister.items()
 
     def _list_labels(self, args):
-        return self._endpoint.get("recognition/v2/label/", args=args)
+        return self._ximilar.get("recognition/v2/label/", args=args)
 
     def _label_from_json(self, data):
-        return Label(self._endpoint, json=data)
+        return Label(self._ximilar, json=data)
 
 
 class RecognitionClient:
@@ -149,15 +149,15 @@ class RecognitionClient:
     The umbrella wrapper class for everything related to Recognition application
     """
 
-    def __init__(self, endpoint):
-        self._endpoint = endpoint
+    def __init__(self, ximilar):
+        self._ximilar = ximilar
 
     def new_tag(self, name: str, /, *, description: str = None, output_name: str = None) -> Label:
         """
         Creates a new label of type tag on the server
         """
         reply = self._new_label({"name": name, "type": "tag", "description": description, "output_name": output_name})
-        return Label(self._endpoint, json=reply)
+        return Label(self._ximilar, json=reply)
 
     def new_category(self, name: str, /, *, description: str = None, output_name: str = None) -> Label:
         """
@@ -166,19 +166,19 @@ class RecognitionClient:
         reply = self._new_label(
             {"name": name, "type": "category", "description": description, "output_name": output_name}
         )
-        return Label(self._endpoint, json=reply)
+        return Label(self._ximilar, json=reply)
 
     def label(self, label_id: str, /):
         """
         Returns a structure with all the label properties
         """
-        return Label(self._endpoint, label_id=label_id)
+        return Label(self._ximilar, label_id=label_id)
 
     def labels(self):
         """
         Iterates over existing labels
         """
-        return Labels(self._endpoint)
+        return Labels(self._ximilar)
 
     def _new_label(self, args):
-        return self._endpoint.post("recognition/v2/label/", args=args)
+        return self._ximilar.post("recognition/v2/label/", args=args)

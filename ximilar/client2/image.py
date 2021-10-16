@@ -3,14 +3,14 @@
 import base64
 from typing import Dict, Any
 
-from ximilar.client2.endpoints import AppEndpoint
+from ximilar.client2 import endpoint
 
 
 class NewImage:
     """New image configuration class"""
 
-    def __init__(self, endpoint: AppEndpoint):
-        self._endpoint = endpoint
+    def __init__(self, ximilar: endpoint.Ximilar):
+        self._ximilar = ximilar
         self._args: Dict[str, Any] = {}
 
     def no_resizing(self):
@@ -18,7 +18,7 @@ class NewImage:
         self._args["noresize"] = True
         return self
 
-    # TODO: looks like dup detecction dosen't work
+    # TODO: looks like dup detecction doesn't work
     # def even_if_duplicate(self):
     #     self._args['force'] = True
     #     return self
@@ -40,7 +40,7 @@ class NewImage:
         else:
             raise Exception("Either file or data must be set")
 
-        return self._endpoint.post("recognition/v2/training-image/", args=args)
+        return self._ximilar.post("recognition/v2/training-image/", args=args)
 
     @staticmethod
     def _read_file(filename: str):

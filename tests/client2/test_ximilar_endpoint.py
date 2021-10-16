@@ -3,13 +3,13 @@ from unittest.mock import ANY
 import json
 import pytest
 
-from ximilar.client2.endpoints import XimilarEndpoint, EndpointError
+from ximilar.client2 import endpoint
 from .helpers import EndpointWrapper
 
 
 @pytest.fixture(name="http_endpoint")
 def http_endpoint_fixture(mocker):
-    return EndpointWrapper(mocker.patch("ximilar.client2.endpoints.HttpEndpoint", autospec=True))
+    return EndpointWrapper(mocker.patch("ximilar.client2.endpoint.http.Http", autospec=True))
 
 
 @pytest.fixture(name="json_endpoint")
@@ -24,17 +24,17 @@ def json_endpoint_fixture(http_endpoint):
 
 @pytest.fixture(name="client")
 def client_fixture(http_endpoint):
-    return XimilarEndpoint(token="anything", endpoint=http_endpoint)
+    return endpoint.Default(token="anything", http=http_endpoint)
 
 
 def test_creates_suffixed_endpoint(http_endpoint):
-    XimilarEndpoint(token="anything", endpoint=http_endpoint).sub("service/v2")
+    endpoint.Default(token="anything", http=http_endpoint).sub("service/v2")
 
     http_endpoint.sub.assert_called_with("service/v2")
 
 
 def test_sets_correct_auth_header_for_normal_token(json_endpoint):
-    client = XimilarEndpoint(token="token", endpoint=json_endpoint)
+    client = endpoint.Default(token="token", http=json_endpoint)
     client.get("resource")
 
     json_endpoint.get.assert_called_with(
@@ -49,7 +49,7 @@ def test_sets_correct_auth_header_for_normal_token(json_endpoint):
 
 
 def test_sets_correct_auth_header_for_jwt_token(json_endpoint):
-    client = XimilarEndpoint(jwttoken="token", endpoint=json_endpoint)
+    client = endpoint.Default(jwttoken="token", http=json_endpoint)
     client.get("resource")
 
     json_endpoint.get.assert_called_with(
@@ -102,7 +102,7 @@ def test_sends_no_body_if_no_args(json_endpoint, client, method):
 def test_throws_on_bad_status(json_endpoint, client, method):
     getattr(json_endpoint, method).return_value["status"] = 500
 
-    with pytest.raises(EndpointError) as error_info:
+    with pytest.raises(endpoint.Error) as error_info:
         getattr(client, method)("anything")
     assert str(error_info.value) == "Error returned from HTTP layer: 500"
     assert error_info.value.code == 500
