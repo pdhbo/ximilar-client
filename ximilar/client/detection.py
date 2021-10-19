@@ -483,13 +483,26 @@ class DetectionObject(DetectionClient):
         """
         return self.remove_object(self.id)
 
-    def add_recognition_label(self, label_id):
+    def change_label(self, detection_label):
+        return self.put(
+            OBJECT_ENDPOINT + self.id, data={"detection_label": detection_label, "image": self.image, "data": self.data}
+        )
+
+    def add_recognition_label(self, label_id, value=None):
         """
         Add recognition label to the object.
         :param label_id: id (uuid) of label
         :return: result
         """
-        return self.post(OBJECT_ENDPOINT + self.id + "/add-label/", data={LABEL_ID: label_id})
+        data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
+        return self.post(OBJECT_ENDPOINT + self.id + "/add-label/", data=data)
+
+    def update_label(self, label_id, value=None):
+        """
+        Update value of the label on object.
+        """
+        data = {LABEL_ID: label_id, "value": value}
+        return self.post(OBJECT_ENDPOINT + self.id + "/update-label/", data=data)
 
     def detach_recognition_label(self, label_id):
         """
@@ -556,4 +569,6 @@ class DetectionObject(DetectionClient):
         return self.data
 
     def __str__(self):
+        if isinstance(self.detection_label, dict):
+            return self.id + " " + self.detection_label["name"]
         return self.id + " " + self.detection_label

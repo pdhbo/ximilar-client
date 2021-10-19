@@ -1,6 +1,8 @@
 from ximilar.client.constants import *
 from ximilar.client import RestClient
 from ximilar.client.recognition import Image, RecognitionClient
+from ximilar.client.detection import DetectionObject
+
 
 TYPE_ENDPOINT = "similarity/training/v2/type/"
 TASK_ENDPOINT = "similarity/training/v2/task/"
@@ -209,6 +211,10 @@ class SimilarityGroup(CustomSimilarityClient):
         if "images" in group_json:
             self.images = [Image(token, endpoint, image) for image in group_json["images"]]
 
+        self.object = None
+        if "detection_objects" in group_json:
+            self.objects = [DetectionObject(token, endpoint, object_s) for object_s in group_json["detection_objects"]]
+
         self.test_group = group_json["test_group"] if "test_group" in group_json else None
         if isinstance(group_json["type"], str):
             self.type = group_json["type"]
@@ -226,6 +232,7 @@ class SimilarityGroup(CustomSimilarityClient):
 
             self.name = group.name
             self.groups = group.groups
+            self.objects = group.objects
             self.images = group.images
             self.type = group.type
             self.test_group = group.test_group
@@ -243,8 +250,18 @@ class SimilarityGroup(CustomSimilarityClient):
         self.refresh(refresh)
         return result
 
+    def add_objects(self, objects, refresh=False):
+        result = self.post(GROUP_ENDPOINT + self.id + "/add-objects/", data={"objects": objects})
+        self.refresh(refresh)
+        return result
+
     def remove_images(self, images, refresh=False):
         result = self.post(GROUP_ENDPOINT + self.id + "/remove-images/", data={"images": images})
+        self.refresh(refresh)
+        return result
+
+    def remove_objects(self, objects, refresh=False):
+        result = self.post(GROUP_ENDPOINT + self.id + "/remove-objects/", data={"objects": objects})
         self.refresh(refresh)
         return result
 

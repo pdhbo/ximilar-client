@@ -143,7 +143,7 @@ class RecognitionClient(RestClient):
         """
         return self.post(IMAGE_ENDPOINT + image_id + "/add-label/", data={LABEL_ID: label_id})
 
-    def get_training_images(self, page_url=None, verification=None, test=False):
+    def get_training_images(self, page_url=None, verification=None, real=None, test=False):
         """
         Get paginated result of images from workspace.
         :param page_url: optional, select the specific page of images, default first page
@@ -156,6 +156,9 @@ class RecognitionClient(RestClient):
             else IMAGE_ENDPOINT + "?page=1"
         )
         url += "&verified=" + str(verification) if verification is not None else ""
+
+        if real is not None:
+            url += "&real=" + str(real)
 
         if test:
             url += "&test=true"
@@ -521,13 +524,13 @@ class Task(RecognitionClient):
         self.check_json_status(result)
         return result
 
-    def add_label(self, label_id, value=None):
+    def add_label(self, label_id):
         """
         Add label to this task.
         :param label_id: identification of label
         :return: json/dict result
         """
-        data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
+        data = {LABEL_ID: label_id}
         return self.post(TASK_ENDPOINT + self.id + "/add-label/", data=data)
 
     def detach_label(self, label_id):
