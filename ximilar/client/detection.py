@@ -86,7 +86,7 @@ class DetectionClient(RecognitionClient):
     def remove_model(self, object_id):
         pass
 
-    def get_objects(self, page_url=None):
+    def get_objects(self, page_url=None, object_label=None):
         """
         Get paginated result of all Detection Objects in your workspace.
         :param page_url: optional, select the specific page of images, default first page
@@ -97,6 +97,9 @@ class DetectionClient(RecognitionClient):
             if page_url
             else OBJECT_ENDPOINT + "?page=1"
         )
+        if object_label:
+            url += "&object_labels=" + object_label
+
         result = self.get(url)
         return (
             [DetectionObject(self.token, self.endpoint, object_json) for object_json in result[RESULTS]],
@@ -483,11 +486,6 @@ class DetectionObject(DetectionClient):
         """
         return self.remove_object(self.id)
 
-    def change_label(self, detection_label):
-        return self.put(
-            OBJECT_ENDPOINT + self.id, data={"detection_label": detection_label, "image": self.image, "data": self.data}
-        )
-
     def add_recognition_label(self, label_id, value=None):
         """
         Add recognition label to the object.
@@ -496,13 +494,6 @@ class DetectionObject(DetectionClient):
         """
         data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
         return self.post(OBJECT_ENDPOINT + self.id + "/add-label/", data=data)
-
-    def update_label(self, label_id, value=None):
-        """
-        Update value of the label on object.
-        """
-        data = {LABEL_ID: label_id, "value": value}
-        return self.post(OBJECT_ENDPOINT + self.id + "/update-label/", data=data)
 
     def detach_recognition_label(self, label_id):
         """
