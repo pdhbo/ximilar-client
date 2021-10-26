@@ -16,20 +16,6 @@ class FashionSearchClient(SimilarityPhotosClient):
         super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = SEARCH_PRODUCT
 
-    def construct_data(self, records=[], filter=None, k=5, fields_to_return=[_ID], custom_flow=None, **kwargs):
-        if len(records) == 0:
-            raise Exception("Please specify at least on record when using search method.")
-
-        data = {RECORDS: self.preprocess_records(records), K_COUNT: k, FIELDS_TO_RETURN: fields_to_return}
-        if filter:
-            data[FILTER] = filter
-
-        if kwargs:
-            data.update(kwargs)
-
-        data = self.fill_data(data, custom_flow)
-        return data
-
     def get_categories(self):
         """
         Return available top categories for products.
@@ -40,20 +26,6 @@ class FashionSearchClient(SimilarityPhotosClient):
     def descriptor(self, records, custom_flow=None, **kwargs):
         data = self.construct_data(records=records, custom_flow=custom_flow, **kwargs)
         return self.post("descriptor", data=data)
-
-    def search(self, records, filter=None, k=5, fields_to_return=[_ID], custom_flow=None):
-        """
-        Detects Objects and Tags and find for the largest object most visually similar items in your collection.
-        :param records: array with one record (dictionary) with '_url' or "_base64' data
-        :param k: how many similar items to return
-        :param fields_to_return: fields to return in every record
-        :param filter: how to filter picked items (mongodb syntax)
-        :return:
-        """
-        data = self.construct_data(
-            records=records, filter=filter, k=k, fields_to_return=fields_to_return, custom_flow=custom_flow
-        )
-        return self.post(self.PREDICT_ENDPOINT, data=data)
 
     def detect(self, records, custom_flow=None):
         """
