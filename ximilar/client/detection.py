@@ -486,6 +486,18 @@ class DetectionObject(DetectionClient):
         """
         return self.remove_object(self.id)
 
+    def change_label(self, detection_label):
+        return self.put(
+            OBJECT_ENDPOINT + self.id, data={"detection_label": detection_label, "image": self.image, "data": self.data}
+        )
+
+    def update_label(self, label_id, value=None):
+        """
+        Update value of the label on object.
+        """
+        data = {LABEL_ID: label_id, "value": value}
+        return self.post(OBJECT_ENDPOINT + self.id + "/update-label/", data=data)
+
     def add_recognition_label(self, label_id, value=None):
         """
         Add recognition label to the object.
