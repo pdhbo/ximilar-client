@@ -206,6 +206,7 @@ class SimilarityGroup(CustomSimilarityClient):
 
         self.id = group_json["id"]
         self.name = group_json["name"] if "name" in group_json else None
+        self.verifyCount = 0
 
         self.groups = None
         if "groups" in group_json:
@@ -319,6 +320,29 @@ class SimilarityGroup(CustomSimilarityClient):
         new_data = dict(list(self.meta_data.items()) + list(meta_data.items()))
         result = self.patch(GROUP_ENDPOINT + self.id, data={META_DATA: new_data})
         self.meta_data = result[META_DATA]
+        return True
+
+    def _ensure_verifications(self):
+        json_results = self.get("annotate/v2/similarity-verification/?group=" + self.id)
+        self.verifyCount = len(json_results["results"])
+        return json_results["results"]
+
+    def verify(self, user_id):
+        """
+        Verify this group by some user.
+        """
+        result = self.post("annotate/v2/similarity-verification/", data={USER: user_id, "group_id": self.id})
+        self._ensure_verifications()
+        return result
+
+    def unverify(self):
+        """
+        Unverify all users from group.
+        """
+        results = self._ensure_verifications()
+        for result in results:
+            self.delete("annotate/v2/similarity-verification/" + str(result["id"]))
+        self._ensure_verifications()
         return True
 
 
