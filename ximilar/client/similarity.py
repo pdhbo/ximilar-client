@@ -27,8 +27,12 @@ class CustomSimilarityClient(RecognitionClient):
         )
         self.PREDICT_ENDPOINT = DESCRIPTOR_ENDPOINT
 
-    def create_group(self, name, description, sim_type):
+    def create_group(self, name, description, sim_type, meta_data=None):
         data = {NAME: name, DESCRIPTION: description, "type": sim_type}
+
+        if meta_data:
+            data[META_DATA] = meta_data
+
         group_json = self.post(GROUP_ENDPOINT, data=data)
         if ID not in group_json:
             return None, {STATUS: "unexpected error"}
@@ -215,6 +219,10 @@ class SimilarityGroup(CustomSimilarityClient):
         if "detection_objects" in group_json:
             self.objects = [DetectionObject(token, endpoint, object_s) for object_s in group_json["detection_objects"]]
 
+        self.meta_data = (
+            None if META_DATA not in group_json else (group_json[META_DATA] if group_json[META_DATA] else {})
+        )
+
         self.test_group = group_json["test_group"] if "test_group" in group_json else None
         if isinstance(group_json["type"], str):
             self.type = group_json["type"]
@@ -230,6 +238,7 @@ class SimilarityGroup(CustomSimilarityClient):
         if force or self.images is None or self.groups is None:
             group, _ = self.get_group(self.id)
 
+            self.meta_data = group.meta_data
             self.name = group.name
             self.groups = group.groups
             self.objects = group.objects
@@ -283,6 +292,34 @@ class SimilarityGroup(CustomSimilarityClient):
 
     def remove(self):
         self.remove_group(self.id)
+
+    def _ensure_meta_data(self):
+        """
+        If the meta_data were not downloaded yet, do so
+        """
+        if self.meta_data is None:
+            self.refresh(True)
+
+    def get_meta_data(self):
+        """
+        Return the group meta data (dictionary) or empty dictionary.
+        :return: None is never returned
+        """
+        self._ensure_meta_data()
+        return self.meta_data
+
+    def add_meta_data(self, meta_data):
+        """
+        Add some meta data to group (extends already present meta data).
+        """
+        self._ensure_meta_data()
+        if meta_data is None or not isinstance(meta_data, dict):
+            raise Exception("Please specify dictionary of meta_data as param!")
+
+        new_data = dict(list(self.meta_data.items()) + list(meta_data.items()))
+        result = self.patch(GROUP_ENDPOINT + self.id, data={META_DATA: new_data})
+        self.meta_data = result[META_DATA]
+        return True
 
 
 class SimilarityRunLogClient(RestClient):

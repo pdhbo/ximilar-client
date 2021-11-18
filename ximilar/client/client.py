@@ -145,6 +145,13 @@ class RestClient(object):
         return self.post(api_endpoint, data=data, files=files, params=params, method=requests.put)
 
     @retry_when(ConnectionError)
+    def patch(self, api_endpoint, data=None, files=None, params=None):
+        """
+        Call the http PATCH request with data
+        """
+        return self.post(api_endpoint, data=data, files=files, params=params, method=requests.patch)
+
+    @retry_when(ConnectionError)
     def delete(self, api_endpoint, data=None, params=None):
         """
         Call the http DELETE request with data.
