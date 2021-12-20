@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
             tmp_json = image.to_json()
             objects, status = client_d.get_objects_of_image(image.id)
-            if objects is not None:
+            if objects is not None and len(objects):
                 tmp_json[OBJECTS] = [object1.to_json() for object1 in objects]
             img_json.append(tmp_json)
 
