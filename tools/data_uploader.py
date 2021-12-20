@@ -133,8 +133,11 @@ if __name__ == "__main__":
             image_e = image_e[0]
         else:
             image_1, _ = client_old.get_image(image["image"])
-            image_e, _ = client_r.upload_images([{"_url": image_1.img_path}])
+            image_e, status = client_r.upload_images([{"_url": image_1.img_path}])
             image_e = image_e[0]
+
+        if "present" in status["status"]:
+            continue
 
         for label in image["labels"]:
             if recognition_r["LABELS"][label]:

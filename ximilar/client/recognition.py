@@ -340,6 +340,7 @@ class RecognitionClient(RestClient):
                 worst_status = {STATUS: "image not uploaded " + str(record)}
                 continue
             else:
+                worst_status = {STATUS: "some data already present"}
                 image = Image(self.token, self.endpoint, image_json)
 
             if REAL_IMAGE in record:
