@@ -9,7 +9,7 @@ from ximilar.client.recognition import Image, Label
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Upload all images from a workspace, label and their metadata to json")
-    parser.add_argument("--folder", default="folder to images and annotations")
+    parser.add_argument("--folder", default="folder")
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--workspace_id", help="ID of workspace to upload the images into", default=DEFAULT_WORKSPACE)
