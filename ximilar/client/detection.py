@@ -567,7 +567,7 @@ class DetectionObject(DetectionClient):
             ID: self.id,
             DETECTION_LABEL: self.detection_label,
             DATA: self.data,
-            LABELS: self.recognition_labels,
+            LABELS: [label["id"] for label in self.recognition_labels],
             META_DATA: self.meta_data,
         }
 
