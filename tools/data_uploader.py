@@ -132,8 +132,8 @@ if __name__ == "__main__":
             image_e, _ = client_r.upload_images([{"_file": image["_file"]}])
             image_e = image_e[0]
         else:
-            image = client_old.get_image(image["image"])
-            image_e, _ = client_r.upload_images([{"_url": image.img_path}])
+            image_1, _ = client_old.get_image(image["image"])
+            image_e, _ = client_r.upload_images([{"_url": image_1.img_path}])
             image_e = image_e[0]
 
         for label in image["labels"]:
@@ -141,6 +141,9 @@ if __name__ == "__main__":
                 image_e.add_label(recognition_r["LABELS"][label].id)
 
         for object_1 in image["objects"]:
-            client_d.create_object(
+            object_c, _ = client_d.create_object(
                 detection_r["LABELS"][object_1["detection_label"]["id"]].id, image_e.id, object_1["data"]
             )
+
+            for label in object_1["labels"]:
+                object_c.add_recognition_label(recognition_r["LABELS"][label].id)
