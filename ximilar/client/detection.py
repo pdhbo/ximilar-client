@@ -519,8 +519,10 @@ class DetectionObject(DetectionClient):
         """
         If the meta_data were not downloaded yet, do so
         """
-        if not self.meta_data:
-            self.meta_data = self.get(OBJECT_ENDPOINT + self.id)[META_DATA]
+        if not self.meta_data or not self.recognition_labels:
+            data = self.get(OBJECT_ENDPOINT + self.id)
+            self.meta_data = data[META_DATA]
+            self.recognition_labels = data[RECOGNITION_LABELS]
         if not self.meta_data:
             self.meta_data = {}
 
@@ -559,6 +561,7 @@ class DetectionObject(DetectionClient):
         return True
 
     def to_json(self):
+        self._ensure_meta_data()
         return {
             IMAGE: self.image,
             ID: self.id,
