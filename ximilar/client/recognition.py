@@ -334,13 +334,13 @@ class RecognitionClient(RestClient):
             elif "detail" in image_json and "already exists" in image_json["detail"]:
                 import re
 
+                worst_status = {STATUS: "some data already present"}
                 result = re.search(r".*image.ID..(.*?)\'.*", image_json["detail"]).group(1)
                 image, _ = self.get_image(result)
             elif ID not in image_json:
                 worst_status = {STATUS: "image not uploaded " + str(record)}
                 continue
             else:
-                worst_status = {STATUS: "some data already present"}
                 image = Image(self.token, self.endpoint, image_json)
 
             if REAL_IMAGE in record:
