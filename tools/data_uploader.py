@@ -162,3 +162,4 @@ if __name__ == "__main__":
                     for label in object_1["labels"]:
                         object_c.add_recognition_label(recognition_r["LABELS"][label].id)
             pbar.update(1)
+            sys.stdout.flush()
