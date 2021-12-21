@@ -2,6 +2,7 @@ import os
 import sys
 import json
 from argparse import ArgumentParser
+from tqdm import tqdm
 
 from ximilar.client import RecognitionClient, DetectionClient
 from ximilar.client.constants import FILE, DEFAULT_WORKSPACE, NORESIZE, OBJECTS
@@ -126,32 +127,38 @@ if __name__ == "__main__":
                 label = detection_r["LABELS"][elabel]
                 task.add_label(label.id)
 
-    for image in images:
-        #print("IMAGE")
-        if image["_file"] is not None:
-            image_e, _ = client_r.upload_images([{"_file": image["_file"]}])
-            image_e = image_e[0]
-        else:
-            image_1, _ = client_old.get_image(image["image"])
-            if image_1 is None:
-                continue
-            image_e, status = client_r.upload_images([{"_url": image_1.img_path, "meta_data": {"id":image["image"]}}])
-            image_e = image_e[0]
-
-        if "present" in status["status"]:
-            print("SKIP IMAGE...", image_e.id, image["image"])
-            continue
-
-        for label in image["labels"]:
-            #print("Adding label", label, recognition_r["LABELS"][label])
-            if recognition_r["LABELS"][label]:
-                image_e.add_label(recognition_r["LABELS"][label].id)
-
-        if "objects" in image:
-            for object_1 in image["objects"]:
-                object_c, _ = client_d.create_object(
-                    detection_r["LABELS"][object_1["detection_label"]["id"]].id, image_e.id, object_1["data"]
+    with tqdm(total=len(images)) as pbar:
+        for image in images:
+            # print("IMAGE")
+            if image["_file"] is not None:
+                image_e, _ = client_r.upload_images([{"_file": image["_file"]}])
+                image_e = image_e[0]
+            else:
+                image_1, _ = client_old.get_image(image["image"])
+                if image_1 is None:
+                    pbar.update(1)
+                    continue
+                image_e, status = client_r.upload_images(
+                    [{"_url": image_1.img_path, "meta_data": {"id": image["image"]}}]
                 )
+                image_e = image_e[0]
 
-                for label in object_1["labels"]:
-                    object_c.add_recognition_label(recognition_r["LABELS"][label].id)
+            if "present" in status["status"]:
+                print("SKIP IMAGE...", image_e.id, image["image"])
+                pbar.update(1)
+                continue
+
+            for label in image["labels"]:
+                # print("Adding label", label, recognition_r["LABELS"][label])
+                if recognition_r["LABELS"][label]:
+                    image_e.add_label(recognition_r["LABELS"][label].id)
+
+            if "objects" in image:
+                for object_1 in image["objects"]:
+                    object_c, _ = client_d.create_object(
+                        detection_r["LABELS"][object_1["detection_label"]["id"]].id, image_e.id, object_1["data"]
+                    )
+
+                    for label in object_1["labels"]:
+                        object_c.add_recognition_label(recognition_r["LABELS"][label].id)
+            pbar.update(1)
