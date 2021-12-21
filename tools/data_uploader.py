@@ -127,26 +127,31 @@ if __name__ == "__main__":
                 task.add_label(label.id)
 
     for image in images:
-        print("IMAGE", image["_file"], len(image["objects"]))
+        #print("IMAGE")
         if image["_file"] is not None:
             image_e, _ = client_r.upload_images([{"_file": image["_file"]}])
             image_e = image_e[0]
         else:
             image_1, _ = client_old.get_image(image["image"])
-            image_e, status = client_r.upload_images([{"_url": image_1.img_path}])
+            if image_1 is None:
+                continue
+            image_e, status = client_r.upload_images([{"_url": image_1.img_path, "meta_data": {"id":image["image"]}}])
             image_e = image_e[0]
 
         if "present" in status["status"]:
+            print("SKIP IMAGE...", image_e.id, image["image"])
             continue
 
         for label in image["labels"]:
+            #print("Adding label", label, recognition_r["LABELS"][label])
             if recognition_r["LABELS"][label]:
                 image_e.add_label(recognition_r["LABELS"][label].id)
 
-        for object_1 in image["objects"]:
-            object_c, _ = client_d.create_object(
-                detection_r["LABELS"][object_1["detection_label"]["id"]].id, image_e.id, object_1["data"]
-            )
+        if "objects" in image:
+            for object_1 in image["objects"]:
+                object_c, _ = client_d.create_object(
+                    detection_r["LABELS"][object_1["detection_label"]["id"]].id, image_e.id, object_1["data"]
+                )
 
-            for label in object_1["labels"]:
-                object_c.add_recognition_label(recognition_r["LABELS"][label].id)
+                for label in object_1["labels"]:
+                    object_c.add_recognition_label(recognition_r["LABELS"][label].id)
