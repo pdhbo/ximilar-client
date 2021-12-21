@@ -139,7 +139,7 @@ if __name__ == "__main__":
                     pbar.update(1)
                     continue
                 image_e, status = client_r.upload_images(
-                    [{"_url": image_1.img_path, "meta_data": {"id": image["image"]}}]
+                        [{"_url": image_1.img_path, "noresize": True, "meta_data": {"id": image["image"]}}]
                 )
                 image_e = image_e[0]
 
