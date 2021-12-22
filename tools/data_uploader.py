@@ -151,8 +151,8 @@ if __name__ == "__main__":
 
             if "present" in status["status"]:
                 print("SKIP IMAGE...", image_e.id, image["image"])
-                #pbar.update(1)
-                #continue
+                pbar.update(1)
+                continue
 
             for label in image["labels"]:
                 # print("Adding label", label, recognition_r["LABELS"][label])
