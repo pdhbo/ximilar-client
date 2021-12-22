@@ -88,6 +88,12 @@ if __name__ == "__main__":
                 if label != False:
                     task.add_label(label.id)
 
+    for entity in recognition:
+        if "label_id" in entity and entity["negative_for_task"]:
+            print("Getting negative task")
+            ntask, _ = recognition_r["TASKS"][entity["negative_for_task"]].get_negative_label()
+            recognition_r["LABELS"][entity["label_id"]] = ntask
+
     # create d labels
     detection_r = {"LABELS": {}, "TASKS": {}}  # type: ignore
     for entity in detection:
@@ -145,13 +151,13 @@ if __name__ == "__main__":
 
             if "present" in status["status"]:
                 print("SKIP IMAGE...", image_e.id, image["image"])
-                pbar.update(1)
-                continue
+                #pbar.update(1)
+                #continue
 
             for label in image["labels"]:
                 # print("Adding label", label, recognition_r["LABELS"][label])
-                if recognition_r["LABELS"][label]:
-                    image_e.add_label(recognition_r["LABELS"][label].id)
+                #if recognition_r["LABELS"][label]:
+                image_e.add_label(recognition_r["LABELS"][label].id)
 
             if "objects" in image:
                 for object_1 in image["objects"]:
@@ -160,6 +166,7 @@ if __name__ == "__main__":
                     )
 
                     for label in object_1["labels"]:
+                        #print(image["image"], label, recognition_r["LABELS"][label])
                         object_c.add_recognition_label(recognition_r["LABELS"][label].id)
             pbar.update(1)
             sys.stdout.flush()
