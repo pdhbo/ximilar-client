@@ -167,6 +167,7 @@ if __name__ == "__main__":
 
                     for label in object_1["labels"]:
                         #print(image["image"], label, recognition_r["LABELS"][label])
-                        object_c.add_recognition_label(recognition_r["LABELS"][label].id)
+                        if object_c is not None:
+                            object_c.add_recognition_label(recognition_r["LABELS"][label].id)
             pbar.update(1)
             sys.stdout.flush()
