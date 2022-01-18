@@ -88,6 +88,12 @@ if __name__ == "__main__":
                 if label != False:
                     task.add_label(label.id)
 
+    for entity in recognition:
+        if "label_id" in entity and entity["negative_for_task"]:
+            print("Getting negative task")
+            ntask, _ = recognition_r["TASKS"][entity["negative_for_task"]].get_negative_label()
+            recognition_r["LABELS"][entity["label_id"]] = ntask
+
     # create d labels
     detection_r = {"LABELS": {}, "TASKS": {}}  # type: ignore
     for entity in detection:
@@ -139,7 +145,7 @@ if __name__ == "__main__":
                     pbar.update(1)
                     continue
                 image_e, status = client_r.upload_images(
-                    [{"_url": image_1.img_path, "meta_data": {"id": image["image"]}}]
+                        [{"_url": image_1.img_path, "noresize": True, "meta_data": {"id": image["image"]}}]
                 )
                 image_e = image_e[0]
 
@@ -150,8 +156,8 @@ if __name__ == "__main__":
 
             for label in image["labels"]:
                 # print("Adding label", label, recognition_r["LABELS"][label])
-                if recognition_r["LABELS"][label]:
-                    image_e.add_label(recognition_r["LABELS"][label].id)
+                #if recognition_r["LABELS"][label]:
+                image_e.add_label(recognition_r["LABELS"][label].id)
 
             if "objects" in image:
                 for object_1 in image["objects"]:
@@ -160,5 +166,8 @@ if __name__ == "__main__":
                     )
 
                     for label in object_1["labels"]:
-                        object_c.add_recognition_label(recognition_r["LABELS"][label].id)
+                        #print(image["image"], label, recognition_r["LABELS"][label])
+                        if object_c is not None:
+                            object_c.add_recognition_label(recognition_r["LABELS"][label].id)
             pbar.update(1)
+            sys.stdout.flush()
