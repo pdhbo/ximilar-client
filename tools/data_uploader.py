@@ -145,18 +145,18 @@ if __name__ == "__main__":
                     pbar.update(1)
                     continue
                 image_e, status = client_r.upload_images(
-                        [{"_url": image_1.img_path, "noresize": True, "meta_data": {"id": image["image"]}}]
+                    [{"_url": image_1.img_path, "noresize": True, "meta_data": {"id": image["image"]}}]
                 )
                 image_e = image_e[0]
 
-            if "present" in status["status"]:
+            if "exists" in status["status"]:
                 print("SKIP IMAGE...", image_e.id, image["image"])
                 pbar.update(1)
                 continue
 
             for label in image["labels"]:
                 # print("Adding label", label, recognition_r["LABELS"][label])
-                #if recognition_r["LABELS"][label]:
+                # if recognition_r["LABELS"][label]:
                 image_e.add_label(recognition_r["LABELS"][label].id)
 
             if "objects" in image:
@@ -166,7 +166,7 @@ if __name__ == "__main__":
                     )
 
                     for label in object_1["labels"]:
-                        #print(image["image"], label, recognition_r["LABELS"][label])
+                        # print(image["image"], label, recognition_r["LABELS"][label])
                         if object_c is not None:
                             object_c.add_recognition_label(recognition_r["LABELS"][label].id)
             pbar.update(1)

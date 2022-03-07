@@ -269,6 +269,15 @@ class DetectionClient(RecognitionClient):
             images.append(image)
         return images, worst_status
 
+    def add_label_to_object(self, object_id, label_id, value=None):
+        """
+        Add recognition label to the object.
+        :param label_id: id (uuid) of label
+        :return: result
+        """
+        data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
+        return self.post(OBJECT_ENDPOINT + object_id + "/add-label/", data=data)
+
     def construct_data(self, records=[], task_id=None, version=None, store_images=None):
         if len(records) == 0:
             raise Exception("Please specify at least one record in detect method!")
