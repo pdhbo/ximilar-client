@@ -17,6 +17,22 @@ class AsyncRClient(RecognitionClient):
             token=token, endpoint=endpoint, workspace=workspace, resource_name=None,
         )
 
+    def get_requests(self, page_url=None, type=None, status=None):
+        url = page_url if page_url else REQUEST_ENDPOINT + "?page=1"
+
+        if type is not None:
+            url += "&type=" + str(type)
+
+        if status is not None:
+            url += "&status=" + str(status)
+
+        result = self.get(url)
+        return (
+            [AsynchronousRequest(self.token, self.endpoint, self.workspace, ar_json) for ar_json in result[RESULTS]],
+            result[NEXT],
+            {"count": result["count"], STATUS: "ok"},
+        )
+
     def get_request(self, id):
         result = self.get(REQUEST_ENDPOINT + id)
         return AsynchronousRequest(self.token, self.endpoint, self.workspace, result), STATUS_OK
@@ -54,3 +70,8 @@ class AsynchronousRequest(AsyncRClient):
         result = self.get(REQUEST_ENDPOINT + self.id + "/status")
         self.status = result["status"]
         return self.status
+
+
+if __name__ == "__main__":
+    client = AsyncRClient("eaa27e4de24f3d2c0c9abc91bd2a395fdb3c4385")
+    a, b, c = client.get_requests(type="flows", status="DONE")
