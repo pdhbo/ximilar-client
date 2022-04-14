@@ -258,6 +258,7 @@ class DetectionClient(RecognitionClient):
                 continue
             elif "detail" in image_json and "already exists" in image_json["detail"]:
                 import re
+
                 result = re.search(r".*image.ID..(.*?)\'.*", image_json["detail"]).group(1)
                 image, _ = self.get_image(result)
             elif ID not in image_json:
