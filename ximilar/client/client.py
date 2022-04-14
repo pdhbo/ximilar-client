@@ -448,6 +448,7 @@ class RestClient(object):
         :return: None
         """
         f_name = url.split("/")[-1] if name is None else name
+        f_name = f_name.split("?")[0]
         f_dest = os.path.join(destination, f_name)
         f_dest += ".jpg" if "." not in f_name else ""
 

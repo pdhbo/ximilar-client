@@ -50,10 +50,15 @@ def save(task, task_type, args):
         )
 
     # get recognition entities
-    labels, status = task.get_labels()
+    if args.label_id:
+        label, _ = task.get_label(args.label_id)
+        labels = [label]
+    else:
+        labels, status = task.get_labels()
     labels_ids = [str(label.id) for label in labels]
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
+    print(labels_ids)
     futures = {}
     print("Loading all data of task and saving images...")
     with JSONWriter(os.path.join(args.folder, args.task_id, "labels.json")) as writer:
@@ -115,11 +120,12 @@ def save(task, task_type, args):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Save all images from a workspace and their metadata to json")
-    parser.add_argument("--folder", default="folder to images and annotations")
+    parser.add_argument("--folder", default="task_data")
     parser.add_argument("--api_prefix", type=str, help="API prefix", default="https://api.ximilar.com/")
     parser.add_argument("--auth_token", help="user authorization token to be used for API authentication")
     parser.add_argument("--workspace_id", help="ID of workspace to download the images from", default=DEFAULT_WORKSPACE)
     parser.add_argument("--task_id", help="only images from this task are listed", default=None)
+    parser.add_argument("--label_id", help="if used, just images from this label are listed", default=None)
     args = parser.parse_args()
 
     # Try to find the task among recognition tasks and save it if found.

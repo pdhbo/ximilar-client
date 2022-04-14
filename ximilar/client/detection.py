@@ -273,6 +273,15 @@ class DetectionClient(RecognitionClient):
             images.append(image)
         return images, worst_status
 
+    def add_label_to_object(self, object_id, label_id, value=None):
+        """
+        Add recognition label to the object.
+        :param label_id: id (uuid) of label
+        :return: result
+        """
+        data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
+        return self.post(OBJECT_ENDPOINT + object_id + "/add-label/", data=data)
+
     def construct_data(self, records=[], task_id=None, version=None, store_images=None):
         if len(records) == 0:
             raise Exception("Please specify at least one record in detect method!")
@@ -523,8 +532,10 @@ class DetectionObject(DetectionClient):
         """
         If the meta_data were not downloaded yet, do so
         """
-        if not self.meta_data:
-            self.meta_data = self.get(OBJECT_ENDPOINT + self.id)[META_DATA]
+        if not self.meta_data or not self.recognition_labels:
+            data = self.get(OBJECT_ENDPOINT + self.id)
+            self.meta_data = data[META_DATA]
+            self.recognition_labels = data[RECOGNITION_LABELS]
         if not self.meta_data:
             self.meta_data = {}
 
@@ -563,12 +574,13 @@ class DetectionObject(DetectionClient):
         return True
 
     def to_json(self):
+        self._ensure_meta_data()
         return {
             IMAGE: self.image,
             ID: self.id,
             DETECTION_LABEL: self.detection_label,
             DATA: self.data,
-            LABELS: self.recognition_labels,
+            LABELS: [label["id"] for label in self.recognition_labels],
             META_DATA: self.meta_data,
         }
 
