@@ -15,3 +15,4 @@ from .exceptions import XimilarClientException
 from .removebg import RemoveBGClient
 from .similarity import CustomSimilarityClient
 from .upscaler import UpscaleClient
+from .asyncr import AsyncRClient, AsynchronousRequest

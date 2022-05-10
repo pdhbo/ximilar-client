@@ -70,8 +70,3 @@ class AsynchronousRequest(AsyncRClient):
         result = self.get(REQUEST_ENDPOINT + self.id + "/status")
         self.status = result["status"]
         return self.status
-
-
-if __name__ == "__main__":
-    client = AsyncRClient("eaa27e4de24f3d2c0c9abc91bd2a395fdb3c4385")
-    a, b, c = client.get_requests(type="flows", status="DONE")
