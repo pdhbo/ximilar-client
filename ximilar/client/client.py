@@ -494,7 +494,7 @@ class RestClient(object):
                     results.append(result)
                     pbar.update(future["size"])
         else:
-            results = [future["future"].result() for future in futures]
+            results = [future["future"].result(timeout=30) for future in futures]
         return results
 
     def update_status(self, status, result):

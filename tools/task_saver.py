@@ -63,6 +63,7 @@ def save(task, task_type, args):
     print("Loading all data of task and saving images...")
     with JSONWriter(os.path.join(args.folder, args.task_id, "labels.json")) as writer:
         for label in labels:
+            os.makedirs(os.path.join(args.folder, args.task_id, label.name), exist_ok=True)
             image_iter = label.training_images_iter()
 
             base = {ID: label.id, NAME: label.name, OUTPUT_NAME: label.output_name}
@@ -83,7 +84,7 @@ def save(task, task_type, args):
                 for image in image_iter:
                     image: Image
                     if image.id not in futures:
-                        future = executor.submit(image.download, os.path.join(args.folder, args.task_id, "images"))
+                        future = executor.submit(image.download, os.path.join(args.folder, args.task_id, label.name))
 
                         if task_type == TaskType.RECOGNITION:
                             img_labels, _ = image.get_labels()

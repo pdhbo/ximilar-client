@@ -91,7 +91,7 @@ class CustomSimilarityClient(RecognitionClient):
             return None, status
         return [SimilarityType(self.token, self.endpoint, self.workspace, t_json) for t_json in types], RESULT_OK
 
-    def get_groups_url(self, page_url=None, search=None, test=None, image=None, group=None):
+    def get_groups_url(self, page_url=None, search=None, test=None, image=None, group=None, empty=None):
         url = (
             page_url.replace(self.endpoint, "").replace(self.endpoint.replace("https", "http"), "")
             if page_url
@@ -105,10 +105,12 @@ class CustomSimilarityClient(RecognitionClient):
             url += "&image=" + str(image)
         if group is not None:
             url += "&group=" + str(group)
+        if empty is not None:
+            url += "&empty=true"
         return url
 
-    def get_groups(self, page_url=None, search=None, test=None, image=None, group=None):
-        url = self.get_groups_url(page_url, search, test, image, group)
+    def get_groups(self, page_url=None, search=None, test=None, image=None, group=None, empty=None):
+        url = self.get_groups_url(page_url, search, test, image, group, empty)
 
         result = self.get(url)
         return (
