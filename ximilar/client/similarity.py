@@ -125,7 +125,7 @@ class CustomSimilarityClient(RecognitionClient):
         groups, status = self.get_all_paginated_items(url)
         return (
             [SimilarityGroup(self.token, self.endpoint, self.workspace, group_json) for group_json in groups],
-            RESULT_OK,
+            status,
         )
 
     def get_all_groups_by_name(self, name, sim_type=None, page_url=None, test=None):

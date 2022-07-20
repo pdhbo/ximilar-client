@@ -214,10 +214,11 @@ class RestClient(object):
         :param url: url path which will be queried
         :return: items
         """
-        items = []
+        count, items = 0, []
 
         while True:
             result = self.get(url)
+            count = result.get("count", 0)
             if RESULTS in result:
                 for item in result[RESULTS]:
                     items.append(item)
@@ -239,7 +240,7 @@ class RestClient(object):
                 .replace("http://localhost/api/", "")
             )
 
-        return items, RESULT_OK
+        return items, {"status": "OK", "count": count}
 
     def add_header(self, header):
         """Add header to the every request"""
