@@ -134,7 +134,6 @@ class CustomSimilarityClient(RecognitionClient):
         else:
             query = "search=" + name
 
-        print(query)
         return self.get_all_groups(page_url, query, test)
 
     def get_group_by_name(self, name, sim_type=None, page_url=None, test=None):
