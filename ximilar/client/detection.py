@@ -86,10 +86,11 @@ class DetectionClient(RecognitionClient):
     def remove_model(self, object_id):
         pass
 
-    def get_objects(self, page_url=None, object_label=None):
+    def get_objects(self, page_url=None, object_label=None, detection_label=None):
         """
         Get paginated result of all Detection Objects in your workspace.
         :param page_url: optional, select the specific page of images, default first page
+        :param object_label: recognition label that must be present in objects
         :return: (list of images, next_page)
         """
         url = (
@@ -99,6 +100,8 @@ class DetectionClient(RecognitionClient):
         )
         if object_label:
             url += "&object_labels=" + object_label
+        if detection_label:
+            url += "&object_detection_label=" + detection_label
 
         result = self.get(url)
         return (

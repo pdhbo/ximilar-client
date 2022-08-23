@@ -119,8 +119,8 @@ class CustomSimilarityClient(RecognitionClient):
             {"count": result["count"], STATUS: "ok"},
         )
 
-    def get_all_groups(self, page_url=None, search=None, test=None):
-        url = self.get_groups_url(page_url, search, test)
+    def get_all_groups(self, page_url=None, search=None, test=None, empty=None):
+        url = self.get_groups_url(page_url, search, test, empty=empty)
 
         groups, status = self.get_all_paginated_items(url)
         return (
