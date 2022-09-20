@@ -306,6 +306,16 @@ class RecognitionClient(RestClient):
             return None, {STATUS: "unexpected error"}
         return Label(self.token, self.endpoint, label_json), RESULT_OK
 
+    def parse_already_inserted(self, detail):
+        import re
+
+        worst_status = {STATUS: "exists"}
+        result = re.search(
+            r".*image.ID..([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}).*", detail
+        ).group(1)
+        image, _ = self.get_image(result)
+        return image, worst_status
+
     def upload_images(self, records):
         """
         Upload one or more files and add labels to them.
@@ -332,11 +342,9 @@ class RecognitionClient(RestClient):
                 worst_status = {STATUS: "image not uploaded " + str(record)}
                 continue
             elif "detail" in image_json and "already exists" in image_json["detail"]:
-                import re
-
-                worst_status = {STATUS: "exists"}
-                result = re.search(r".*image.ID..(.*?)\'.*", image_json["detail"]).group(1)
-                image, _ = self.get_image(result)
+                image, worst_status = self.parse_already_inserted(image_json["detail"])
+            elif isinstance(image_json, list) and "already exists" in image_json[0]:
+                image, worst_status = self.parse_already_inserted(image_json[0])
             elif ID not in image_json:
                 worst_status = {STATUS: "image not uploaded " + str(record)}
                 continue
