@@ -281,7 +281,7 @@ class DetectionClient(RecognitionClient):
         data = {LABEL_ID: label_id} if value is None else {LABEL_ID: label_id, "value": value}
         return self.post(OBJECT_ENDPOINT + object_id + "/add-label/", data=data)
 
-    def construct_data(self, records=[], task_id=None, version=None, store_images=None):
+    def construct_data(self, records=[], task_id=None, version=None, keep_prob=None, store_images=None):
         if len(records) == 0:
             raise Exception("Please specify at least one record in detect method!")
 
@@ -293,9 +293,12 @@ class DetectionClient(RecognitionClient):
         if store_images:
             data[STORE_IMAGES] = True
 
+        if keep_prob:
+            data["keep_prob"] = keep_prob
+
         return data
 
-    def detect_on_task(self, records=[], task_id=None, version=None):
+    def detect_on_task(self, records=[], task_id=None, version=None, keep_prob=None):
         """
         Takes the images and calls the ximilar client for detection these images on the task.
 
@@ -309,7 +312,7 @@ class DetectionClient(RecognitionClient):
         :return: json response
         """
         # version is default set to None, so ximilar will determine which one to take
-        data = self.construct_data(records=records, task_id=task_id, version=version)
+        data = self.construct_data(records=records, task_id=task_id, version=version, keep_prob=keep_prob)
         result = self.post(self.PREDICT_ENDPOINT, data=data)
 
         self.check_json_status(result)
