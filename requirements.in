@@ -2,3 +2,4 @@ requests
 opencv-contrib-python-headless
 pytest
 tqdm
+urllib
