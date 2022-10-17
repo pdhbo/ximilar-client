@@ -1,7 +1,11 @@
 from ximilar.client import RecognitionClient
 from ximilar.client.recognition import Image, IMAGE_ENDPOINT
 from ximilar.client.constants import *
-from ximilar.client.recognition import Image, IMAGE_ENDPOINT
+
+from urllib.request import urlopen
+import numpy as np
+import cv2
+
 
 OBJECT_ENDPOINT = "detection/v2/object/"
 LABEL_ENDPOINT = "detection/v2/label/"
@@ -585,6 +589,13 @@ class DetectionObject(DetectionClient):
             LABELS: [label["id"] for label in self.recognition_labels],
             META_DATA: self.meta_data,
         }
+
+    def extract_object_image(self):
+        xmin, ymin, xmax, ymax = self.data
+        response = urlopen(self.image[IMG_PATH])
+        arr = np.asarray(bytearray(response.read()), dtype="uint8")
+        img = cv2.imdecode(arr, cv2.IMREAD_UNCHANGED)
+        return img[ymin:ymax, xmin:xmax]
 
     def get_bbox(self):
         return self.data

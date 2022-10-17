@@ -253,7 +253,10 @@ class RestClient(object):
         :raises XimilarClientException: returned status code from endpoint, text
         :raises XimilarClientException: 500, text
         """
-        if result is not None and "status" in result:
+        if isinstance(result["status"], int):
+            raise XimilarClientException(result["status"], "Service unavailable!")
+
+        elif result is not None and "status" in result:
             if "code" in result["status"] and result["status"]["code"] != 200:
                 if result["status"]["text"]:
                     raise XimilarClientException(result["status"]["code"], result["status"]["text"])
