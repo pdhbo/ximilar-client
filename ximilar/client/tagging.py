@@ -10,6 +10,7 @@ HOME_DECOR_TAGGING_ENDPOINT = "tagging/homedecor/v2/tags"
 DETECT_FASHION_TAGGING_ENDPOINT = "tagging/fashion/v2/detect_tags"
 DETECT_FASHION_ENDPOINT = "tagging/fashion/v2/detect"
 DETECT_FASHION_TAGGING_ALL_ENDPOINT = "tagging/fashion/v2/detect_tags_all"
+COLLECTIBLES_RECOGNITION_ENDPOINT = "tagging/collectibles/v2/process"
 
 
 class TaggingClient(RestClient):
@@ -75,6 +76,15 @@ class FashionTaggingClient(TaggingClient):
     def get_categories(self):
         result = requests.get(self.urljoin(self.endpoint, "tagging/fashion/v2/categories"))
         return result.json()["labels"]
+
+
+class CollectiblesRecognitionClient(TaggingClient):
+    def __init__(self, token, endpoint=ENDPOINT, resource_name=HOME_DECOR_TAGGING):
+        super().__init__(token=token, endpoint=endpoint, resource_name=resource_name)
+        self.PREDICT_ENDPOINT = COLLECTIBLES_RECOGNITION_ENDPOINT
+
+    def tags(self, records):
+        return super().tags(records, self.PREDICT_ENDPOINT, aggregate_labels=None, profile=None)
 
 
 class HomeDecorTaggingClient(TaggingClient):
