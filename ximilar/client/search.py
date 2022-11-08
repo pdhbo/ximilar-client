@@ -14,6 +14,8 @@ from ximilar.client.constants import (
     FASHION_SIMILARITY,
     CUSTOM_SIMILARITY,
     IMAGE_MATCHING,
+    ANSWER_RECORDS,
+    NEXT,
 )
 
 SIMILARITY_PHOTOS = "similarity/photos/v2/"
@@ -88,6 +90,24 @@ class SimilarityPhotosClient(RestClient):
         :return: {"answer_records": [an array with records with "_id" fields], "answer_count": "# of records"}
         """
         return self.allRecords(size=0, fields_to_return=[_ID] + fields)
+
+    def all_records_iter(self, fields_to_return=[_ID], batch_size=1000):
+        """
+        Get iterator over all records in the collection; the requests are done using batches & pagination.
+        :param page_url: optional, can add new parameters or select a different page than the first one
+        :param batch_size: optional, integer saying the batch size to retrieve the records with
+        :param fields_to_return fields to be returned for each record in the collection ("_id" is returned always)
+        :return: iterator over records with the fields specified
+        """
+        page_counter = 1
+        result = self.allRecords(batch_size, page_counter, fields_to_return)
+        while ANSWER_RECORDS in result and len(result[ANSWER_RECORDS]) > 0:
+            for rec in result[ANSWER_RECORDS]:
+                yield rec
+            if NEXT not in result:
+                break
+            page_counter += 1
+            result = self.allRecords(batch_size, page_counter, fields_to_return)
 
     def search(self, query_record, filter=None, k=5, fields_to_return=[_ID]):
         """
@@ -193,7 +213,11 @@ class ImageMatchingSearchClient(SimilarityPhotosClient):
 
 class SimilarityFashionClient(SimilarityPhotosClient):
     def __init__(
-        self, token, collection_id=None, endpoint=ENDPOINT + SIMILARITY_FASHION, resource_name=FASHION_SIMILARITY,
+        self,
+        token,
+        collection_id=None,
+        endpoint=ENDPOINT + SIMILARITY_FASHION,
+        resource_name=FASHION_SIMILARITY,
     ):
         super().__init__(token=token, collection_id=collection_id, endpoint=endpoint, resource_name=resource_name)
         self.PREDICT_ENDPOINT = KNN_VISUAL_TAGS
