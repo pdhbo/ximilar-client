@@ -13,9 +13,7 @@ class CustomPredictClient(RecognitionClient):
         """
         # version is default set to None, so ximilar will determine which one to take
         data = self.construct_data(records=records, task_id=task_id, version=version)
-        print(data)
         result = self.post(self.PREDICT_ENDPOINT, data=data)
 
-        print(result)
         self.check_json_status(result)
         return result
