@@ -499,6 +499,8 @@ class DetectionObject(DetectionClient):
             None if META_DATA not in object_json else (object_json[META_DATA] if object_json[META_DATA] else {})
         )
 
+        self._image_data = None  # The full image not actual object
+
     def remove(self):
         """
         Removes detection object.
@@ -586,7 +588,10 @@ class DetectionObject(DetectionClient):
             ID: self.id,
             DETECTION_LABEL: self.detection_label,
             DATA: self.data,
-            LABELS: [label["id"] for label in self.recognition_labels],
+            LABELS: [
+                {"id": label["id"], "name": label["name"], "value": label.get("value", None)}
+                for label in self.recognition_labels
+            ],
             META_DATA: self.meta_data,
         }
 

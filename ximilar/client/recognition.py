@@ -10,6 +10,7 @@ TASK_ENDPOINT = "recognition/v2/task/"
 MODEL_ENDPOINT = "recognition/v2/model/"
 IMAGE_ENDPOINT = "recognition/v2/training-image/"
 CLASSIFY_ENDPOINT = "recognition/v2/classify/"
+POINT_ENDPOINT = "annotate/v2/point/"
 
 
 class RecognitionClient(RestClient):
@@ -305,6 +306,21 @@ class RecognitionClient(RestClient):
         if ID not in label_json:
             return None, {STATUS: "unexpected error"}
         return Label(self.token, self.endpoint, label_json), RESULT_OK
+
+    def create_point(self, image_id=None, name=None, data=None):
+        points_json = self.post(POINT_ENDPOINT, {"image": image_id, "name": name, "data": data})
+        return points_json, STATUS_OK
+
+    def get_points(self, image_id=None, name=None):
+        """
+        Get points stored (optional for image or filtered by name).
+        """
+        url = POINT_ENDPOINT
+        if image_id:
+            url += "?image=" + str(image_id)
+
+        points_json = self.get(url)
+        return [Point(self.token, self.endpoint, point) for point in points_json[RESULTS]], STATUS_OK
 
     def parse_already_inserted(self, detail):
         import re
@@ -904,3 +920,19 @@ class Workspace(RecognitionClient):
 
     def __str__(self):
         return "Worskpace: (%s) (%s)" % (self.name, self.id)
+
+
+class Point(RecognitionClient):
+    """
+    Workspace entity. All Task, Labels and Images are mapped to some workspace.
+    Every workspace has some owner.
+    """
+
+    def __init__(self, token, endpoint, point_json):
+        super().__init__(token, endpoint)
+        self.id = point_json[ID]
+        self.data = point_json[DATA]
+        self.name = point_json[NAME]
+
+    def __str__(self):
+        return "POINT: (%s) (%s)" % (self.name, self.id)
